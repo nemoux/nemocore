@@ -40,7 +40,6 @@ struct nemocompz;
 struct nemolayer;
 struct nemocontent;
 struct nemocanvas;
-struct nemoactor;
 struct nemoxkb;
 struct nemoscope;
 
@@ -52,14 +51,10 @@ struct nemotransform {
 struct nemoview {
 	struct nemocompz *compz;
 	struct nemocontent *content;
+	struct nemocanvas *canvas;
 
 	char *type;
-
 	char uuid[38];
-
-	struct nemocanvas *canvas;
-	struct nemoactor *actor;
-
 	uint32_t tag;
 
 	struct wl_signal destroy_signal;

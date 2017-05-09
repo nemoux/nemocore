@@ -12,7 +12,6 @@
 #include <compz.h>
 #include <screen.h>
 #include <canvas.h>
-#include <actor.h>
 #include <view.h>
 #include <content.h>
 #include <waylandhelper.h>

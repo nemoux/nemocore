@@ -17,7 +17,6 @@
 #include <screen.h>
 #include <view.h>
 #include <content.h>
-#include <actor.h>
 #include <canvas.h>
 #include <subcanvas.h>
 #include <seat.h>
@@ -97,8 +96,6 @@ void nemoenvs_handle_left_button(struct nemocompz *compz, struct nemopointer *po
 					nemopointer_set_keyboard_focus(pointer, pointer->focus);
 					datadevice_set_focus(pointer->seat, pointer->focus);
 				}
-			} else if (pointer->focus->actor != NULL) {
-				nemopointer_set_keyboard_focus(pointer, pointer->focus);
 			}
 		}
 
@@ -110,17 +107,6 @@ void nemoenvs_handle_left_button(struct nemocompz *compz, struct nemopointer *po
 				image = pixman_image_create_bits(PIXMAN_a8r8g8b8, canvas->base.width, canvas->base.height, NULL, canvas->base.width * 4);
 
 				nemocontent_read_pixels(&canvas->base, PIXMAN_a8r8g8b8, pixman_image_get_data(image));
-
-				pixman_save_png_file(image, "nemoshot.png");
-
-				pixman_image_unref(image);
-			} else if (pointer->focus != NULL && pointer->focus->actor != NULL) {
-				struct nemoactor *actor = pointer->focus->actor;
-				pixman_image_t *image;
-
-				image = pixman_image_create_bits(PIXMAN_a8r8g8b8, actor->base.width, actor->base.height, NULL, actor->base.width * 4);
-
-				nemocontent_read_pixels(&actor->base, PIXMAN_a8r8g8b8, pixman_image_get_data(image));
 
 				pixman_save_png_file(image, "nemoshot.png");
 

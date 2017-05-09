@@ -104,7 +104,6 @@ struct glcontent {
 	pixman_image_t *image;
 
 	struct wl_listener canvas_destroy_listener;
-	struct wl_listener actor_destroy_listener;
 	struct wl_listener renderer_destroy_listener;
 };
 

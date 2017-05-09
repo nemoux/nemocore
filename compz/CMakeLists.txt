@@ -127,7 +127,6 @@ add_library(nemocompz SHARED
 	subcanvas.c
 	view.c
 	content.c
-	actor.c
 	layer.c
 	session.c
 	task.c
@@ -149,10 +148,8 @@ add_library(nemocompz SHARED
 	fbnode.c
 	pixmanrenderer.c
 	pixmancanvas.c
-	pixmanactor.c
 	glrenderer.c
 	glcanvas.c
-	glactor.c
 	drmbackend.c
 	drmnode.c
 	evdevbackend.c
@@ -224,7 +221,6 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/compz/renderer.h
 	${CMAKE_SOURCE_DIR}/compz/view.h
 	${CMAKE_SOURCE_DIR}/compz/content.h
-	${CMAKE_SOURCE_DIR}/compz/actor.h
 	${CMAKE_SOURCE_DIR}/compz/canvas.h
 	${CMAKE_SOURCE_DIR}/compz/subcanvas.h
 	${CMAKE_SOURCE_DIR}/compz/screen.h

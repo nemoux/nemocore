@@ -19,7 +19,6 @@
 #include <compz.h>
 #include <datadevice.h>
 #include <canvas.h>
-#include <actor.h>
 #include <view.h>
 #include <layer.h>
 #include <region.h>
@@ -202,15 +201,6 @@ static char *nemocompz_get_display_name(void)
 	return dname;
 }
 
-static inline void nemocompz_dispatch_actor_frame(struct nemocompz *compz, uint32_t msecs)
-{
-	struct nemoactor *actor, *next;
-
-	wl_list_for_each_safe(actor, next, &compz->frame_list, frame_link) {
-		actor->dispatch_frame(actor, msecs);
-	}
-}
-
 static inline void nemocompz_dispatch_animation_frame(struct nemocompz *compz, uint32_t msecs)
 {
 	struct nemoanimation *anim, *next;
@@ -263,7 +253,6 @@ static int nemocompz_dispatch_frame_timeout(void *data)
 	if (compz->scene_dirty != 0)
 		nemocompz_update_scene(compz);
 
-	nemocompz_dispatch_actor_frame(compz, msecs);
 	nemocompz_dispatch_animation_frame(compz, msecs);
 	nemocompz_dispatch_effect_frame(compz, msecs);
 
@@ -358,7 +347,6 @@ struct nemocompz *nemocompz_create(void)
 	wl_list_init(&compz->task_list);
 	wl_list_init(&compz->layer_list);
 	wl_list_init(&compz->canvas_list);
-	wl_list_init(&compz->actor_list);
 	wl_list_init(&compz->feedback_list);
 
 	wl_signal_init(&compz->session_signal);
@@ -574,17 +562,11 @@ void nemocompz_accumulate_damage(struct nemocompz *compz)
 void nemocompz_flush_damage(struct nemocompz *compz)
 {
 	struct nemocanvas *canvas;
-	struct nemoactor *actor;
 	struct nemoscreen *screen;
 
 	wl_list_for_each(canvas, &compz->canvas_list, link) {
 		if (canvas->base.dirty != 0)
 			nemocanvas_flush_damage(canvas);
-	}
-
-	wl_list_for_each(actor, &compz->actor_list, link) {
-		if (actor->base.dirty != 0)
-			nemoactor_flush_damage(actor);
 	}
 
 	wl_list_for_each(screen, &compz->screen_list, link) {
@@ -601,14 +583,6 @@ void nemocompz_flush_damage(struct nemocompz *compz)
 			canvas->base.dirty = 0;
 
 			pixman_region32_clear(&canvas->base.damage);
-		}
-	}
-
-	wl_list_for_each(actor, &compz->actor_list, link) {
-		if (actor->base.dirty != 0) {
-			actor->base.dirty = 0;
-
-			pixman_region32_clear(&actor->base.damage);
 		}
 	}
 

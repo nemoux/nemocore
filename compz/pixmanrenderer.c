@@ -8,10 +8,10 @@
 #include <pixmanprivate.h>
 
 #include <pixmanrenderer.h>
+#include <pixmancanvas.h>
 #include <renderer.h>
 #include <compz.h>
 #include <canvas.h>
-#include <actor.h>
 #include <view.h>
 #include <content.h>
 #include <screen.h>
@@ -255,15 +255,6 @@ static void pixmanrenderer_repaint_screen(struct nemorenderer *base, struct nemo
 	pixmanrenderer_copy_to_screen_buffer(screen, surface, screen_damage);
 }
 
-extern void pixmanrenderer_prepare_buffer(struct nemorenderer *base, struct nemobuffer *buffer);
-extern void pixmanrenderer_attach_canvas(struct nemorenderer *base, struct nemocanvas *canvas);
-extern void pixmanrenderer_flush_canvas(struct nemorenderer *base, struct nemocanvas *canvas);
-extern int pixmanrenderer_read_canvas(struct nemorenderer *base, struct nemocanvas *canvas, pixman_format_code_t format, void *pixels);
-extern void *pixmanrenderer_get_canvas_buffer(struct nemorenderer *base, struct nemocanvas *canvas);
-extern void pixmanrenderer_attach_actor(struct nemorenderer *base, struct nemoactor *actor);
-extern void pixmanrenderer_flush_actor(struct nemorenderer *base, struct nemoactor *actor);
-extern int pixmanrenderer_read_actor(struct nemorenderer *base, struct nemoactor *actor, pixman_format_code_t format, void *pixels);
-
 struct nemorenderer *pixmanrenderer_create(struct rendernode *node)
 {
 	struct nemocompz *compz = node->compz;
@@ -282,16 +273,11 @@ struct nemorenderer *pixmanrenderer_create(struct rendernode *node)
 	renderer->base.flush_canvas = pixmanrenderer_flush_canvas;
 	renderer->base.read_canvas = pixmanrenderer_read_canvas;
 	renderer->base.get_canvas_buffer = pixmanrenderer_get_canvas_buffer;
-	renderer->base.attach_actor = pixmanrenderer_attach_actor;
-	renderer->base.flush_actor = pixmanrenderer_flush_actor;
-	renderer->base.read_actor = pixmanrenderer_read_actor;
-	renderer->base.get_actor_buffer = NULL;
 	renderer->base.destroy = pixmanrenderer_destroy;
 	renderer->base.make_current = NULL;
 
-	if (compz->renderer == NULL) {
+	if (compz->renderer == NULL)
 		compz->renderer = &renderer->base;
-	}
 
 	wl_display_add_shm_format(node->compz->display, WL_SHM_FORMAT_RGB565);
 

@@ -16,7 +16,6 @@
 #include <view.h>
 #include <content.h>
 #include <canvas.h>
-#include <actor.h>
 #include <layer.h>
 #include <picker.h>
 #include <binding.h>
@@ -112,8 +111,6 @@ static void nemopointer_destroy_sprite(struct nemopointer *pointer)
 		pointer->sprite->canvas->configure_private = NULL;
 
 		nemoview_destroy(pointer->sprite);
-	} else if (pointer->sprite->actor != NULL) {
-		nemoactor_destroy(pointer->sprite->actor);
 	}
 
 	pointer->sprite = NULL;

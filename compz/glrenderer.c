@@ -12,11 +12,11 @@
 #include <glprivate.h>
 
 #include <glrenderer.h>
+#include <glcanvas.h>
 #include <renderer.h>
 #include <compz.h>
 #include <screen.h>
 #include <canvas.h>
-#include <actor.h>
 #include <view.h>
 #include <drmnode.h>
 #include <content.h>
@@ -500,15 +500,6 @@ static int glrenderer_prepare_egl_extentsion(struct glrenderer *renderer)
 	return 0;
 }
 
-extern void glrenderer_prepare_buffer(struct nemorenderer *base, struct nemobuffer *buffer);
-extern void glrenderer_attach_canvas(struct nemorenderer *base, struct nemocanvas *canvas);
-extern void glrenderer_flush_canvas(struct nemorenderer *base, struct nemocanvas *canvas);
-extern int glrenderer_read_canvas(struct nemorenderer *base, struct nemocanvas *canvas, pixman_format_code_t format, void *pixels);
-extern void *glrenderer_get_canvas_buffer(struct nemorenderer *base, struct nemocanvas *canvas);
-extern void glrenderer_attach_actor(struct nemorenderer *base, struct nemoactor *actor);
-extern void glrenderer_flush_actor(struct nemorenderer *base, struct nemoactor *actor);
-extern int glrenderer_read_actor(struct nemorenderer *base, struct nemoactor *actor, pixman_format_code_t format, void *pixels);
-
 struct nemorenderer *glrenderer_create(struct rendernode *node, EGLNativeDisplayType display, const EGLint *visualid)
 {
 	static EGLint attribs[] = {
@@ -540,10 +531,6 @@ struct nemorenderer *glrenderer_create(struct rendernode *node, EGLNativeDisplay
 	renderer->base.flush_canvas = glrenderer_flush_canvas;
 	renderer->base.read_canvas = glrenderer_read_canvas;
 	renderer->base.get_canvas_buffer = glrenderer_get_canvas_buffer;
-	renderer->base.attach_actor = glrenderer_attach_actor;
-	renderer->base.flush_actor = glrenderer_flush_actor;
-	renderer->base.read_actor = glrenderer_read_actor;
-	renderer->base.get_actor_buffer = NULL;
 	renderer->base.destroy = glrenderer_destroy;
 	renderer->base.make_current = glrenderer_make_current;
 

@@ -13,7 +13,6 @@ NEMO_BEGIN_EXTERN_C
 struct nemoscreen;
 struct nemocanvas;
 struct nemobuffer;
-struct nemoactor;
 struct rendernode;
 
 struct nemorenderer {
@@ -37,15 +36,6 @@ struct nemorenderer {
 			pixman_format_code_t format, void *pixels);
 	void *(*get_canvas_buffer)(struct nemorenderer *renderer,
 			struct nemocanvas *canvas);
-	void (*attach_actor)(struct nemorenderer *renderer,
-			struct nemoactor *actor);
-	void (*flush_actor)(struct nemorenderer *renderer,
-			struct nemoactor *actor);
-	int (*read_actor)(struct nemorenderer *renderer,
-			struct nemoactor *actor,
-			pixman_format_code_t format, void *pixels);
-	void *(*get_actor_buffer)(struct nemorenderer *renderer,
-			struct nemoactor *actor);
 	void (*destroy)(struct nemorenderer *renderer);
 	void (*make_current)(struct nemorenderer *renderer);
 };

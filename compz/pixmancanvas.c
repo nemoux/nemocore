@@ -11,7 +11,6 @@
 #include <renderer.h>
 #include <compz.h>
 #include <canvas.h>
-#include <actor.h>
 #include <view.h>
 #include <content.h>
 #include <screen.h>

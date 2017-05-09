@@ -100,7 +100,6 @@ struct nemocompz {
 	struct wl_list task_list;
 	struct wl_list layer_list;
 	struct wl_list canvas_list;
-	struct wl_list actor_list;
 	struct wl_list feedback_list;
 
 	struct nemolayer *cursor_layer;

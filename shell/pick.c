@@ -20,7 +20,6 @@
 #include <datadevice.h>
 #include <view.h>
 #include <canvas.h>
-#include <actor.h>
 #include <content.h>
 #include <vieweffect.h>
 #include <nemolog.h>

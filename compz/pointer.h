@@ -14,7 +14,6 @@ NEMO_BEGIN_EXTERN_C
 struct nemoseat;
 struct nemokeyboard;
 struct nemoview;
-struct nemoactor;
 struct nemobinding;
 
 struct nemopointer_grab;

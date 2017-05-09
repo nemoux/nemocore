@@ -39,7 +39,6 @@ struct nemoview *nemoview_create(struct nemocompz *compz, struct nemocontent *co
 	view->compz = compz;
 	view->content = content;
 	view->canvas = NULL;
-	view->actor = NULL;
 
 	uuid_generate_time_safe(uuid);
 	uuid_unparse_lower(uuid, view->uuid);
