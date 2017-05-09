@@ -111,6 +111,7 @@ add_library(nemoshell SHARED
 	nemoclient.c
 	viewanimation.c
 	vieweffect.c
+	plugin.c
 	${PROTOCOLS}
 	)
 
@@ -146,6 +147,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/shell/pick.h
 	${CMAKE_SOURCE_DIR}/shell/viewanimation.h
 	${CMAKE_SOURCE_DIR}/shell/vieweffect.h
+	${CMAKE_SOURCE_DIR}/shell/plugin.h
 	)
 
 configure_file(

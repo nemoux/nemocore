@@ -161,7 +161,6 @@ add_library(nemocompz SHARED
 	binding.c
 	keymap.c
 	backend.c
-	plugin.c
 	waylandhelper.c
 	xmlhelper.c
 	${EXTRA}
@@ -235,7 +234,6 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/compz/datadevice.h
 	${CMAKE_SOURCE_DIR}/compz/session.h
 	${CMAKE_SOURCE_DIR}/compz/binding.h
-	${CMAKE_SOURCE_DIR}/compz/plugin.h
 	${CMAKE_SOURCE_DIR}/compz/task.h
 	${CMAKE_SOURCE_DIR}/compz/event.h
 	${CMAKE_SOURCE_DIR}/compz/timer.h

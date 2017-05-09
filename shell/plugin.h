@@ -7,9 +7,9 @@
 NEMO_BEGIN_EXTERN_C
 #endif
 
-struct nemocompz;
+struct nemoshell;
 
-extern int nemocompz_load_plugin(struct nemocompz *compz, const char *path, const char *args);
+extern int nemoshell_load_plugin(struct nemoshell *shell, const char *path, const char *args);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

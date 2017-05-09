@@ -6,16 +6,17 @@
 #include <errno.h>
 
 #include <dlfcn.h>
+
 #include <wayland-server.h>
 
 #include <plugin.h>
-#include <compz.h>
+#include <shell.h>
 #include <nemolog.h>
 #include <nemomisc.h>
 
-int nemocompz_load_plugin(struct nemocompz *compz, const char *path, const char *args)
+int nemoshell_load_plugin(struct nemoshell *shell, const char *path, const char *args)
 {
-	int (*init)(struct nemocompz *compz, const char *args);
+	int (*init)(struct nemoshell *shell, const char *args);
 	void *handle;
 	char *err;
 
@@ -35,5 +36,5 @@ int nemocompz_load_plugin(struct nemocompz *compz, const char *path, const char 
 		return -1;
 	}
 
-	return init(compz, args);
+	return init(shell, args);
 }

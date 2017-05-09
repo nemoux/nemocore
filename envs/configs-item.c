@@ -565,7 +565,7 @@ int nemoenvs_handle_item_config(struct nemoenvs *envs, struct itemone *one)
 				nemostring_has_prefix(protocol, "osc") == 0 ? NEMOTUIO_OSC_PROTOCOL : NEMOTUIO_XML_PROTOCOL,
 				port, max);
 	} else if (nemostring_has_prefix(path, "/nemoshell/plugin") != 0) {
-		nemocompz_load_plugin(compz,
+		nemoshell_load_plugin(shell,
 				nemoitem_one_get_attr(one, "path"),
 				nemoitem_one_get_attr(one, "args"));
 	} else if (nemostring_has_prefix(path, "/nemoshell/pick") != 0) {
