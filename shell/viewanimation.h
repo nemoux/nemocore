@@ -61,6 +61,8 @@ struct viewanimation {
 
 		float v;
 	} alpha;
+
+	void *userdata;
 };
 
 extern struct viewanimation *viewanimation_create(struct nemoview *view, uint32_t ease, uint32_t delay, uint32_t duration);
@@ -95,6 +97,16 @@ static inline void viewanimation_set_alpha(struct viewanimation *animation, floa
 {
 	animation->type |= NEMOVIEW_ALPHA_ANIMATION;
 	animation->alpha.v = v;
+}
+
+static inline void viewanimation_set_userdata(struct viewanimation *animation, void *data)
+{
+	animation->userdata = data;
+}
+
+static inline void *viewanimation_get_userdata(struct viewanimation *animation)
+{
+	return animation->userdata;
 }
 
 #ifdef __cplusplus
