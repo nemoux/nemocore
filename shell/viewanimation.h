@@ -1,5 +1,5 @@
-#ifndef	__NEMO_VIEWANIMATION_H__
-#define	__NEMO_VIEWANIMATION_H__
+#ifndef	__NEMO_VIEW_ANIMATION_H__
+#define	__NEMO_VIEW_ANIMATION_H__
 
 #include <nemoconfig.h>
 

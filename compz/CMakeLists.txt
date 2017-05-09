@@ -160,9 +160,6 @@ add_library(nemocompz SHARED
 	picker.c
 	binding.c
 	keymap.c
-	animation.c
-	viewanimation.c
-	vieweffect.c
 	backend.c
 	plugin.c
 	waylandhelper.c
@@ -243,7 +240,7 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/compz/event.h
 	${CMAKE_SOURCE_DIR}/compz/timer.h
 	${CMAKE_SOURCE_DIR}/compz/animation.h
-	${CMAKE_SOURCE_DIR}/compz/viewanimation.h
+	${CMAKE_SOURCE_DIR}/compz/effect.h
 	)
 
 configure_file(

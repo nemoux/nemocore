@@ -109,6 +109,8 @@ add_library(nemoshell SHARED
 	xdgshell.c
 	nemoshell.c
 	nemoclient.c
+	viewanimation.c
+	vieweffect.c
 	${PROTOCOLS}
 	)
 
@@ -142,6 +144,8 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/shell/grab.h
 	${CMAKE_SOURCE_DIR}/shell/move.h
 	${CMAKE_SOURCE_DIR}/shell/pick.h
+	${CMAKE_SOURCE_DIR}/shell/viewanimation.h
+	${CMAKE_SOURCE_DIR}/shell/vieweffect.h
 	)
 
 configure_file(

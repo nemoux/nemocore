@@ -1,5 +1,5 @@
-#ifndef	__VIEW_EFFECT_H__
-#define	__VIEW_EFFECT_H__
+#ifndef	__NEMO_VIEW_EFFECT_H__
+#define	__NEMO_VIEW_EFFECT_H__
 
 #include <nemoconfig.h>
 
