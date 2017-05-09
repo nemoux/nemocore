@@ -181,7 +181,7 @@ struct nemosubcanvas *nemosubcanvas_create(struct wl_client *client, struct wl_r
 	sub->buffer_reference.buffer = NULL;
 	sub->sync = 1;
 
-	sub->view = nemoview_create(canvas->compz, &canvas->base);
+	sub->view = nemoview_create(canvas->compz);
 	if (sub->view == NULL) {
 		wl_resource_post_error(resource,
 				WL_SUBCOMPOSITOR_ERROR_BAD_SURFACE,
@@ -190,9 +190,7 @@ struct nemosubcanvas *nemosubcanvas_create(struct wl_client *client, struct wl_r
 		return NULL;
 	}
 
-	sub->view->canvas = canvas;
-
-	wl_list_insert(&canvas->view_list, &sub->view->link);
+	nemoview_attach_canvas(sub->view, canvas);
 
 	nemoview_set_parent(sub->view, nemocanvas_get_default_view(parent));
 

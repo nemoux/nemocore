@@ -440,16 +440,17 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 	}
 	memset(bin, 0, sizeof(struct shellbin));
 
-	bin->view = nemoview_create(canvas->compz, &canvas->base);
+	bin->view = nemoview_create(canvas->compz);
 	if (bin->view == NULL) {
 		nemolog_error("SHELL", "failed to create nemoview\n");
 		goto err1;
 	}
 
-	bin->view->canvas = canvas;
 	bin->view->client = wl_resource_get_client(canvas->resource);
 
 	nemoview_set_state(bin->view, NEMOVIEW_CANVAS_STATE);
+
+	nemoview_attach_canvas(bin->view, canvas);
 
 	wl_signal_init(&bin->destroy_signal);
 	wl_signal_init(&bin->ungrab_signal);
@@ -487,8 +488,6 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 	canvas->update_transform = shellbin_update_canvas_transform;
 	canvas->update_layer = shellbin_update_canvas_layer;
 	canvas->update_fullscreen = shellbin_update_canvas_fullscreen;
-
-	wl_list_insert(&canvas->view_list, &bin->view->link);
 
 	bin->canvas_destroy_listener.notify = shellbin_handle_canvas_destroy;
 	wl_signal_add(&canvas->destroy_signal, &bin->canvas_destroy_listener);

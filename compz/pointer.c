@@ -204,12 +204,11 @@ static void wayland_pointer_set_cursor(struct wl_client *client, struct wl_resou
 	if (canvas == NULL)
 		return;
 
-	pointer->sprite = nemoview_create(seat->compz, &canvas->base);
+	pointer->sprite = nemoview_create(seat->compz);
 	if (pointer->sprite == NULL)
 		return;
-	pointer->sprite->canvas = canvas;
 
-	wl_list_insert(&canvas->view_list, &pointer->sprite->link);
+	nemoview_attach_canvas(pointer->sprite, canvas);
 
 	wl_signal_add(&canvas->destroy_signal, &pointer->sprite_destroy_listener);
 
@@ -283,12 +282,11 @@ static void nemo_pointer_set_cursor(struct wl_client *client, struct wl_resource
 	if (canvas == NULL)
 		return;
 
-	pointer->sprite = nemoview_create(seat->compz, &canvas->base);
+	pointer->sprite = nemoview_create(seat->compz);
 	if (pointer->sprite == NULL)
 		return;
-	pointer->sprite->canvas = canvas;
 
-	wl_list_insert(&canvas->view_list, &pointer->sprite->link);
+	nemoview_attach_canvas(pointer->sprite, canvas);
 
 	wl_signal_add(&canvas->destroy_signal, &pointer->sprite_destroy_listener);
 

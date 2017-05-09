@@ -225,13 +225,11 @@ int datadrag_start_pointer_grab(struct nemopointer *pointer, struct nemodatasour
 	drag->base.pointer.interface = &datadrag_pointer_grab_interface;
 
 	if (icon != NULL) {
-		drag->icon = nemoview_create(icon->compz, &icon->base);
+		drag->icon = nemoview_create(icon->compz);
 		if (drag->icon == NULL)
 			goto err1;
 
-		drag->icon->canvas = icon;
-
-		wl_list_insert(&icon->view_list, &drag->icon->link);
+		nemoview_attach_canvas(drag->icon, icon);
 
 		drag->icon_destroy_listener.notify = datadrag_handle_icon_destroy;
 		wl_signal_add(&icon->destroy_signal, &drag->icon_destroy_listener);

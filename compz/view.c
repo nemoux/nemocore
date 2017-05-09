@@ -11,6 +11,7 @@
 
 #include <view.h>
 #include <content.h>
+#include <canvas.h>
 #include <compz.h>
 #include <screen.h>
 #include <renderer.h>
@@ -22,7 +23,7 @@
 #include <nemomisc.h>
 #include <nemolog.h>
 
-struct nemoview *nemoview_create(struct nemocompz *compz, struct nemocontent *content)
+struct nemoview *nemoview_create(struct nemocompz *compz)
 {
 	struct nemoview *view;
 	uuid_t uuid;
@@ -37,7 +38,7 @@ struct nemoview *nemoview_create(struct nemocompz *compz, struct nemocontent *co
 		goto err1;
 
 	view->compz = compz;
-	view->content = content;
+	view->content = NULL;
 	view->canvas = NULL;
 
 	uuid_generate_time_safe(uuid);
@@ -52,6 +53,7 @@ struct nemoview *nemoview_create(struct nemocompz *compz, struct nemocontent *co
 	wl_list_init(&view->children_link);
 	wl_list_init(&view->children_list);
 
+	wl_list_init(&view->canvas_destroy_listener.link);
 	wl_list_init(&view->parent_destroy_listener.link);
 	wl_list_init(&view->focus_destroy_listener.link);
 
@@ -110,6 +112,7 @@ void nemoview_destroy(struct nemoview *view)
 	wl_list_remove(&view->layer_link);
 	wl_list_remove(&view->children_link);
 
+	wl_list_remove(&view->canvas_destroy_listener.link);
 	wl_list_remove(&view->parent_destroy_listener.link);
 	wl_list_remove(&view->focus_destroy_listener.link);
 
@@ -617,6 +620,54 @@ void nemoview_merge_damage(struct nemoview *view, pixman_region32_t *damage)
 		pixman_region32_copy(damage, &view->content->damage);
 		pixman_region32_translate(damage, view->geometry.x, view->geometry.y);
 	}
+}
+
+static void nemoview_handle_canvas_destroy(struct wl_listener *listener, void *data)
+{
+	struct nemoview *view = (struct nemoview *)container_of(listener, struct nemoview, canvas_destroy_listener);
+
+	view->canvas = NULL;
+	view->content = NULL;
+
+	wl_list_remove(&view->link);
+	wl_list_init(&view->link);
+
+	wl_list_remove(&view->canvas_destroy_listener.link);
+	wl_list_init(&view->canvas_destroy_listener.link);
+}
+
+void nemoview_attach_canvas(struct nemoview *view, struct nemocanvas *canvas)
+{
+	wl_list_remove(&view->link);
+	wl_list_init(&view->link);
+
+	wl_list_remove(&view->canvas_destroy_listener.link);
+	wl_list_init(&view->canvas_destroy_listener.link);
+
+	if (canvas != NULL) {
+		view->canvas = canvas;
+		view->content = &canvas->base;
+
+		wl_list_insert(&canvas->view_list, &view->link);
+
+		view->canvas_destroy_listener.notify = nemoview_handle_canvas_destroy;
+		wl_signal_add(&canvas->destroy_signal, &view->canvas_destroy_listener);
+	} else {
+		view->canvas = NULL;
+		view->content = NULL;
+	}
+}
+
+void nemoview_detach_canvas(struct nemoview *view)
+{
+	view->canvas = NULL;
+	view->content = NULL;
+
+	wl_list_remove(&view->link);
+	wl_list_init(&view->link);
+
+	wl_list_remove(&view->canvas_destroy_listener.link);
+	wl_list_init(&view->canvas_destroy_listener.link);
 }
 
 void nemoview_attach_layer(struct nemoview *view, struct nemolayer *layer)

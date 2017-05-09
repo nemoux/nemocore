@@ -50,8 +50,11 @@ struct nemotransform {
 
 struct nemoview {
 	struct nemocompz *compz;
+
 	struct nemocontent *content;
+
 	struct nemocanvas *canvas;
+	struct wl_listener canvas_destroy_listener;
 
 	char *type;
 	char uuid[38];
@@ -133,7 +136,7 @@ struct nemoview {
 	void *data;
 };
 
-extern struct nemoview *nemoview_create(struct nemocompz *compz, struct nemocontent *content);
+extern struct nemoview *nemoview_create(struct nemocompz *compz);
 extern void nemoview_destroy(struct nemoview *view);
 
 extern void nemoview_correct_pivot(struct nemoview *view, float px, float py);
@@ -161,6 +164,9 @@ extern void nemoview_put_scope(struct nemoview *view);
 
 extern void nemoview_accumulate_damage(struct nemoview *view, pixman_region32_t *opaque);
 extern void nemoview_merge_damage(struct nemoview *view, pixman_region32_t *damage);
+
+extern void nemoview_attach_canvas(struct nemoview *view, struct nemocanvas *canvas);
+extern void nemoview_detach_canvas(struct nemoview *view);
 
 extern void nemoview_attach_layer(struct nemoview *view, struct nemolayer *layer);
 extern void nemoview_detach_layer(struct nemoview *view);
