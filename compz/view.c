@@ -23,6 +23,18 @@
 #include <nemomisc.h>
 #include <nemolog.h>
 
+static struct nemocontent content_dummy;
+
+void __attribute__((constructor(101))) nemoview_initialize(void)
+{
+	nemocontent_prepare(&content_dummy, NEMOCOMPZ_NODE_MAX);
+}
+
+void __attribute__((destructor(101))) nemoview_finalize(void)
+{
+	nemocontent_finish(&content_dummy);
+}
+
 struct nemoview *nemoview_create(struct nemocompz *compz)
 {
 	struct nemoview *view;
@@ -38,7 +50,7 @@ struct nemoview *nemoview_create(struct nemocompz *compz)
 		goto err1;
 
 	view->compz = compz;
-	view->content = NULL;
+	view->content = &content_dummy;
 	view->canvas = NULL;
 
 	uuid_generate_time_safe(uuid);
@@ -284,12 +296,12 @@ void nemoview_update_output(struct nemoview *view)
 	pixman_region32_t region;
 	uint32_t scrnmask, nodemask;
 
-	pixman_region32_init(&region);
-
 	nodemask = 0;
 	scrnmask = 0;
 
 	view->screen = NULL;
+
+	pixman_region32_init(&region);
 
 	wl_list_for_each(screen, &compz->screen_list, link) {
 		pixman_region32_intersect(&region, &view->transform.boundingbox, &screen->region);
@@ -302,12 +314,12 @@ void nemoview_update_output(struct nemoview *view)
 		}
 	}
 
+	pixman_region32_fini(&region);
+
 	view->node_mask = nodemask;
 	view->screen_mask = scrnmask;
 
 	nemocontent_update_output(view->content, nodemask, scrnmask);
-
-	pixman_region32_fini(&region);
 }
 
 static void nemoview_update_transform_disable(struct nemoview *view)
@@ -627,7 +639,7 @@ static void nemoview_handle_canvas_destroy(struct wl_listener *listener, void *d
 	struct nemoview *view = (struct nemoview *)container_of(listener, struct nemoview, canvas_destroy_listener);
 
 	view->canvas = NULL;
-	view->content = NULL;
+	view->content = &content_dummy;
 
 	wl_list_remove(&view->link);
 	wl_list_init(&view->link);
@@ -654,14 +666,14 @@ void nemoview_attach_canvas(struct nemoview *view, struct nemocanvas *canvas)
 		wl_signal_add(&canvas->destroy_signal, &view->canvas_destroy_listener);
 	} else {
 		view->canvas = NULL;
-		view->content = NULL;
+		view->content = &content_dummy;
 	}
 }
 
 void nemoview_detach_canvas(struct nemoview *view)
 {
 	view->canvas = NULL;
-	view->content = NULL;
+	view->content = &content_dummy;
 
 	wl_list_remove(&view->link);
 	wl_list_init(&view->link);
