@@ -28,7 +28,6 @@
 #include <seat.h>
 #include <touch.h>
 #include <session.h>
-#include <task.h>
 #include <sound.h>
 #include <clipboard.h>
 #include <virtuio.h>
@@ -130,7 +129,7 @@ static int on_chld_signal(int signum, void *data)
 		if (&task->link != &compz->task_list) {
 			wl_list_remove(&task->link);
 
-			task->cleanup(task, state);
+			task->cleanup(compz, task, state);
 		}
 	}
 
@@ -1029,4 +1028,9 @@ struct nemolayer *nemocompz_get_layer_by_name(struct nemocompz *compz, const cha
 	}
 
 	return NULL;
+}
+
+void nemocompz_watch_task(struct nemocompz *compz, struct nemotask *task)
+{
+	wl_list_insert(&compz->task_list, &task->link);
 }

@@ -36,9 +36,19 @@ struct nemoeffect;
 struct nemoscreen;
 struct nemoview;
 struct nemolayer;
+struct nemotask;
 struct evdevnode;
 
 typedef void (*nemocompz_dispatch_idle_t)(void *data);
+typedef void (*nemocompz_cleanup_task_t)(struct nemocompz *compz, struct nemotask *task, int status);
+
+struct nemotask {
+	pid_t pid;
+
+	struct wl_list link;
+
+	nemocompz_cleanup_task_t cleanup;
+};
 
 struct nemoproc {
 	pid_t pid;
@@ -195,6 +205,8 @@ extern struct nemoview *nemocompz_get_view_by_uuid(struct nemocompz *compz, cons
 extern struct nemoview *nemocompz_get_view_by_client(struct nemocompz *compz, struct wl_client *client);
 
 extern struct nemolayer *nemocompz_get_layer_by_name(struct nemocompz *compz, const char *name);
+
+extern void nemocompz_watch_task(struct nemocompz *compz, struct nemotask *task);
 
 static inline struct wl_event_loop *nemocompz_get_wayland_event_loop(struct nemocompz *compz)
 {

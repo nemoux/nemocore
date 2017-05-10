@@ -129,7 +129,6 @@ add_library(nemocompz SHARED
 	content.c
 	layer.c
 	session.c
-	task.c
 	timer.c
 	seat.c
 	input.c
@@ -234,7 +233,6 @@ set(HEADER_FILES
 	${CMAKE_SOURCE_DIR}/compz/datadevice.h
 	${CMAKE_SOURCE_DIR}/compz/session.h
 	${CMAKE_SOURCE_DIR}/compz/binding.h
-	${CMAKE_SOURCE_DIR}/compz/task.h
 	${CMAKE_SOURCE_DIR}/compz/event.h
 	${CMAKE_SOURCE_DIR}/compz/timer.h
 	${CMAKE_SOURCE_DIR}/compz/animation.h

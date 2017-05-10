@@ -11,7 +11,7 @@ NEMO_BEGIN_EXTERN_C
 #include <xcb/xfixes.h>
 #include <xcb/composite.h>
 
-#include <task.h>
+#include <compz.h>
 
 typedef enum {
 	NEMOXSERVER_NONE_STATE = 0,
@@ -21,7 +21,6 @@ typedef enum {
 	NEMOXSERVER_LAST_STATE
 } NemoXServerState;
 
-struct nemocompz;
 struct nemoxmanager;
 struct nemoxwindow;
 

@@ -17,7 +17,6 @@
 #include <view.h>
 #include <xserver.h>
 #include <xmanager.h>
-#include <task.h>
 #include <nemomisc.h>
 #include <nemolog.h>
 
@@ -96,7 +95,7 @@ static int nemoxserver_handle_event(int listenfd, uint32_t mask, void *data)
 		close(wm[1]);
 		xserver->wm_fd = wm[0];
 
-		nemotask_watch(xserver->compz, &xserver->task);
+		nemocompz_watch_task(xserver->compz, &xserver->task);
 
 		wl_event_source_remove(xserver->abstract_source);
 		xserver->abstract_source = NULL;
@@ -230,7 +229,7 @@ static void nemoxserver_handle_compz_destroy(struct wl_listener *listener, void 
 	nemoxserver_destroy(xserver);
 }
 
-static void nemoxserver_cleanup(struct nemotask *task, int status)
+static void nemoxserver_cleanup(struct nemocompz *compz, struct nemotask *task, int status)
 {
 	struct nemoxserver *xserver = container_of(task, struct nemoxserver, task);
 
@@ -398,7 +397,7 @@ int nemoxserver_execute(struct nemoxserver *xserver)
 		close(wm[1]);
 		xserver->wm_fd = wm[0];
 
-		nemotask_watch(xserver->compz, &xserver->task);
+		nemocompz_watch_task(xserver->compz, &xserver->task);
 
 		wl_event_source_remove(xserver->abstract_source);
 		xserver->abstract_source = NULL;
