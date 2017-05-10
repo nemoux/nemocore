@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+#define __USE_GNU
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -1098,6 +1100,18 @@ int main(int argc, char *argv[])
 	}
 
 	if (contentpath != NULL) {
+		if (contentpath[0] == '@') {
+			const char *contentskey = "@contents";
+			char *subpath;
+
+			subpath = strstr(contentpath, contentskey);
+			if (subpath != NULL) {
+				const char *ctspath = env_get_string("NEMO_CONTENTS_PATH", "/opt/contents");
+
+				asprintf(&contentpath, "%s%s", ctspath, subpath + strlen(contentskey));
+			}
+		}
+
 		if (os_file_is_directory(contentpath) != 0)
 			nemofs_dir_scan_extensions(art->contents, contentpath, 8, "mp4", "avi", "mov", "mkv", "ts", "png", "jpg", "jpeg");
 		else
