@@ -211,9 +211,9 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 	if (tp->focus != NULL) {
 		float sx, sy;
 
-		nemoview_transform_from_global(tp->focus, tp->rx, tp->ry, &sx, &sy);
+		nemoview_transform_from_global(tp->focus, tp->x, tp->y, &sx, &sy);
 
-		nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy, tp->rx, tp->ry);
+		nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy, tp->x, tp->y);
 		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
 
 		touchpoint_set_focus(tp, NULL);
@@ -236,14 +236,14 @@ static void move_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 		int32_t cx, cy;
 
 		if (bin->reset_move != 0) {
-			move->dx = bin->view->geometry.x - tp->rx;
-			move->dy = bin->view->geometry.y - tp->ry;
+			move->dx = bin->view->geometry.x - tp->x;
+			move->dy = bin->view->geometry.y - tp->y;
 
 			bin->reset_move = 0;
 		}
 
-		cx = tp->rx + move->dx;
-		cy = tp->ry + move->dy;
+		cx = tp->x + move->dx;
+		cy = tp->y + move->dy;
 
 		nemoview_set_position(bin->view, cx, cy);
 		nemoview_schedule_repaint(bin->view);
@@ -306,8 +306,8 @@ int nemoshell_move_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 		return -1;
 	memset(move, 0, sizeof(struct shellgrab_move));
 
-	move->dx = bin->view->geometry.x - tp->rx;
-	move->dy = bin->view->geometry.y - tp->ry;
+	move->dx = bin->view->geometry.x - tp->x;
+	move->dy = bin->view->geometry.y - tp->y;
 
 	bin->reset_move = 0;
 

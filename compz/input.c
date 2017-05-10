@@ -48,16 +48,6 @@ void nemoinput_put_screen(struct inputnode *node)
 	}
 }
 
-void nemoinput_set_sampling(struct inputnode *node, uint32_t sampling)
-{
-	node->sampling = sampling;
-}
-
-void nemoinput_set_maximum_distance(struct inputnode *node, float distance)
-{
-	node->distance = distance;
-}
-
 void nemoinput_transform_to_global(struct inputnode *node, float dx, float dy, float *x, float *y)
 {
 	if (node->transform.enable != 0) {

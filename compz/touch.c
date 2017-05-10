@@ -234,57 +234,14 @@ void nemotouch_destroy(struct nemotouch *touch)
 
 void touchpoint_down(struct touchpoint *tp, float x, float y)
 {
-	if (tp->nsamples == 0) {
-		tp->rx = tp->x = x;
-		tp->ry = tp->y = y;
-	} else {
-		int i;
-
-		for (i = 0; i < tp->nsamples; i++) {
-			tp->samples[i * 2 + 0] = x;
-			tp->samples[i * 2 + 1] = y;
-		}
-
-		tp->rx = tp->x = x;
-		tp->ry = tp->y = y;
-	}
+	tp->x = x;
+	tp->y = y;
 }
 
 void touchpoint_motion(struct touchpoint *tp, float x, float y)
 {
-	if (tp->distance > 1e-6) {
-		float dx = x - tp->x;
-		float dy = y - tp->y;
-
-		if (sqrtf(dx * dx + dy * dy) > tp->distance) {
-			tp->rx = x;
-			tp->ry = y;
-
-			return;
-		}
-	}
-
-	if (tp->nsamples == 0) {
-		tp->rx = tp->x = x;
-		tp->ry = tp->y = y;
-	} else {
-		float sx = 0.0f;
-		float sy = 0.0f;
-		int i;
-
-		tp->samples[tp->isamples * 2 + 0] = x;
-		tp->samples[tp->isamples * 2 + 1] = y;
-
-		tp->isamples = (tp->isamples + 1) % tp->nsamples;
-
-		for (i = 0; i < tp->nsamples; i++) {
-			sx += tp->samples[i * 2 + 0];
-			sy += tp->samples[i * 2 + 1];
-		}
-
-		tp->rx = tp->x = sx / (float)tp->nsamples;
-		tp->ry = tp->y = sy / (float)tp->nsamples;
-	}
+	tp->x = x;
+	tp->y = y;
 }
 
 void touchpoint_up(struct touchpoint *tp)
@@ -344,13 +301,6 @@ static struct touchpoint *nemotouch_create_touchpoint(struct nemotouch *touch, u
 	tp->gid = ++touch->seat->compz->touch_ids;
 	tp->touch = touch;
 
-	tp->nsamples = touch->node->sampling;
-
-	if (tp->nsamples > 0)
-		tp->samples = (float *)malloc(sizeof(float[2]) * tp->nsamples);
-
-	tp->distance = touch->node->distance;
-
 	wl_signal_init(&tp->destroy_signal);
 
 	tp->default_grab.interface = &default_touchpoint_grab_interface;
@@ -375,9 +325,6 @@ static void nemotouch_destroy_touchpoint(struct nemotouch *touch, struct touchpo
 	wl_list_remove(&tp->focus_view_listener.link);
 
 	wl_list_remove(&tp->link);
-
-	if (tp->samples != NULL)
-		free(tp->samples);
 
 	free(tp);
 }
@@ -688,122 +635,6 @@ struct touchnode *nemotouch_get_node_by_name(struct nemocompz *compz, const char
 	}
 
 	return NULL;
-}
-
-struct touchtaps *nemotouch_create_taps(int max)
-{
-	struct touchtaps *taps;
-
-	taps = (struct touchtaps *)malloc(sizeof(struct touchtaps));
-	if (taps == NULL)
-		return NULL;
-
-	taps->ids = (uint64_t *)malloc(sizeof(uint64_t) * max);
-	if (taps->ids == NULL)
-		goto err1;
-
-	taps->points = (double *)malloc(sizeof(double[2]) * max);
-	if (taps->points == NULL)
-		goto err2;
-
-	taps->ntaps = 0;
-	taps->staps = max;
-
-	return taps;
-
-err2:
-	free(taps->ids);
-
-err1:
-	free(taps);
-
-	return NULL;
-}
-
-void nemotouch_destroy_taps(struct touchtaps *taps)
-{
-	free(taps->ids);
-	free(taps->points);
-	free(taps);
-}
-
-void nemotouch_attach_tap(struct touchtaps *taps, uint64_t id, double x, double y)
-{
-	taps->ids[taps->ntaps] = id;
-	taps->points[taps->ntaps * 2 + 0] = x;
-	taps->points[taps->ntaps * 2 + 1] = y;
-
-	taps->ntaps++;
-}
-
-void nemotouch_flush_taps(struct touchnode *node, struct touchtaps *taps)
-{
-	struct nemotouch *touch = node->touch;
-	struct touchpoint *tp, *tnext;
-	struct wl_list touchpoint_list;
-	uint32_t msecs = time_current_msecs();
-	float x, y;
-	int i;
-
-	wl_list_init(&touchpoint_list);
-	wl_list_insert_list(&touchpoint_list, &touch->touchpoint_list);
-	wl_list_init(&touch->touchpoint_list);
-
-	for (i = 0; i < taps->ntaps; i++) {
-		if (node->base.screen != NULL) {
-			nemoscreen_transform_to_global(node->base.screen,
-					taps->points[i * 2 + 0] * node->base.screen->width,
-					taps->points[i * 2 + 1] * node->base.screen->height,
-					&x, &y);
-		} else {
-			nemoinput_transform_to_global(&node->base,
-					taps->points[i * 2 + 0] * node->base.width,
-					taps->points[i * 2 + 1] * node->base.height,
-					&x, &y);
-		}
-
-		tp = nemotouch_get_touchpoint_list_by_id(touch, &touchpoint_list, taps->ids[i]);
-		if (tp == NULL) {
-			tp = nemotouch_create_touchpoint(touch, taps->ids[i]);
-			if (tp == NULL)
-				return;
-
-			tp->grab_x = x;
-			tp->grab_y = y;
-
-			tp->state = TOUCHPOINT_DOWN_STATE;
-
-			tp->grab->interface->down(tp->grab, msecs, tp->gid, x, y);
-
-			tp->grab_serial = wl_display_get_serial(node->compz->display);
-			tp->grab_time = msecs;
-
-			nemocompz_run_touch_binding(touch->seat->compz, tp, msecs);
-		} else {
-			tp->state = TOUCHPOINT_MOTION_STATE;
-
-			tp->grab->interface->motion(tp->grab, msecs, tp->gid, x, y);
-
-			wl_list_remove(&tp->link);
-			wl_list_insert(&touch->touchpoint_list, &tp->link);
-		}
-	}
-
-	wl_list_for_each_safe(tp, tnext, &touchpoint_list, link) {
-		tp->state = TOUCHPOINT_UP_STATE;
-
-		nemocompz_run_touch_binding(touch->seat->compz, tp, msecs);
-
-		tp->grab->interface->up(tp->grab, msecs, tp->gid);
-
-		nemotouch_destroy_touchpoint(touch, tp);
-	}
-
-	touch->frame_count++;
-
-	wl_list_for_each(tp, &touch->touchpoint_list, link) {
-		tp->grab->interface->frame(tp->grab, touch->frame_count);
-	}
 }
 
 void nemotouch_bypass_event(struct nemocompz *compz, int32_t touchid, float sx, float sy)

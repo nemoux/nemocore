@@ -126,11 +126,9 @@ static void nemoenvs_handle_nemoshell_input(struct nemoenvs *envs, struct json_o
 		int32_t x, y;
 		int32_t width, height;
 		int32_t nodeid, screenid;
-		int32_t sampling;
 		float sx, sy;
 		float r;
 		float px, py;
-		float distance;
 
 		x = nemojson_object_get_integer(cobj, "x", 0);
 		y = nemojson_object_get_integer(cobj, "y", 0);
@@ -138,13 +136,11 @@ static void nemoenvs_handle_nemoshell_input(struct nemoenvs *envs, struct json_o
 		height = nemojson_object_get_integer(cobj, "height", screen->height);
 		nodeid = nemojson_object_get_integer(cobj, "nodeid", -1);
 		screenid = nemojson_object_get_integer(cobj, "screenid", -1);
-		sampling = nemojson_object_get_integer(cobj, "sampling", 0);
 		sx = nemojson_object_get_double(cobj, "sx", 1.0f);
 		sy = nemojson_object_get_double(cobj, "sy", 1.0f);
 		r = nemojson_object_get_double(cobj, "r", 0.0f) * M_PI / 180.0f;
 		px = nemojson_object_get_double(cobj, "px", 0.0f);
 		py = nemojson_object_get_double(cobj, "py", 0.0f);
-		distance = nemojson_object_get_double(cobj, "distance", 0.0f);
 		transform = nemojson_object_get_string(cobj, "transform", NULL);
 
 		wl_list_for_each(node, &compz->input_list, link) {
@@ -173,9 +169,6 @@ static void nemoenvs_handle_nemoshell_input(struct nemoenvs *envs, struct json_o
 					nemoinput_update_transform(node);
 				}
 
-				nemoinput_set_sampling(node, sampling);
-				nemoinput_set_maximum_distance(node, distance);
-
 				if (devnode != NULL)
 					nemoinput_set_state(node, NEMOINPUT_CONFIG_STATE);
 			}
@@ -200,11 +193,9 @@ static void nemoenvs_handle_nemoshell_evdev(struct nemoenvs *envs, struct json_o
 		int32_t x, y;
 		int32_t width, height;
 		int32_t nodeid, screenid;
-		int32_t sampling;
 		float sx, sy;
 		float r;
 		float px, py;
-		float distance;
 
 		enode = nemocompz_get_evdev(compz, devpath);
 		if (enode == NULL) {
@@ -227,13 +218,11 @@ static void nemoenvs_handle_nemoshell_evdev(struct nemoenvs *envs, struct json_o
 		height = nemojson_object_get_integer(cobj, "height", screen->height);
 		nodeid = nemojson_object_get_integer(cobj, "nodeid", -1);
 		screenid = nemojson_object_get_integer(cobj, "screenid", -1);
-		sampling = nemojson_object_get_integer(cobj, "sampling", 0);
 		sx = nemojson_object_get_double(cobj, "sx", 1.0f);
 		sy = nemojson_object_get_double(cobj, "sy", 1.0f);
 		r = nemojson_object_get_double(cobj, "r", 0.0f) * M_PI / 180.0f;
 		px = nemojson_object_get_double(cobj, "px", 0.0f);
 		py = nemojson_object_get_double(cobj, "py", 0.0f);
-		distance = nemojson_object_get_double(cobj, "distance", 0.0f);
 		transform = nemojson_object_get_string(cobj, "transform", NULL);
 
 		if (nodeid >= 0 && screenid >= 0) {
@@ -259,8 +248,6 @@ static void nemoenvs_handle_nemoshell_evdev(struct nemoenvs *envs, struct json_o
 			nemoinput_update_transform(node);
 		}
 
-		nemoinput_set_sampling(node, sampling);
-		nemoinput_set_maximum_distance(node, distance);
 		nemoinput_set_state(node, NEMOINPUT_CONFIG_STATE);
 	}
 }
