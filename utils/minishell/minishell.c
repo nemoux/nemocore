@@ -122,6 +122,11 @@ static int minishell_handle_json_config(struct minishell *mini, struct json_obje
 	return 0;
 }
 
+static int minishell_handle_json_theme(struct minishell *mini, struct json_object *jobj)
+{
+	return 0;
+}
+
 static int minishell_dispatch_db(struct minishell *mini, const char *dburi, const char *dbname, const char *configpath, const char *themepath)
 {
 	struct nemodb *db;
@@ -146,7 +151,7 @@ static int minishell_dispatch_db(struct minishell *mini, const char *dburi, cons
 	jobj = nemodb_load_json_object(db);
 	if (jobj != NULL) {
 		nemoenvs_handle_json_theme(mini->envs, jobj);
-		minishell_handle_json_config(mini, jobj);
+		minishell_handle_json_theme(mini, jobj);
 
 		json_object_put(jobj);
 	}
@@ -171,7 +176,7 @@ static int minishell_dispatch_file(struct minishell *mini, const char *configpat
 	jobj = nemojson_object_create_file(themepath);
 	if (jobj != NULL) {
 		nemoenvs_handle_json_theme(mini->envs, jobj);
-		minishell_handle_json_config(mini, jobj);
+		minishell_handle_json_theme(mini, jobj);
 
 		json_object_put(jobj);
 	}

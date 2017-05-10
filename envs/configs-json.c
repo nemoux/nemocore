@@ -409,10 +409,22 @@ static void nemoenvs_handle_nemoshell_pitch(struct nemoenvs *envs, struct json_o
 int nemoenvs_handle_json_config(struct nemoenvs *envs, struct json_object *jobj)
 {
 	struct nemojson *json;
+	struct json_object *tobj;
+	struct json_object *cobj;
 	int i;
 
+	tobj = nemojson_object_get_object(jobj, "shells", NULL);
+	if (tobj == NULL)
+		return -1;
+
+	cobj = nemojson_search_attribute(tobj,
+			"id",
+			nemojson_object_get_string(jobj, "useShellId", NULL));
+	if (cobj == NULL)
+		return -1;
+
 	json = nemojson_create();
-	nemojson_iterate_object(json, jobj);
+	nemojson_iterate_object(json, cobj);
 
 	for (i = 0; i < nemojson_get_count(json); i++) {
 		struct json_object *iobj = nemojson_get_object(json, i);
