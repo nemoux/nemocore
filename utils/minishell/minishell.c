@@ -131,6 +131,7 @@ static int minishell_dispatch_db(struct minishell *mini, const char *dburi, cons
 {
 	struct nemodb *db;
 	struct json_object *jobj;
+	struct json_object *pobj;
 	struct json_object *tobj;
 	struct json_object *cobj;
 
@@ -142,14 +143,17 @@ static int minishell_dispatch_db(struct minishell *mini, const char *dburi, cons
 
 	jobj = nemodb_load_json_object(db);
 	if (jobj != NULL) {
-		tobj = nemojson_object_get_object(jobj, "configs", NULL);
-		if (tobj != NULL) {
-			cobj = nemojson_search_attribute(tobj,
-					"id",
-					nemojson_object_get_string(jobj, "useDefaultId", NULL));
-			if (cobj != NULL) {
-				nemoenvs_handle_json_config(mini->envs, cobj);
-				minishell_handle_json_config(mini, cobj);
+		pobj = nemojson_object_get_object(jobj, "config", NULL);
+		if (pobj != NULL) {
+			tobj = nemojson_object_get_object(pobj, "configs", NULL);
+			if (tobj != NULL) {
+				cobj = nemojson_search_attribute(tobj,
+						"id",
+						nemojson_object_get_string(pobj, "useDefaultId", NULL));
+				if (cobj != NULL) {
+					nemoenvs_handle_json_config(mini->envs, cobj);
+					minishell_handle_json_config(mini, cobj);
+				}
 			}
 		}
 
@@ -160,14 +164,17 @@ static int minishell_dispatch_db(struct minishell *mini, const char *dburi, cons
 
 	jobj = nemodb_load_json_object(db);
 	if (jobj != NULL) {
-		tobj = nemojson_object_get_object(jobj, "configs", NULL);
-		if (tobj != NULL) {
-			cobj = nemojson_search_attribute(tobj,
-					"id",
-					nemojson_object_get_string(jobj, "useDefaultId", NULL));
-			if (cobj != NULL) {
-				nemoenvs_handle_json_theme(mini->envs, cobj);
-				minishell_handle_json_theme(mini, cobj);
+		pobj = nemojson_object_get_object(jobj, "config", NULL);
+		if (pobj != NULL) {
+			tobj = nemojson_object_get_object(pobj, "configs", NULL);
+			if (tobj != NULL) {
+				cobj = nemojson_search_attribute(tobj,
+						"id",
+						nemojson_object_get_string(pobj, "useDefaultId", NULL));
+				if (cobj != NULL) {
+					nemoenvs_handle_json_theme(mini->envs, cobj);
+					minishell_handle_json_theme(mini, cobj);
+				}
 			}
 		}
 
