@@ -305,17 +305,6 @@ static void nemoenvs_handle_nemoshell_fullscreen(struct nemoenvs *envs, struct j
 	}
 }
 
-static void nemoenvs_handle_nemoshell_daemon(struct nemoenvs *envs, struct json_object *jobj)
-{
-	struct nemoshell *shell = envs->shell;
-	struct nemocompz *compz = shell->compz;
-	int i;
-
-	for (i = 0; i < nemojson_array_get_length(jobj); i++) {
-		struct json_object *cobj = nemojson_array_get_object(jobj, i);
-	}
-}
-
 static void nemoenvs_handle_nemoshell_stage(struct nemoenvs *envs, struct json_object *jobj)
 {
 	struct nemoshell *shell = envs->shell;
@@ -413,8 +402,6 @@ int nemoenvs_handle_json_config(struct nemoenvs *envs, struct json_object *jobj)
 			nemoenvs_handle_nemoshell_evdev(envs, iobj);
 		} else if (strcmp(ikey, "fullscreens") == 0) {
 			nemoenvs_handle_nemoshell_fullscreen(envs, iobj);
-		} else if (strcmp(ikey, "daemons") == 0) {
-			nemoenvs_handle_nemoshell_daemon(envs, iobj);
 		} else if (strcmp(ikey, "stages") == 0) {
 			nemoenvs_handle_nemoshell_stage(envs, iobj);
 		} else if (strcmp(ikey, "window") == 0) {

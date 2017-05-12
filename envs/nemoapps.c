@@ -119,8 +119,28 @@ void nemoenvs_start_services(struct nemoenvs *envs, const char *type)
 	struct nemoservice *service;
 
 	nemolist_for_each(service, &envs->service_list, link) {
-		if (strcmp(service->type, type) == 0)
+		if (type == NULL || strcmp(service->type, type) == 0) {
 			service->pid = nemoenvs_launch_service(envs, service->path, service->args, service->states);
+		}
+	}
+}
+
+void nemoenvs_stop_services(struct nemoenvs *envs, const char *type)
+{
+	struct nemoservice *service;
+
+	nemolist_for_each(service, &envs->service_list, link) {
+		if (type == NULL || strcmp(service->type, type) == 0) {
+			if (service->pid != 0) {
+				kill(service->pid, SIGKILL);
+
+				service->pid = 0;
+			}
+
+			if (service->timer != NULL) {
+				nemotimer_set_timeout(service->timer, 0);
+			}
+		}
 	}
 }
 
