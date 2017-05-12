@@ -55,7 +55,7 @@ void time_get_string(const char *fmt, char *buffer, int length)
 
 	time(&ttime);
 	stime = localtime(&ttime);
-	strftime(buffer, length, "%Y:%m:%d-%H:%M:%S", stime);
+	strftime(buffer, length, fmt, stime);
 }
 
 int random_get_integer(int min, int max)

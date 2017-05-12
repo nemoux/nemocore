@@ -332,8 +332,8 @@ static void minishell_dispatch_screenshot_timer(struct nemotimer *timer, void *d
 				screen->x, screen->y,
 				screen->width, screen->height);
 
-		time_get_string("%Y:%m:%d-%H:%M:%S", times, sizeof(times));
-		snprintf(pngpath, sizeof(pngpath), "%s/screen-%d-%d-%s.png", mini->screenshot.path, screen->node->nodeid, screen->screenid, times);
+		time_get_string("_%Y%m%d_%H%M%S", times, sizeof(times));
+		snprintf(pngpath, sizeof(pngpath), "%s/screen-%d-%d%s.png", mini->screenshot.path, screen->node->nodeid, screen->screenid, times);
 
 		eone = nemoqueue_one_create();
 		nemoqueue_one_set_max_string(eone, 1);
