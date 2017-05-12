@@ -46,7 +46,7 @@
 
 #include <nemoenvs.h>
 
-static void nemoenvs_handle_nemotheme_service(struct nemoenvs *envs, struct json_object *jobj, const char *type)
+static void nemoenvs_handle_nemotheme_service(struct nemoenvs *envs, struct json_object *jobj)
 {
 	int i;
 
@@ -131,7 +131,7 @@ static void nemoenvs_handle_nemotheme_service(struct nemoenvs *envs, struct json
 		}
 
 		nemoenvs_attach_service(envs,
-				type,
+				nemojson_object_get_string(cobj, "type", "background"),
 				binpath,
 				nemomemo_get(args),
 				nemomemo_get(states));
@@ -180,12 +180,8 @@ int nemoenvs_handle_json_theme(struct nemoenvs *envs, struct json_object *jobj)
 		struct json_object *iobj = nemojson_get_object(json, i);
 		const char *ikey = nemojson_get_key(json, i);
 
-		if (strcmp(ikey, "backgrounds") == 0) {
-			nemoenvs_handle_nemotheme_service(envs, iobj, "background");
-		} else if (strcmp(ikey, "daemons") == 0) {
-			nemoenvs_handle_nemotheme_service(envs, iobj, "daemon");
-		} else if (strcmp(ikey, "screensavers") == 0) {
-			nemoenvs_handle_nemotheme_service(envs, iobj, "screensaver");
+		if (strcmp(ikey, "services") == 0) {
+			nemoenvs_handle_nemotheme_service(envs, iobj);
 		} else if (strcmp(ikey, "layers") == 0) {
 			nemoenvs_handle_nemotheme_layer(envs, iobj);
 		} else if (strcmp(ikey, "defaultLayerId") == 0) {
