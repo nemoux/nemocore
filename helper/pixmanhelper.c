@@ -7,6 +7,8 @@
 
 #include <png.h>
 #include <jpeglib.h>
+#include <cairo.h>
+#include <librsvg/rsvg.h>
 
 #include <pixmanhelper.h>
 #include <nemomisc.h>
@@ -209,90 +211,6 @@ out:
 	return image;
 }
 
-struct jpegerror {
-	struct jpeg_error_mgr pub;
-	jmp_buf setjmp_buffer;
-};
-
-static void jpegerror_exit(j_common_ptr cinfo)
-{
-	struct jpegerror *err = (struct jpegerror *)cinfo->err;
-
-	(*cinfo->err->output_message)(cinfo);
-
-	longjmp(err->setjmp_buffer, 1);
-}
-
-pixman_image_t *pixman_load_jpeg_file(const char *path)
-{
-	pixman_image_t *image = NULL;
-	struct jpeg_decompress_struct cinfo;
-	JSAMPARRAY buffer;
-	struct jpegerror jerr;
-	FILE *fp;
-	int width, height;
-	uint32_t *data;
-	uint8_t *src, *dst;
-	int rowstride;
-	int i;
-
-	fp = fopen(path, "rb");
-	if (fp == NULL)
-		return NULL;
-
-	cinfo.err = jpeg_std_error(&jerr.pub);
-	jerr.pub.error_exit = jpegerror_exit;
-
-	if (setjmp(jerr.setjmp_buffer)) {
-		jpeg_destroy_decompress(&cinfo);
-		goto out;
-	}
-
-	jpeg_create_decompress(&cinfo);
-
-	jpeg_stdio_src(&cinfo, fp);
-
-	jpeg_read_header(&cinfo, TRUE);
-
-	jpeg_start_decompress(&cinfo);
-
-	rowstride = cinfo.output_width * cinfo.output_components;
-
-	buffer = (*cinfo.mem->alloc_sarray)((j_common_ptr)&cinfo, JPOOL_IMAGE, rowstride, 1);
-
-	width = cinfo.output_width;
-	height = cinfo.output_height;
-
-	image = pixman_image_create_bits_no_clear(PIXMAN_a8r8g8b8, width, height, NULL, width * 4);
-	if (image == NULL)
-		goto out;
-
-	data = pixman_image_get_data(image);
-
-	while (cinfo.output_scanline < cinfo.output_height) {
-		jpeg_read_scanlines(&cinfo, buffer, 1);
-
-		src = (uint8_t *)buffer[0];
-		dst = (uint8_t *)&data[(cinfo.output_scanline - 1) * cinfo.output_width];
-
-		for (i = 0; i < cinfo.output_width; i++) {
-			dst[i * 4 + 2] = src[i * 3 + 0];
-			dst[i * 4 + 1] = src[i * 3 + 1];
-			dst[i * 4 + 0] = src[i * 3 + 2];
-			dst[i * 4 + 3] = 255;
-		}
-	}
-
-	jpeg_finish_decompress(&cinfo);
-
-	jpeg_destroy_decompress(&cinfo);
-
-out:
-	fclose(fp);
-
-	return image;
-}
-
 struct pngbuffer {
 	uint8_t *buffer;
 	int length;
@@ -406,6 +324,90 @@ out:
 	return image;
 }
 
+struct jpegerror {
+	struct jpeg_error_mgr pub;
+	jmp_buf setjmp_buffer;
+};
+
+static void jpegerror_exit(j_common_ptr cinfo)
+{
+	struct jpegerror *err = (struct jpegerror *)cinfo->err;
+
+	(*cinfo->err->output_message)(cinfo);
+
+	longjmp(err->setjmp_buffer, 1);
+}
+
+pixman_image_t *pixman_load_jpeg_file(const char *path)
+{
+	pixman_image_t *image = NULL;
+	struct jpeg_decompress_struct cinfo;
+	JSAMPARRAY buffer;
+	struct jpegerror jerr;
+	FILE *fp;
+	int width, height;
+	uint32_t *data;
+	uint8_t *src, *dst;
+	int rowstride;
+	int i;
+
+	fp = fopen(path, "rb");
+	if (fp == NULL)
+		return NULL;
+
+	cinfo.err = jpeg_std_error(&jerr.pub);
+	jerr.pub.error_exit = jpegerror_exit;
+
+	if (setjmp(jerr.setjmp_buffer)) {
+		jpeg_destroy_decompress(&cinfo);
+		goto out;
+	}
+
+	jpeg_create_decompress(&cinfo);
+
+	jpeg_stdio_src(&cinfo, fp);
+
+	jpeg_read_header(&cinfo, TRUE);
+
+	jpeg_start_decompress(&cinfo);
+
+	rowstride = cinfo.output_width * cinfo.output_components;
+
+	buffer = (*cinfo.mem->alloc_sarray)((j_common_ptr)&cinfo, JPOOL_IMAGE, rowstride, 1);
+
+	width = cinfo.output_width;
+	height = cinfo.output_height;
+
+	image = pixman_image_create_bits_no_clear(PIXMAN_a8r8g8b8, width, height, NULL, width * 4);
+	if (image == NULL)
+		goto out;
+
+	data = pixman_image_get_data(image);
+
+	while (cinfo.output_scanline < cinfo.output_height) {
+		jpeg_read_scanlines(&cinfo, buffer, 1);
+
+		src = (uint8_t *)buffer[0];
+		dst = (uint8_t *)&data[(cinfo.output_scanline - 1) * cinfo.output_width];
+
+		for (i = 0; i < cinfo.output_width; i++) {
+			dst[i * 4 + 2] = src[i * 3 + 0];
+			dst[i * 4 + 1] = src[i * 3 + 1];
+			dst[i * 4 + 0] = src[i * 3 + 2];
+			dst[i * 4 + 3] = 255;
+		}
+	}
+
+	jpeg_finish_decompress(&cinfo);
+
+	jpeg_destroy_decompress(&cinfo);
+
+out:
+	fclose(fp);
+
+	return image;
+}
+
 pixman_image_t *pixman_load_jpeg_data(uint32_t *data, int length)
 {
 	pixman_image_t *image = NULL;
@@ -468,23 +470,92 @@ out:
 	return image;
 }
 
+pixman_image_t *pixman_load_svg_file(const char *path)
+{
+	pixman_image_t *image = NULL;
+	RsvgHandle *rsvg;
+	RsvgDimensionData dims;
+	cairo_surface_t *surface;
+	cairo_t *cr;
+
+	rsvg = rsvg_handle_new_from_file(path, NULL);
+	if (rsvg == NULL)
+		return NULL;
+
+	rsvg_handle_get_dimensions(rsvg, &dims);
+
+	image = pixman_image_create_bits_no_clear(PIXMAN_a8r8g8b8, dims.width, dims.height, NULL, dims.width * 4);
+	if (image == NULL)
+		goto out1;
+
+	surface = cairo_image_surface_create_for_data(
+			(unsigned char *)pixman_image_get_data(image),
+			CAIRO_FORMAT_ARGB32,
+			pixman_image_get_width(image),
+			pixman_image_get_height(image),
+			pixman_image_get_stride(image));
+	cr = cairo_create(surface);
+	rsvg_handle_render_cairo(rsvg, cr);
+	cairo_destroy(cr);
+	cairo_surface_destroy(surface);
+
+out1:
+	g_object_unref(rsvg);
+
+	return image;
+}
+
+pixman_image_t *pixman_load_svg_data(uint32_t *data, int length)
+{
+	pixman_image_t *image = NULL;
+	RsvgHandle *rsvg;
+	RsvgDimensionData dims;
+	cairo_surface_t *surface;
+	cairo_t *cr;
+
+	rsvg = rsvg_handle_new_from_data((unsigned char *)data, length, NULL);
+	if (rsvg == NULL)
+		return NULL;
+
+	rsvg_handle_get_dimensions(rsvg, &dims);
+
+	image = pixman_image_create_bits_no_clear(PIXMAN_a8r8g8b8, dims.width, dims.height, NULL, dims.width * 4);
+	if (image == NULL)
+		goto out1;
+
+	surface = cairo_image_surface_create_for_data(
+			(unsigned char *)pixman_image_get_data(image),
+			CAIRO_FORMAT_ARGB32,
+			pixman_image_get_width(image),
+			pixman_image_get_height(image),
+			pixman_image_get_stride(image));
+	cr = cairo_create(surface);
+	rsvg_handle_render_cairo(rsvg, cr);
+	cairo_destroy(cr);
+	cairo_surface_destroy(surface);
+
+out1:
+	g_object_unref(rsvg);
+
+	return image;
+}
+
 static int pixman_compare_extension(const void *a, const void *b)
 {
 	return strcasecmp((const char *)a, (const char *)b);
 }
-
-typedef pixman_image_t *(*pixman_load_image_t)(const char *path);
 
 pixman_image_t *pixman_load_image(const char *filepath, int32_t width, int32_t height)
 {
 	static struct extensionelement {
 		char extension[32];
 
-		pixman_load_image_t load;
+		pixman_image_t *(*load)(const char *path);
 	} elements[] = {
-		{ ".jpeg",				pixman_load_jpeg_file },
+		{ ".jpeg",			pixman_load_jpeg_file },
 		{ ".jpg",				pixman_load_jpeg_file },
-		{ ".png",				pixman_load_png_file }
+		{ ".png",				pixman_load_png_file },
+		{ ".svg",				pixman_load_svg_file }
 	}, *element;
 
 	pixman_image_t *src;
