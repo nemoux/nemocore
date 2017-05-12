@@ -80,6 +80,13 @@ static int minishell_dispatch_command(struct minishell *mini, struct itemone *on
 		const char *states = nemoitem_one_get_attr(one, "states");
 
 		nemoenvs_launch_xapp(mini->envs, path, args, states);
+	} else if (strcmp(type, "service") == 0) {
+		const char *service = nemoitem_one_get_attr(one, "service");
+
+		if (nemoitem_one_has_sattr(one, "request", "stop") != 0)
+			nemoenvs_stop_services(mini->envs, service);
+		else
+			nemoenvs_start_services(mini->envs, service);
 	} else if (strcmp(type, "close") == 0) {
 		struct nemoshell *shell = mini->shell;
 		struct shellbin *bin;
@@ -357,6 +364,7 @@ int main(int argc, char *argv[])
 		{ "db",									required_argument,	NULL,		'd' },
 		{ "config",							required_argument,	NULL,		'c' },
 		{ "theme",							required_argument,	NULL,		't' },
+		{ "service",						required_argument,	NULL,		's' },
 		{ "debug",							no_argument,				NULL,		'g' },
 		{ "help",								no_argument,				NULL,		'h' },
 		{ 0 }
@@ -368,6 +376,7 @@ int main(int argc, char *argv[])
 	char *dbname = NULL;
 	char *configpath = NULL;
 	char *themepath = NULL;
+	char *service = NULL;
 	char *rendernode = env_get_string("NEMOSHELL_RENDER_NODE", NULL);
 	char *evdevopts = env_get_string("NEMOSHELL_EVDEV_OPTS", NULL);
 	char *seat = env_get_string("NEMOSHELL_SEAT_NAME", "seat0");
@@ -375,7 +384,7 @@ int main(int argc, char *argv[])
 	int tty = env_get_integer("NEMOSHELL_TTY", 0);
 	int opt;
 
-	while (opt = getopt_long(argc, argv, "r:e:x:d:c:t:gh", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "r:e:x:d:c:t:s:gh", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -402,6 +411,10 @@ int main(int argc, char *argv[])
 
 			case 't':
 				themepath = strdup(optarg);
+				break;
+
+			case 's':
+				service = strdup(optarg);
 				break;
 
 			case 'g':
@@ -471,8 +484,12 @@ int main(int argc, char *argv[])
 	nemoenvs_launch_xserver(mini->envs, xdisplay, rendernode);
 	nemoenvs_use_xserver(mini->envs, xdisplay);
 
-	nemoenvs_start_services(mini->envs, "background");
-	nemoenvs_start_services(mini->envs, "daemon");
+	if (service != NULL) {
+		nemoenvs_start_services(mini->envs, service);
+	} else {
+		nemoenvs_start_services(mini->envs, "background");
+		nemoenvs_start_services(mini->envs, "daemon");
+	}
 
 	if (mini->screenshot.path != NULL && mini->screenshot.interval > 0) {
 		if (os_file_is_exist(mini->screenshot.path) == 0)
