@@ -87,6 +87,8 @@ static int minishell_dispatch_command(struct minishell *mini, struct itemone *on
 			nemoenvs_stop_services(mini->envs, service);
 		else
 			nemoenvs_start_services(mini->envs, service);
+	} else if (strcmp(type, "idle") == 0) {
+		nemocompz_set_idle_timeout(mini->compz, nemoitem_one_get_iattr(one, "timeout", 0));
 	} else if (strcmp(type, "close") == 0) {
 		struct nemoshell *shell = mini->shell;
 		struct shellbin *bin;

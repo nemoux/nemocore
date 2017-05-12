@@ -382,6 +382,14 @@ static void nemoenvs_handle_nemoshell_pitch(struct nemoenvs *envs, struct json_o
 	shell->pitch.coefficient = nemojson_object_get_double(jobj, "coefficient", 0.0f);
 }
 
+static void nemoenvs_handle_nemoshell_idle(struct nemoenvs *envs, struct json_object *jobj)
+{
+	struct nemoshell *shell = envs->shell;
+	struct nemocompz *compz = shell->compz;
+
+	nemocompz_set_idle_timeout(compz, nemojson_object_get_integer(jobj, "timeout", 0));
+}
+
 int nemoenvs_handle_json_config(struct nemoenvs *envs, struct json_object *jobj)
 {
 	struct nemojson *json;
@@ -410,6 +418,8 @@ int nemoenvs_handle_json_config(struct nemoenvs *envs, struct json_object *jobj)
 			nemoenvs_handle_nemoshell_pick(envs, iobj);
 		} else if (strcmp(ikey, "pitch") == 0) {
 			nemoenvs_handle_nemoshell_pitch(envs, iobj);
+		} else if (strcmp(ikey, "idle") == 0) {
+			nemoenvs_handle_nemoshell_idle(envs, iobj);
 		}
 	}
 
