@@ -540,6 +540,52 @@ out1:
 	return image;
 }
 
+static pixman_image_t *pixman_load_jpeg_image(const char *filepath, int32_t width, int32_t height)
+{
+	return pixman_load_jpeg_file(filepath);
+}
+
+static pixman_image_t *pixman_load_png_image(const char *filepath, int32_t width, int32_t height)
+{
+	return pixman_load_png_file(filepath);
+}
+
+static pixman_image_t *pixman_load_svg_image(const char *filepath, int32_t width, int32_t height)
+{
+	pixman_image_t *image = NULL;
+	RsvgHandle *rsvg;
+	RsvgDimensionData dims;
+	cairo_surface_t *surface;
+	cairo_t *cr;
+
+	rsvg = rsvg_handle_new_from_file(filepath, NULL);
+	if (rsvg == NULL)
+		return NULL;
+
+	rsvg_handle_get_dimensions(rsvg, &dims);
+
+	image = pixman_image_create_bits_no_clear(PIXMAN_a8r8g8b8, width, height, NULL, width * 4);
+	if (image == NULL)
+		goto out1;
+
+	surface = cairo_image_surface_create_for_data(
+			(unsigned char *)pixman_image_get_data(image),
+			CAIRO_FORMAT_ARGB32,
+			pixman_image_get_width(image),
+			pixman_image_get_height(image),
+			pixman_image_get_stride(image));
+	cr = cairo_create(surface);
+	cairo_scale(cr, (double)width / (double)dims.width, (double)height / (double)dims.height);
+	rsvg_handle_render_cairo(rsvg, cr);
+	cairo_destroy(cr);
+	cairo_surface_destroy(surface);
+
+out1:
+	g_object_unref(rsvg);
+
+	return image;
+}
+
 static int pixman_compare_extension(const void *a, const void *b)
 {
 	return strcasecmp((const char *)a, (const char *)b);
@@ -550,12 +596,12 @@ pixman_image_t *pixman_load_image(const char *filepath, int32_t width, int32_t h
 	static struct extensionelement {
 		char extension[32];
 
-		pixman_image_t *(*load)(const char *path);
+		pixman_image_t *(*load)(const char *path, int32_t width, int32_t height);
 	} elements[] = {
-		{ ".jpeg",			pixman_load_jpeg_file },
-		{ ".jpg",				pixman_load_jpeg_file },
-		{ ".png",				pixman_load_png_file },
-		{ ".svg",				pixman_load_svg_file }
+		{ ".jpeg",			pixman_load_jpeg_image },
+		{ ".jpg",				pixman_load_jpeg_image },
+		{ ".png",				pixman_load_png_image },
+		{ ".svg",				pixman_load_svg_image }
 	}, *element;
 
 	pixman_image_t *src;
@@ -565,7 +611,7 @@ pixman_image_t *pixman_load_image(const char *filepath, int32_t width, int32_t h
 		return NULL;
 
 	element = (struct extensionelement *)bsearch(extension, elements, sizeof(elements) / sizeof(elements[0]), sizeof(elements[0]), pixman_compare_extension);
-	if (element != NULL && (src = element->load(filepath)) != NULL) {
+	if (element != NULL && (src = element->load(filepath, width, height)) != NULL) {
 		pixman_image_t *dst;
 		pixman_transform_t transform;
 
