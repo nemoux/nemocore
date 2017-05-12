@@ -42,6 +42,7 @@
 #include <nemotoken.h>
 #include <nemoitem.h>
 #include <nemojson.h>
+#include <nemomemo.h>
 #include <nemomisc.h>
 #include <nemolog.h>
 
@@ -132,8 +133,8 @@ static void nemoenvs_handle_nemoshell_input(struct nemoenvs *envs, struct json_o
 
 		x = nemojson_object_get_integer(cobj, "x", 0);
 		y = nemojson_object_get_integer(cobj, "y", 0);
-		width = nemojson_object_get_integer(cobj, "width", screen->width);
-		height = nemojson_object_get_integer(cobj, "height", screen->height);
+		width = nemojson_object_get_integer(cobj, "width", 1920);
+		height = nemojson_object_get_integer(cobj, "height", 1080);
 		nodeid = nemojson_object_get_integer(cobj, "nodeid", -1);
 		screenid = nemojson_object_get_integer(cobj, "screenid", -1);
 		sx = nemojson_object_get_double(cobj, "sx", 1.0f);
@@ -249,6 +250,72 @@ static void nemoenvs_handle_nemoshell_evdev(struct nemoenvs *envs, struct json_o
 		}
 
 		nemoinput_set_state(node, NEMOINPUT_CONFIG_STATE);
+	}
+}
+
+static void nemoenvs_handle_nemoshell_daemon(struct nemoenvs *envs, struct json_object *jobj)
+{
+	struct nemoshell *shell = envs->shell;
+	struct nemocompz *compz = shell->compz;
+	int i;
+
+	for (i = 0; i < nemojson_array_get_length(jobj); i++) {
+		struct json_object *cobj = nemojson_array_get_object(jobj, i);
+		struct json_object *tobj;
+		struct nemomemo *args;
+		char binpath[256] = "";
+		const char *path;
+
+		path = nemojson_object_get_string(cobj, "path", NULL);
+		if (path != NULL) {
+			strcpy(binpath, path);
+		} else {
+			const char *pkgpath = env_get_string("NEMO_PACKAGES_PATH", NEMOUX_INSTALL_PACKAGES);
+			const char *pkgname;
+
+			pkgname = nemojson_object_get_string(cobj, "pkgname", NULL);
+			if (pkgname != NULL) {
+				strcpy(binpath, pkgpath);
+				strncat(binpath, "/", 1);
+				strcat(binpath, pkgname);
+				strncat(binpath, "/", 1);
+				strcat(binpath, "exec");
+			}
+		}
+
+		args = nemomemo_create(512);
+
+		tobj = nemojson_object_get_object(cobj, "param", NULL);
+		if (tobj != NULL) {
+			struct nemojson *json;
+			int j;
+
+			json = nemojson_create();
+			nemojson_iterate_object(json, tobj);
+
+			for (j = 0; j < nemojson_get_count(json); j++) {
+				const char *ikey = nemojson_get_key(json, j);
+				const char *istr = nemojson_get_string(json, j);
+
+				if (strcmp(ikey, "#optind") == 0) {
+					nemomemo_append_format(args, "%s;", istr);
+				} else if (istr[0] != '\0' && istr[0] != ' ' && istr[0] != '\t' && istr[0] != '\n') {
+					nemomemo_append_format(args, "--%s;%s;", ikey, istr);
+				} else {
+					nemomemo_append_format(args, "--%s;", ikey);
+				}
+			}
+
+			nemojson_destroy(json);
+		}
+
+		nemoenvs_attach_service(envs,
+				nemojson_object_get_string(cobj, "type", "daemon"),
+				binpath,
+				nemomemo_get(args),
+				NULL);
+
+		nemomemo_destroy(args);
 	}
 }
 
@@ -408,6 +475,8 @@ int nemoenvs_handle_json_config(struct nemoenvs *envs, struct json_object *jobj)
 			nemoenvs_handle_nemoshell_input(envs, iobj);
 		} else if (strcmp(ikey, "evdevs") == 0) {
 			nemoenvs_handle_nemoshell_evdev(envs, iobj);
+		} else if (strcmp(ikey, "daemons") == 0) {
+			nemoenvs_handle_nemoshell_daemon(envs, iobj);
 		} else if (strcmp(ikey, "fullscreens") == 0) {
 			nemoenvs_handle_nemoshell_fullscreen(envs, iobj);
 		} else if (strcmp(ikey, "stages") == 0) {
