@@ -54,6 +54,7 @@ static void nemoenvs_handle_nemotheme_service(struct nemoenvs *envs, struct json
 		struct json_object *cobj = nemojson_array_get_object(jobj, i);
 		struct json_object *tobj;
 		struct nemomemo *args;
+		struct nemomemo *envp;
 		struct nemomemo *states;
 		char binpath[256] = "";
 		const char *path;
@@ -104,6 +105,26 @@ static void nemoenvs_handle_nemotheme_service(struct nemoenvs *envs, struct json
 			nemojson_destroy(json);
 		}
 
+		envp = nemomemo_create(512);
+
+		tobj = nemojson_object_get_object(cobj, "environ", NULL);
+		if (tobj != NULL) {
+			struct nemojson *json;
+			int j;
+
+			json = nemojson_create();
+			nemojson_iterate_object(json, tobj);
+
+			for (j = 0; j < nemojson_get_count(json); j++) {
+				const char *ikey = nemojson_get_key(json, j);
+				const char *istr = nemojson_get_string(json, j);
+
+				nemomemo_append_format(envp, "%s=%s;", ikey, istr);
+			}
+
+			nemojson_destroy(json);
+		}
+
 		states = nemomemo_create(512);
 		nemomemo_append_format(states, "%s;%f;", "x", nemojson_object_get_double(cobj, "x", 0.0f));
 		nemomemo_append_format(states, "%s;%f;", "y", nemojson_object_get_double(cobj, "y", 0.0f));
@@ -134,9 +155,11 @@ static void nemoenvs_handle_nemotheme_service(struct nemoenvs *envs, struct json
 				nemojson_object_get_string(cobj, "type", "background"),
 				binpath,
 				nemomemo_get(args),
+				nemomemo_get(envp),
 				nemomemo_get(states));
 
 		nemomemo_destroy(args);
+		nemomemo_destroy(envp);
 		nemomemo_destroy(states);
 	}
 }

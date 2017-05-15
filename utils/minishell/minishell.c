@@ -71,15 +71,17 @@ static int minishell_dispatch_command(struct minishell *mini, struct itemone *on
 	if (strcmp(type, "app") == 0) {
 		const char *path = nemoitem_one_get_attr(one, "path");
 		const char *args = nemoitem_one_get_attr(one, "args");
+		const char *envp = nemoitem_one_get_attr(one, "envp");
 		const char *states = nemoitem_one_get_attr(one, "states");
 
-		nemoenvs_launch_app(mini->envs, path, args, states);
+		nemoenvs_launch_app(mini->envs, path, args, envp, states);
 	} else if (strcmp(type, "xapp") == 0) {
 		const char *path = nemoitem_one_get_attr(one, "path");
 		const char *args = nemoitem_one_get_attr(one, "args");
+		const char *envp = nemoitem_one_get_attr(one, "envp");
 		const char *states = nemoitem_one_get_attr(one, "states");
 
-		nemoenvs_launch_xapp(mini->envs, path, args, states);
+		nemoenvs_launch_xapp(mini->envs, path, args, envp, states);
 	} else if (strcmp(type, "service") == 0) {
 		const char *service = nemoitem_one_get_attr(one, "service");
 

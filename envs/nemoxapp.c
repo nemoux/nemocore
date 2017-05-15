@@ -21,7 +21,7 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
-static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xserver, const char *_path, const char *_args, const char *_states);
+static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xserver, const char *_path, const char *_args, const char *_envp, const char *_states);
 static int nemoenvs_execute_xserver(struct nemoenvs *envs, int xdisplay, const char *rendernode);
 
 static struct nemoxserver *nemoenvs_search_xserver_ready(struct nemoenvs *envs)
@@ -76,7 +76,7 @@ static void nemoenvs_handle_xserver_sigusr1(struct wl_listener *listener, void *
 			if (xserver == NULL)
 				break;
 
-			nemoenvs_execute_xapp(envs, xserver, xapp->path, xapp->args, xapp->states);
+			nemoenvs_execute_xapp(envs, xserver, xapp->path, xapp->args, xapp->envp, xapp->states);
 
 			wl_list_remove(&xapp->link);
 
@@ -123,11 +123,12 @@ static int nemoenvs_execute_xserver(struct nemoenvs *envs, int xdisplay, const c
 	return 0;
 }
 
-static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xserver, const char *_path, const char *_args, const char *_states)
+static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xserver, const char *_path, const char *_args, const char *_envp, const char *_states)
 {
 	struct nemotoken *args;
 	struct nemotoken *envp;
 	pid_t pid;
+	int i;
 
 	args = nemotoken_create(_path, strlen(_path));
 	if (_args != NULL)
@@ -135,7 +136,13 @@ static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xser
 	nemotoken_divide(args, ';');
 	nemotoken_update(args);
 
-	envp = nemotoken_create_format("DISPLAY=:%d;XDG_RUNTIME_DIR=/tmp", xserver->xdisplay);
+	envp = nemotoken_create_empty();
+	nemotoken_set_maximum(envp, 512);
+	if (_envp != NULL)
+		nemotoken_append_format(envp, "%s;", _envp);
+	for (i = 0; environ[i] != NULL; i++)
+		nemotoken_append_format(envp, "%s;", environ[i]);
+	nemotoken_append_format(envp, "DISPLAY=:%d", xserver->xdisplay);
 	nemotoken_divide(envp, ';');
 	nemotoken_update(envp);
 
@@ -200,18 +207,19 @@ void nemoenvs_use_xserver(struct nemoenvs *envs, int xdisplay)
 	env_set_format("DISPLAY", ":%d", xdisplay);
 }
 
-int nemoenvs_launch_xapp(struct nemoenvs *envs, const char *_path, const char *_args, const char *_states)
+int nemoenvs_launch_xapp(struct nemoenvs *envs, const char *_path, const char *_args, const char *_envp, const char *_states)
 {
 	struct nemoxserver *xserver;
 	struct nemoxapp *xapp;
 
 	xserver = nemoenvs_search_xserver_ready(envs);
 	if (xserver != NULL)
-		return nemoenvs_execute_xapp(envs, xserver, _path, _args, _states);
+		return nemoenvs_execute_xapp(envs, xserver, _path, _args, _envp, _states);
 
 	xapp = (struct nemoxapp *)malloc(sizeof(struct nemoxapp));
 	xapp->path = strdup(_path);
 	xapp->args = _args != NULL ? strdup(_args) : NULL;
+	xapp->envp = _envp != NULL ? strdup(_envp) : NULL;
 	xapp->states = _states != NULL ? strdup(_states) : NULL;
 	xapp->xdisplay = -1;
 	xapp->rendernode = NULL;

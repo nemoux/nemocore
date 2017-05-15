@@ -20,6 +20,7 @@ struct nemoservice {
 	char *type;
 	char *path;
 	char *args;
+	char *envp;
 	char *states;
 
 	struct nemotimer *timer;
@@ -37,7 +38,7 @@ struct nemoclient {
 	struct nemolist link;
 };
 
-extern struct nemoservice *nemoenvs_attach_service(struct nemoenvs *envs, const char *type, const char *path, const char *args, const char *states);
+extern struct nemoservice *nemoenvs_attach_service(struct nemoenvs *envs, const char *type, const char *path, const char *args, const char *envp, const char *states);
 extern void nemoenvs_detach_service(struct nemoservice *service);
 
 extern int nemoenvs_alive_service(struct nemoenvs *envs, pid_t pid, uint32_t timeout);
@@ -54,8 +55,8 @@ extern int nemoenvs_terminate_clients(struct nemoenvs *envs);
 
 extern int nemoenvs_get_client_count(struct nemoenvs *envs);
 
-extern int nemoenvs_launch_service(struct nemoenvs *envs, const char *_path, const char *_args, const char *_states);
-extern int nemoenvs_launch_app(struct nemoenvs *envs, const char *_path, const char *_args, const char *_states);
+extern int nemoenvs_launch_service(struct nemoenvs *envs, const char *_path, const char *_args, const char *_envp, const char *_states);
+extern int nemoenvs_launch_app(struct nemoenvs *envs, const char *_path, const char *_args, const char *_envp, const char *_states);
 
 #ifdef __cplusplus
 NEMO_END_EXTERN_C

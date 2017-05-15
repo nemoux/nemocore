@@ -23,7 +23,7 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
-struct nemoservice *nemoenvs_attach_service(struct nemoenvs *envs, const char *type, const char *path, const char *args, const char *states)
+struct nemoservice *nemoenvs_attach_service(struct nemoenvs *envs, const char *type, const char *path, const char *args, const char *envp, const char *states)
 {
 	struct nemoservice *service;
 
@@ -37,6 +37,7 @@ struct nemoservice *nemoenvs_attach_service(struct nemoenvs *envs, const char *t
 	service->type = strdup(type);
 	service->path = strdup(path);
 	service->args = args != NULL ? strdup(args) : NULL;
+	service->envp = envp != NULL ? strdup(envp) : NULL;
 	service->states = states != NULL ? strdup(states) : NULL;
 
 	nemolist_insert(&envs->service_list, &service->link);
@@ -53,6 +54,9 @@ void nemoenvs_detach_service(struct nemoservice *service)
 
 	if (service->args != NULL)
 		free(service->args);
+
+	if (service->envp != NULL)
+		free(service->envp);
 
 	if (service->states != NULL)
 		free(service->states);
@@ -71,7 +75,7 @@ static void nemoenvs_dispatch_service_timer(struct nemotimer *timer, void *data)
 
 	kill(service->pid, SIGKILL);
 
-	service->pid = nemoenvs_launch_service(envs, service->path, service->args, service->states);
+	service->pid = nemoenvs_launch_service(envs, service->path, service->args, service->envp, service->states);
 }
 
 int nemoenvs_alive_service(struct nemoenvs *envs, pid_t pid, uint32_t timeout)
@@ -105,7 +109,7 @@ int nemoenvs_respawn_service(struct nemoenvs *envs, pid_t pid)
 		if (service->pid == pid) {
 			nemolog_warning("ENVS", "respawn service(%s) pid(%d)!\n", service->path, pid);
 
-			service->pid = nemoenvs_launch_service(envs, service->path, service->args, service->states);
+			service->pid = nemoenvs_launch_service(envs, service->path, service->args, service->envp, service->states);
 
 			return 1;
 		}
@@ -120,7 +124,7 @@ void nemoenvs_start_services(struct nemoenvs *envs, const char *type)
 
 	nemolist_for_each(service, &envs->service_list, link) {
 		if (type == NULL || strcmp(service->type, type) == 0) {
-			service->pid = nemoenvs_launch_service(envs, service->path, service->args, service->states);
+			service->pid = nemoenvs_launch_service(envs, service->path, service->args, service->envp, service->states);
 		}
 	}
 }
@@ -221,10 +225,14 @@ int nemoenvs_get_client_count(struct nemoenvs *envs)
 	return nemolist_length(&envs->client_list);
 }
 
-int nemoenvs_launch_service(struct nemoenvs *envs, const char *_path, const char *_args, const char *_states)
+extern char **environ;
+
+int nemoenvs_launch_service(struct nemoenvs *envs, const char *_path, const char *_args, const char *_envp, const char *_states)
 {
 	struct nemotoken *args;
+	struct nemotoken *envp;
 	pid_t pid;
+	int i;
 
 	args = nemotoken_create(_path, strlen(_path));
 	if (_args != NULL)
@@ -232,7 +240,16 @@ int nemoenvs_launch_service(struct nemoenvs *envs, const char *_path, const char
 	nemotoken_divide(args, ';');
 	nemotoken_update(args);
 
-	pid = os_file_execute(_path, nemotoken_get_tokens(args), NULL);
+	envp = nemotoken_create_empty();
+	nemotoken_set_maximum(envp, 512);
+	if (_envp != NULL)
+		nemotoken_append_format(envp, "%s;", _envp);
+	for (i = 0; environ[i] != NULL; i++)
+		nemotoken_append_format(envp, "%s;", environ[i]);
+	nemotoken_divide(envp, ';');
+	nemotoken_update(envp);
+
+	pid = os_file_execute(_path, nemotoken_get_tokens(args), nemotoken_get_tokens(envp));
 	if (pid > 0) {
 		if (_states != NULL) {
 			struct nemotoken *states;
@@ -252,14 +269,17 @@ int nemoenvs_launch_service(struct nemoenvs *envs, const char *_path, const char
 	}
 
 	nemotoken_destroy(args);
+	nemotoken_destroy(envp);
 
 	return pid;
 }
 
-int nemoenvs_launch_app(struct nemoenvs *envs, const char *_path, const char *_args, const char *_states)
+int nemoenvs_launch_app(struct nemoenvs *envs, const char *_path, const char *_args, const char *_envp, const char *_states)
 {
 	struct nemotoken *args;
+	struct nemotoken *envp;
 	pid_t pid;
+	int i;
 
 	args = nemotoken_create(_path, strlen(_path));
 	if (_args != NULL)
@@ -267,7 +287,16 @@ int nemoenvs_launch_app(struct nemoenvs *envs, const char *_path, const char *_a
 	nemotoken_divide(args, ';');
 	nemotoken_update(args);
 
-	pid = os_file_execute(_path, nemotoken_get_tokens(args), NULL);
+	envp = nemotoken_create_empty();
+	nemotoken_set_maximum(envp, 512);
+	if (_envp != NULL)
+		nemotoken_append_format(envp, "%s;", _envp);
+	for (i = 0; environ[i] != NULL; i++)
+		nemotoken_append_format(envp, "%s;", environ[i]);
+	nemotoken_divide(envp, ';');
+	nemotoken_update(envp);
+
+	pid = os_file_execute(_path, nemotoken_get_tokens(args), nemotoken_get_tokens(envp));
 	if (pid > 0) {
 		nemoenvs_attach_client(envs, pid, _path);
 
@@ -289,6 +318,7 @@ int nemoenvs_launch_app(struct nemoenvs *envs, const char *_path, const char *_a
 	}
 
 	nemotoken_destroy(args);
+	nemotoken_destroy(envp);
 
 	return pid;
 }

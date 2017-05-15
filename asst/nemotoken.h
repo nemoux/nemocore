@@ -16,10 +16,11 @@ struct nemotoken {
 	char *contents;
 	int length;
 
-	char *tokens[NEMOTOKEN_TOKEN_MAX];
+	char **tokens;
 	int ntokens;
 };
 
+extern struct nemotoken *nemotoken_create_empty(void);
 extern struct nemotoken *nemotoken_create(const char *str, int length);
 extern struct nemotoken *nemotoken_create_format(const char *fmt, ...);
 extern void nemotoken_destroy(struct nemotoken *token);
@@ -39,6 +40,8 @@ extern void nemotoken_toupper(struct nemotoken *token);
 
 extern int nemotoken_get_index(struct nemotoken *token, const char *name);
 extern int nemotoken_has_token(struct nemotoken *token, const char *name);
+
+extern int nemotoken_set_maximum(struct nemotoken *token, int maximum_tokens);
 
 static inline int nemotoken_get_length(struct nemotoken *token)
 {

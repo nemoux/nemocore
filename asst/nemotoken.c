@@ -12,6 +12,31 @@
 
 #include <nemotoken.h>
 
+struct nemotoken *nemotoken_create_empty(void)
+{
+	struct nemotoken *token;
+
+	token = (struct nemotoken *)malloc(sizeof(struct nemotoken));
+	if (token == NULL)
+		return NULL;
+	memset(token, 0, sizeof(struct nemotoken));
+
+	token->contents = (char *)malloc(1);
+	if (token->contents == NULL)
+		goto err1;
+
+	token->contents[0] = '\0';
+	token->length = 0;
+	token->ntokens = 0;
+
+	return token;
+
+err1:
+	free(token);
+
+	return NULL;
+}
+
 struct nemotoken *nemotoken_create(const char *str, int length)
 {
 	struct nemotoken *token;
@@ -60,6 +85,9 @@ struct nemotoken *nemotoken_create_format(const char *fmt, ...)
 
 void nemotoken_destroy(struct nemotoken *token)
 {
+	if (token->tokens != NULL)
+		free(token->tokens);
+
 	free(token->contents);
 	free(token);
 }
@@ -158,6 +186,13 @@ int nemotoken_update(struct nemotoken *token)
 	int state = 0;
 	int i;
 
+	if (token->tokens == NULL) {
+		token->tokens = (char **)malloc(sizeof(char *) * NEMOTOKEN_TOKEN_MAX);
+		if (token->tokens == NULL)
+			return -1;
+		memset(token->tokens, 0, sizeof(char *) * NEMOTOKEN_TOKEN_MAX);
+	}
+
 	for (i = 0; i < token->length + 1; i++) {
 		if (token->contents[i] == '\0') {
 			state = 0;
@@ -230,6 +265,19 @@ int nemotoken_has_token(struct nemotoken *token, const char *name)
 		if (strcmp(token->tokens[i], name) == 0)
 			return 1;
 	}
+
+	return 0;
+}
+
+int nemotoken_set_maximum(struct nemotoken *token, int maximum_tokens)
+{
+	if (token->tokens != NULL)
+		free(token->tokens);
+
+	token->tokens = (char **)malloc(sizeof(char *) * maximum_tokens);
+	if (token->tokens == NULL)
+		return -1;
+	memset(token->tokens, 0, sizeof(char *) * maximum_tokens);
 
 	return 0;
 }
