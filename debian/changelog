@@ -1,3 +1,21 @@
+nemocore (0.1.0) unstable; urgency=medium
+
+  * Release
+
+ -- Taehwan Kim <taehwan@nemoux.net>  Mon, 15 May 2017 12:59:11 +0900
+
+nemocore (0.0.4) unstable; urgency=medium
+
+  * Add skia as dependency explicitly 
+
+ -- Taehwan Kim <taehwan@nemoux.net>  Mon, 15 May 2017 12:47:39 +0900
+
+nemocore (0.0.3) unstable; urgency=medium
+
+  * Bump up 
+
+ -- Taehwan Kim <taehwan@nemoux.net>  Sat, 13 May 2017 16:32:25 +0900
+
 nemocore (0.0.2) unstable; urgency=medium
 
   * Bump up
