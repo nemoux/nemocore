@@ -13,7 +13,7 @@ Package: nemocore
 Priority: optional
 Section: libs
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, pulseaudio, xwayland
+Depends: ${shlibs:Depends}, ${misc:Depends}, pulseaudio, xwayland, skia
 Description: NEMOUX's core platform libraries
  <insert long description, indented with spaces>
 
