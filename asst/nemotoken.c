@@ -12,7 +12,7 @@
 
 #include <nemotoken.h>
 
-struct nemotoken *nemotoken_create_empty(void)
+struct nemotoken *nemotoken_create_simple(void)
 {
 	struct nemotoken *token;
 

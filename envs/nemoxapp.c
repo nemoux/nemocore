@@ -136,7 +136,7 @@ static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xser
 	nemotoken_divide(args, ';');
 	nemotoken_update(args);
 
-	envp = nemotoken_create_empty();
+	envp = nemotoken_create_simple();
 	nemotoken_set_maximum(envp, 512);
 	if (_envp != NULL)
 		nemotoken_append_format(envp, "%s;", _envp);

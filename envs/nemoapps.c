@@ -240,7 +240,7 @@ int nemoenvs_launch_service(struct nemoenvs *envs, const char *_path, const char
 	nemotoken_divide(args, ';');
 	nemotoken_update(args);
 
-	envp = nemotoken_create_empty();
+	envp = nemotoken_create_simple();
 	nemotoken_set_maximum(envp, 512);
 	if (_envp != NULL)
 		nemotoken_append_format(envp, "%s;", _envp);
@@ -287,7 +287,7 @@ int nemoenvs_launch_app(struct nemoenvs *envs, const char *_path, const char *_a
 	nemotoken_divide(args, ';');
 	nemotoken_update(args);
 
-	envp = nemotoken_create_empty();
+	envp = nemotoken_create_simple();
 	nemotoken_set_maximum(envp, 512);
 	if (_envp != NULL)
 		nemotoken_append_format(envp, "%s;", _envp);

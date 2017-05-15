@@ -20,7 +20,7 @@ struct nemotoken {
 	int ntokens;
 };
 
-extern struct nemotoken *nemotoken_create_empty(void);
+extern struct nemotoken *nemotoken_create_simple(void);
 extern struct nemotoken *nemotoken_create(const char *str, int length);
 extern struct nemotoken *nemotoken_create_format(const char *fmt, ...);
 extern void nemotoken_destroy(struct nemotoken *token);
