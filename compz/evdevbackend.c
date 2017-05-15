@@ -33,8 +33,6 @@ static int evdevbackend_add_device(struct evdevbackend *evdev, struct udev_devic
 	if (node == NULL)
 		goto err1;
 
-	nemolog_message("EVDEV", "add device %s [%s] on %s\n", node->devname, node->devphys, devnode);
-
 	return 0;
 
 err1:
