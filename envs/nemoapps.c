@@ -23,7 +23,7 @@
 #include <nemolog.h>
 #include <nemomisc.h>
 
-struct nemoservice *nemoenvs_attach_service(struct nemoenvs *envs, const char *type, const char *path, const char *args, const char *envp, const char *states)
+struct nemoservice *nemoenvs_attach_service(struct nemoenvs *envs, const char *group, const char *path, const char *args, const char *envp, const char *states)
 {
 	struct nemoservice *service;
 
@@ -34,7 +34,7 @@ struct nemoservice *nemoenvs_attach_service(struct nemoenvs *envs, const char *t
 
 	service->envs = envs;
 
-	service->type = strdup(type);
+	service->group = strdup(group);
 	service->path = strdup(path);
 	service->args = args != NULL ? strdup(args) : NULL;
 	service->envp = envp != NULL ? strdup(envp) : NULL;
@@ -62,7 +62,7 @@ void nemoenvs_detach_service(struct nemoservice *service)
 		free(service->states);
 
 	free(service->path);
-	free(service->type);
+	free(service->group);
 	free(service);
 }
 
@@ -118,23 +118,23 @@ int nemoenvs_respawn_service(struct nemoenvs *envs, pid_t pid)
 	return 0;
 }
 
-void nemoenvs_start_services(struct nemoenvs *envs, const char *type)
+void nemoenvs_start_services(struct nemoenvs *envs, const char *group)
 {
 	struct nemoservice *service;
 
 	nemolist_for_each(service, &envs->service_list, link) {
-		if (type == NULL || strcmp(service->type, type) == 0) {
+		if (group == NULL || strcmp(service->group, group) == 0) {
 			service->pid = nemoenvs_launch_service(envs, service->path, service->args, service->envp, service->states);
 		}
 	}
 }
 
-void nemoenvs_stop_services(struct nemoenvs *envs, const char *type)
+void nemoenvs_stop_services(struct nemoenvs *envs, const char *group)
 {
 	struct nemoservice *service;
 
 	nemolist_for_each(service, &envs->service_list, link) {
-		if (type == NULL || strcmp(service->type, type) == 0) {
+		if (group == NULL || strcmp(service->group, group) == 0) {
 			if (service->pid != 0) {
 				kill(service->pid, SIGKILL);
 

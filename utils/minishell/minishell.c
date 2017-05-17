@@ -83,12 +83,12 @@ static int minishell_dispatch_command(struct minishell *mini, struct itemone *on
 
 		nemoenvs_launch_xapp(mini->envs, path, args, envp, states);
 	} else if (strcmp(type, "service") == 0) {
-		const char *service = nemoitem_one_get_attr(one, "service");
+		const char *group = nemoitem_one_get_attr(one, "group");
 
 		if (nemoitem_one_has_sattr(one, "request", "stop") != 0)
-			nemoenvs_stop_services(mini->envs, service);
+			nemoenvs_stop_services(mini->envs, group);
 		else
-			nemoenvs_start_services(mini->envs, service);
+			nemoenvs_start_services(mini->envs, group);
 	} else if (strcmp(type, "idle") == 0) {
 		nemocompz_set_idle_timeout(mini->compz, nemoitem_one_get_iattr(one, "timeout", 0));
 	} else if (strcmp(type, "close") == 0) {

@@ -152,7 +152,7 @@ static void nemoenvs_handle_nemotheme_service(struct nemoenvs *envs, struct json
 		}
 
 		nemoenvs_attach_service(envs,
-				nemojson_object_get_string(cobj, "type", "background"),
+				nemojson_object_get_string(cobj, "group", "background"),
 				binpath,
 				nemomemo_get(args),
 				nemomemo_get(envp),

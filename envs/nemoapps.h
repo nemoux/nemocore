@@ -17,7 +17,7 @@ struct nemoservice {
 
 	pid_t pid;
 
-	char *type;
+	char *group;
 	char *path;
 	char *args;
 	char *envp;
@@ -38,14 +38,14 @@ struct nemoclient {
 	struct nemolist link;
 };
 
-extern struct nemoservice *nemoenvs_attach_service(struct nemoenvs *envs, const char *type, const char *path, const char *args, const char *envp, const char *states);
+extern struct nemoservice *nemoenvs_attach_service(struct nemoenvs *envs, const char *group, const char *path, const char *args, const char *envp, const char *states);
 extern void nemoenvs_detach_service(struct nemoservice *service);
 
 extern int nemoenvs_alive_service(struct nemoenvs *envs, pid_t pid, uint32_t timeout);
 extern int nemoenvs_respawn_service(struct nemoenvs *envs, pid_t pid);
 
-extern void nemoenvs_start_services(struct nemoenvs *envs, const char *type);
-extern void nemoenvs_stop_services(struct nemoenvs *envs, const char *type);
+extern void nemoenvs_start_services(struct nemoenvs *envs, const char *group);
+extern void nemoenvs_stop_services(struct nemoenvs *envs, const char *group);
 
 extern int nemoenvs_attach_client(struct nemoenvs *envs, pid_t pid, const char *name);
 extern int nemoenvs_detach_client(struct nemoenvs *envs, pid_t pid);
