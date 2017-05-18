@@ -100,11 +100,11 @@ int gl_load_texture(GLuint texture, GLuint width, GLuint height, const char *fil
 	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
 	glTexImage2D(GL_TEXTURE_2D,
 			0,
-			GL_BGRA,
+			GL_RGBA,
 			pixman_image_get_stride(image),
 			pixman_image_get_height(image),
 			0,
-			GL_BGRA,
+			GL_RGBA,
 			GL_UNSIGNED_BYTE,
 			(void *)pixman_image_get_data(image));
 	glBindTexture(GL_TEXTURE_2D, 0);

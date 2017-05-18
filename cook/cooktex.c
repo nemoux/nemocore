@@ -202,11 +202,11 @@ int nemocook_texture_load_image(struct cooktex *tex, const char *filepath)
 	glPixelStorei(GL_UNPACK_SKIP_ROWS_EXT, 0);
 	glTexImage2D(GL_TEXTURE_2D,
 			0,
-			GL_BGRA,
+			GL_RGBA,
 			tex->width,
 			tex->height,
 			0,
-			GL_BGRA,
+			GL_RGBA,
 			GL_UNSIGNED_BYTE,
 			(void *)pixman_image_get_data(image));
 	glBindTexture(GL_TEXTURE_2D, 0);
