@@ -623,7 +623,7 @@ pixman_image_t *pixman_load_image(const char *filepath, int32_t width, int32_t h
 		if (height == 0)
 			height = pixman_image_get_height(src);
 
-		dst = pixman_image_create_bits_no_clear(PIXMAN_a8r8g8b8,
+		dst = pixman_image_create_bits_no_clear(PIXMAN_a8b8g8r8,
 				width, height,
 				NULL,
 				width * 4);
