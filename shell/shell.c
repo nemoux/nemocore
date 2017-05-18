@@ -214,7 +214,7 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 				nemoview_set_position(view, bin->screen.x, bin->screen.y);
 				nemoview_set_rotation(view, bin->screen.r);
 
-				nemoview_attach_layer(view, bin->shell->fullscreen_layer);
+				nemoview_attach_layer(view, nemoshell_get_fullscreen_layer(bin->shell));
 				nemoview_update_transform(view);
 				nemoview_damage_below(view);
 			} else {
@@ -348,7 +348,7 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 			viewanimation_revoke(view->compz, view, NEMOVIEW_TRANSLATE_ANIMATION | NEMOVIEW_ROTATE_ANIMATION);
 			vieweffect_revoke(view->compz, view);
 
-			nemoview_attach_layer(view, bin->shell->fullscreen_layer);
+			nemoview_attach_layer(view, nemoshell_get_fullscreen_layer(bin->shell));
 			nemoview_correct_pivot(view, bin->screen.width / 2.0f, bin->screen.height / 2.0f);
 			nemoview_set_position(view, bin->screen.x, bin->screen.y);
 			nemoview_set_rotation(view, bin->screen.r);
@@ -467,7 +467,7 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 	bin->callback = callback;
 	bin->flags = NEMOSHELL_SURFACE_ALL_FLAGS;
 	bin->state = NEMOSHELL_BIN_PICKSCREEN_STATE | NEMOSHELL_BIN_PITCHSCREEN_STATE;
-	bin->layer = shell->default_layer;
+	bin->layer = nemoshell_get_default_layer(shell);
 
 	bin->min_width = shell->bin.min_width;
 	bin->min_height = shell->bin.min_height;
@@ -818,24 +818,24 @@ void nemoshell_set_frame_timeout(struct nemoshell *shell, uint32_t timeout)
 	wl_event_source_timer_update(shell->frame_timer, shell->frame_timeout);
 }
 
-void nemoshell_set_default_layer(struct nemoshell *shell, struct nemolayer *layer)
+void nemoshell_set_default_layer(struct nemoshell *shell, const char *layer)
 {
-	shell->default_layer = layer;
+	shell->default_layer = strdup(layer);
 }
 
 struct nemolayer *nemoshell_get_default_layer(struct nemoshell *shell)
 {
-	return shell->default_layer;
+	return nemocompz_get_layer_by_name(shell->compz, shell->default_layer);
 }
 
-void nemoshell_set_fullscreen_layer(struct nemoshell *shell, struct nemolayer *layer)
+void nemoshell_set_fullscreen_layer(struct nemoshell *shell, const char *layer)
 {
-	shell->fullscreen_layer = layer;
+	shell->fullscreen_layer = strdup(layer);
 }
 
 struct nemolayer *nemoshell_get_fullscreen_layer(struct nemoshell *shell)
 {
-	return shell->fullscreen_layer;
+	return nemocompz_get_layer_by_name(shell->compz, shell->fullscreen_layer);
 }
 
 void nemoshell_send_bin_close(struct shellbin *bin)

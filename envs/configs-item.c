@@ -525,10 +525,10 @@ int nemoenvs_handle_item_config(struct nemoenvs *envs, struct itemone *one)
 
 			attr = nemoitem_one_get_attr(one, "default");
 			if (attr != NULL && (strcmp(attr, "on") == 0 || strcmp(attr, "true") == 0))
-				nemoshell_set_default_layer(shell, layer);
+				nemoshell_set_default_layer(shell, name);
 			attr = nemoitem_one_get_attr(one, "fullscreen");
 			if (attr != NULL && (strcmp(attr, "on") == 0 || strcmp(attr, "true") == 0))
-				nemoshell_set_fullscreen_layer(shell, layer);
+				nemoshell_set_fullscreen_layer(shell, name);
 		}
 	} else if (nemostring_has_prefix(path, "/nemoshell/virtuio") != 0) {
 		int32_t port = nemoitem_one_get_iattr(one, "port", 3333);

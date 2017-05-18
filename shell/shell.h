@@ -74,8 +74,8 @@ typedef void (*nemoshell_enter_idle_t)(void *data);
 struct nemoshell {
 	struct nemocompz *compz;
 
-	struct nemolayer *default_layer;
-	struct nemolayer *fullscreen_layer;
+	char *default_layer;
+	char *fullscreen_layer;
 
 	struct wl_listener pointer_focus_listener;
 	struct wl_listener keyboard_focus_listener;
@@ -294,9 +294,9 @@ extern void nemoshell_destroy(struct nemoshell *shell);
 
 extern void nemoshell_set_frame_timeout(struct nemoshell *shell, uint32_t timeout);
 
-extern void nemoshell_set_default_layer(struct nemoshell *shell, struct nemolayer *layer);
+extern void nemoshell_set_default_layer(struct nemoshell *shell, const char *layer);
 extern struct nemolayer *nemoshell_get_default_layer(struct nemoshell *shell);
-extern void nemoshell_set_fullscreen_layer(struct nemoshell *shell, struct nemolayer *layer);
+extern void nemoshell_set_fullscreen_layer(struct nemoshell *shell, const char *layer);
 extern struct nemolayer *nemoshell_get_fullscreen_layer(struct nemoshell *shell);
 
 extern struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas *canvas, struct nemocanvas_callback *callback);

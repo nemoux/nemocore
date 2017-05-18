@@ -686,6 +686,9 @@ void nemoview_attach_layer(struct nemoview *view, struct nemolayer *layer)
 {
 	struct wl_list *layer_link = &layer->view_list;
 
+	if (layer == NULL)
+		return;
+
 	if (layer_link == &view->layer_link)
 		return;
 

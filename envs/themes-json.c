@@ -208,15 +208,15 @@ int nemoenvs_handle_json_theme(struct nemoenvs *envs, struct json_object *jobj)
 		} else if (strcmp(ikey, "layers") == 0) {
 			nemoenvs_handle_nemotheme_layer(envs, iobj);
 		} else if (strcmp(ikey, "defaultLayerId") == 0) {
-			struct nemolayer *layer;
+			const char *layer;
 
-			layer = nemocompz_get_layer_by_name(compz, json_object_get_string(iobj));
+			layer = json_object_get_string(iobj);
 			if (layer != NULL)
 				nemoshell_set_default_layer(shell, layer);
 		} else if (strcmp(ikey, "fullscreenLayerId") == 0) {
-			struct nemolayer *layer;
+			const char *layer;
 
-			layer = nemocompz_get_layer_by_name(compz, json_object_get_string(iobj));
+			layer = json_object_get_string(iobj);
 			if (layer != NULL)
 				nemoshell_set_fullscreen_layer(shell, layer);
 		}
