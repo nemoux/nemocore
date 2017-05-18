@@ -391,9 +391,9 @@ pixman_image_t *pixman_load_jpeg_file(const char *path)
 		dst = (uint8_t *)&data[(cinfo.output_scanline - 1) * cinfo.output_width];
 
 		for (i = 0; i < cinfo.output_width; i++) {
-			dst[i * 4 + 2] = src[i * 3 + 0];
+			dst[i * 4 + 0] = src[i * 3 + 0];
 			dst[i * 4 + 1] = src[i * 3 + 1];
-			dst[i * 4 + 0] = src[i * 3 + 2];
+			dst[i * 4 + 2] = src[i * 3 + 2];
 			dst[i * 4 + 3] = 255;
 		}
 	}
@@ -455,9 +455,9 @@ pixman_image_t *pixman_load_jpeg_data(uint32_t *data, int length)
 		dst = (char *)&data[(cinfo.output_scanline - 1) * cinfo.output_width];
 
 		for (i = 0; i < cinfo.output_width; i++) {
-			dst[i * 4 + 2] = src[i * 3 + 0];
+			dst[i * 4 + 0] = src[i * 3 + 0];
 			dst[i * 4 + 1] = src[i * 3 + 1];
-			dst[i * 4 + 0] = src[i * 3 + 2];
+			dst[i * 4 + 2] = src[i * 3 + 2];
 			dst[i * 4 + 3] = 255;
 		}
 	}
@@ -623,7 +623,7 @@ pixman_image_t *pixman_load_image(const char *filepath, int32_t width, int32_t h
 		if (height == 0)
 			height = pixman_image_get_height(src);
 
-		dst = pixman_image_create_bits_no_clear(PIXMAN_a8b8g8r8,
+		dst = pixman_image_create_bits_no_clear(PIXMAN_a8r8g8b8,
 				width, height,
 				NULL,
 				width * 4);
