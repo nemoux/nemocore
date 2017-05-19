@@ -1,6 +1,18 @@
+nemocore (0.3.0) unstable; urgency=medium
+
+  * Fix crash
+
+ -- Taehwan Kim <taehwan@nemoux.net>  Fri, 19 May 2017 13:45:36 +0900
+
+nemocore (0.2.1) unstable; urgency=medium
+
+  * Add splash screen option in minishell service file
+
+ -- Taehwan Kim <taehwan@nemoux.net>  Thu, 18 May 2017 11:55:24 +0900
+
 nemocore (0.2.0) unstable; urgency=medium
 
-  * Release 
+  * Release
 
  -- Taehwan Kim <taehwan@nemoux.net>  Wed, 17 May 2017 22:29:19 +0900
 
@@ -12,13 +24,13 @@ nemocore (0.1.0) unstable; urgency=medium
 
 nemocore (0.0.4) unstable; urgency=medium
 
-  * Add skia as dependency explicitly 
+  * Add skia as dependency explicitly
 
  -- Taehwan Kim <taehwan@nemoux.net>  Mon, 15 May 2017 12:47:39 +0900
 
 nemocore (0.0.3) unstable; urgency=medium
 
-  * Bump up 
+  * Bump up
 
  -- Taehwan Kim <taehwan@nemoux.net>  Sat, 13 May 2017 16:32:25 +0900
 
