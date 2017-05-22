@@ -895,13 +895,23 @@ void nemoshell_change_bin_config(struct shellbin *bin)
 	switch (bin->type) {
 		case NEMOSHELL_SURFACE_NORMAL_TYPE:
 			if (bin->config.fullscreen || bin->config.maximized) {
-				bin->fullscreen.x = view->geometry.x;
-				bin->fullscreen.y = view->geometry.y;
-				bin->fullscreen.width = view->geometry.width;
-				bin->fullscreen.height = view->geometry.height;
-				bin->fullscreen.r = view->geometry.r;
-				bin->fullscreen.px = view->geometry.px;
-				bin->fullscreen.py = view->geometry.py;
+				if (bin->has_screen != 0) {
+					bin->fullscreen.x = bin->screen.x;
+					bin->fullscreen.y = bin->screen.y;
+					bin->fullscreen.width = bin->screen.width;
+					bin->fullscreen.height = bin->screen.height;
+					bin->fullscreen.r = bin->screen.r;
+					bin->fullscreen.px = bin->screen.width / 2.0f;
+					bin->fullscreen.py = bin->screen.height / 2.0f;
+				} else {
+					bin->fullscreen.x = view->geometry.x;
+					bin->fullscreen.y = view->geometry.y;
+					bin->fullscreen.width = view->geometry.width;
+					bin->fullscreen.height = view->geometry.height;
+					bin->fullscreen.r = view->geometry.r;
+					bin->fullscreen.px = view->geometry.px;
+					bin->fullscreen.py = view->geometry.py;
+				}
 			} else if (bin->config.relative && parent) {
 				nemoview_set_position(view,
 						parent->geometry.x + bin->transient.x,
