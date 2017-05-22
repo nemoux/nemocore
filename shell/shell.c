@@ -610,15 +610,15 @@ static void nemoshell_handle_keyboard_focus(struct wl_listener *listener, void *
 	if (keyboard->focused != NULL && keyboard->focused->canvas != NULL) {
 		struct shellbin *bin = nemoshell_get_bin(keyboard->focused->canvas);
 
-		if (bin)
-			nemoshell_send_xdg_config(bin);
+		if (xdgshell_is_xdg_surface(bin))
+			nemoshell_send_bin_config(bin);
 	}
 
 	if (keyboard->focus != NULL && keyboard->focus->canvas != NULL) {
 		struct shellbin *bin = nemoshell_get_bin(keyboard->focus->canvas);
 
-		if (bin)
-			nemoshell_send_xdg_config(bin);
+		if (xdgshell_is_xdg_surface(bin))
+			nemoshell_send_bin_config(bin);
 	}
 }
 
@@ -630,15 +630,15 @@ static void nemoshell_handle_keypad_focus(struct wl_listener *listener, void *da
 	if (keypad->focused != NULL && keypad->focused->canvas != NULL) {
 		struct shellbin *bin = nemoshell_get_bin(keypad->focused->canvas);
 
-		if (bin)
-			nemoshell_send_xdg_config(bin);
+		if (xdgshell_is_xdg_surface(bin))
+			nemoshell_send_bin_config(bin);
 	}
 
 	if (keypad->focus != NULL && keypad->focus->canvas != NULL) {
 		struct shellbin *bin = nemoshell_get_bin(keypad->focus->canvas);
 
-		if (bin)
-			nemoshell_send_xdg_config(bin);
+		if (xdgshell_is_xdg_surface(bin))
+			nemoshell_send_bin_config(bin);
 	}
 }
 
@@ -858,13 +858,8 @@ void nemoshell_send_bin_config(struct shellbin *bin)
 	else
 		config = &bin->config;
 
-	if (config->fullscreen || config->maximized) {
-		width = bin->screen.width;
-		height = bin->screen.height;
-	} else {
-		width = 0;
-		height = 0;
-	}
+	width = bin->screen.width;
+	height = bin->screen.height;
 
 	bin->callback->send_configure(bin->canvas, width, height);
 }
@@ -939,12 +934,6 @@ void nemoshell_clear_bin_config(struct shellbin *bin)
 	if ((bin->next_config.maximized != bin->config.maximized) ||
 			(bin->next_config.fullscreen != bin->config.fullscreen))
 		bin->config_changed = 1;
-}
-
-void nemoshell_send_xdg_config(struct shellbin *bin)
-{
-	if (xdgshell_is_xdg_surface(bin))
-		nemoshell_send_bin_config(bin);
 }
 
 struct nemoview *nemoshell_get_default_view(struct nemocanvas *canvas)

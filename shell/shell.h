@@ -320,8 +320,6 @@ extern void nemoshell_send_bin_config(struct shellbin *bin);
 extern void nemoshell_change_bin_config(struct shellbin *bin);
 extern void nemoshell_clear_bin_config(struct shellbin *bin);
 
-extern void nemoshell_send_xdg_config(struct shellbin *bin);
-
 extern struct nemoview *nemoshell_get_default_view(struct nemocanvas *canvas);
 
 extern struct clientstate *nemoshell_create_client_state(struct nemoshell *shell, uint32_t pid);
