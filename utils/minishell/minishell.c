@@ -105,6 +105,8 @@ static int minishell_dispatch_command(struct minishell *mini, struct itemone *on
 	} else if (strcmp(type, "close_all") == 0) {
 		nemoenvs_terminate_clients(mini->envs);
 		nemoenvs_terminate_xclients(mini->envs);
+	} else if (strcmp(type, "close_fullscreen") == 0) {
+		nemoshell_kill_fullscreen_bin(mini->shell, nemoitem_one_get_iattr(one, "target", 0));
 	}
 
 	return 0;
