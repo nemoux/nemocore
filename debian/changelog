@@ -1,3 +1,9 @@
+nemocore (0.3.1) unstable; urgency=medium
+
+  * Fix the sound issue when playing wmv files in the nemoplay
+
+ -- Taehwan Kim <taehwan@nemoux.net>  Mon, 29 May 2017 14:55:50 +0900
+
 nemocore (0.3.0) unstable; urgency=medium
 
   * Fix crash
