@@ -215,8 +215,16 @@ int nemoplay_load_media(struct nemoplay *play, const char *mediapath)
 		play->audio_timebase = av_q2d(container->streams[audio_stream]->time_base);
 
 		swr = swr_alloc();
-		av_opt_set_int(swr, "in_channel_layout", audio_context->channel_layout, 0);
-		av_opt_set_int(swr, "out_channel_layout", audio_context->channel_layout, 0);
+		if (audio_context->channel_layout != 0) {
+			av_opt_set_int(swr, "in_channel_layout", audio_context->channel_layout, 0);
+			av_opt_set_int(swr, "out_channel_layout", audio_context->channel_layout, 0);
+		} else if (audio_context->channels == 2) {
+			av_opt_set_int(swr, "in_channel_layout", AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT, 0);
+			av_opt_set_int(swr, "out_channel_layout", AV_CH_FRONT_LEFT | AV_CH_FRONT_RIGHT, 0);
+		} else if (audio_context->channels == 1) {
+			av_opt_set_int(swr, "in_channel_layout", AV_CH_FRONT_CENTER, 0);
+			av_opt_set_int(swr, "out_channel_layout", AV_CH_FRONT_CENTER, 0);
+		}
 		av_opt_set_int(swr, "in_sample_rate", audio_context->sample_rate, 0);
 		av_opt_set_int(swr, "out_sample_rate", audio_context->sample_rate, 0);
 		av_opt_set_sample_fmt(swr, "in_sample_fmt", audio_context->sample_fmt, 0);
