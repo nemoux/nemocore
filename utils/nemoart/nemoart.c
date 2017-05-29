@@ -491,7 +491,8 @@ static struct artone *nemoart_one_create(const char *url, int width, int height)
 		{ ".mp4",					nemoart_video_create },
 		{ ".png",					nemoart_image_create },
 		{ ".svg",					nemoart_image_create },
-		{ ".ts",					nemoart_video_create }
+		{ ".ts",					nemoart_video_create },
+		{ ".wmv",					nemoart_video_create }
 	}, *element;
 
 	const char *extension = strrchr(url, '.');
@@ -1114,7 +1115,7 @@ int main(int argc, char *argv[])
 		}
 
 		if (os_file_is_directory(contentpath) != 0)
-			nemofs_dir_scan_extensions(art->contents, contentpath, 8, "mp4", "avi", "mov", "mkv", "ts", "png", "jpg", "jpeg");
+			nemofs_dir_scan_extensions(art->contents, contentpath, 9, "mp4", "avi", "mov", "mkv", "ts", "wmv", "png", "jpg", "jpeg");
 		else
 			nemofs_dir_insert_file(art->contents, NULL, contentpath);
 
