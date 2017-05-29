@@ -35,7 +35,7 @@ int tty_connect(int tty, int *kbmode)
 	} else {
 		snprintf(ttyname, sizeof(ttyname), "/dev/tty%d", tty);
 
-		fd = open(ttyname, O_RDWR | O_CLOEXEC);
+		fd = open(ttyname, O_RDWR | O_CLOEXEC | O_NONBLOCK);
 		if (fd < 0) {
 			nemolog_error("TTY", "failed to open tty %s\n", ttyname);
 			return -1;

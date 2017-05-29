@@ -148,7 +148,7 @@ int framebuffer_open(const char *devpath, struct fbscreeninfo *info)
 {
 	int fd;
 
-	fd = open(devpath, O_RDWR | O_CLOEXEC);
+	fd = open(devpath, O_RDWR | O_CLOEXEC | O_NONBLOCK);
 	if (fd < 0)
 		return -1;
 

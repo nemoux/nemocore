@@ -172,9 +172,9 @@ static int nemoxserver_create_lockfile(int xdisplay, char *lockfile, size_t lsiz
 	pid_t other;
 
 	snprintf(lockfile, lsize, "/tmp/.X%d-lock", xdisplay);
-	fd = open(lockfile, O_WRONLY | O_CLOEXEC | O_CREAT | O_EXCL, 0444);
+	fd = open(lockfile, O_WRONLY | O_CLOEXEC | O_CREAT | O_EXCL | O_NONBLOCK, 0444);
 	if (fd < 0 && errno == EEXIST) {
-		fd = open(lockfile, O_CLOEXEC | O_RDONLY);
+		fd = open(lockfile, O_CLOEXEC | O_RDONLY | O_NONBLOCK);
 		if (fd < 0 || read(fd, pid, 11) != 11) {
 			nemolog_error("XWAYLAND", "can't read lock file %s: %s", lockfile, strerror(errno));
 			if (fd >= 0)

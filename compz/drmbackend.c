@@ -31,7 +31,7 @@ static int drmbackend_add_udev(struct drmbackend *drm, struct udev_device *devic
 
 	nemolog_message("DRM", "add udev device %s\n", devnode);
 
-	fd = nemosession_open(compz->session, devnode, O_RDWR);
+	fd = nemosession_open(compz->session, devnode, O_RDWR | O_NONBLOCK);
 	if (fd < 0) {
 		nemolog_error("DRM", "failed to open device '%s'\n", devnode);
 		return -1;
@@ -60,7 +60,7 @@ static int drmbackend_add_dev(struct drmbackend *drm, const char *devnode)
 
 	nemolog_message("DRM", "add device %s\n", devnode);
 
-	fd = nemosession_open(compz->session, devnode, O_RDWR);
+	fd = nemosession_open(compz->session, devnode, O_RDWR | O_NONBLOCK);
 	if (fd < 0) {
 		nemolog_error("DRM", "failed to open device '%s'\n", devnode);
 		return -1;

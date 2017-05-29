@@ -48,7 +48,7 @@ static void nemolog_finish(void)
 
 int nemolog_open_file(const char *filepath)
 {
-	s_logfile = open(filepath, O_RDWR | O_CREAT, 0644);
+	s_logfile = open(filepath, O_RDWR | O_CREAT | O_NONBLOCK, 0644);
 	s_logtype = 0;
 
 	return s_logfile;
@@ -63,6 +63,8 @@ void nemolog_close_file(void)
 
 void nemolog_set_file(int fd)
 {
+	os_fd_set_nonblocking_mode(fd);
+
 	s_logfile = fd;
 }
 
@@ -82,6 +84,8 @@ int nemolog_open_socket(const char *socketpath)
 
 	if (connect(soc, (struct sockaddr *)&addr, size) < 0)
 		goto err1;
+
+	os_fd_set_nonblocking_mode(soc);
 
 	s_logfile = soc;
 	s_logtype = 1;
