@@ -118,8 +118,7 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 				bin->resize_edges = WL_SHELL_SURFACE_RESIZE_LEFT | WL_SHELL_SURFACE_RESIZE_TOP;
 
 				if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_PICKSCREEN_STATE) != 0) {
-					if (nemocompz_get_scene_width(compz) * shell->pick.fullscreen_scale <= width ||
-							nemocompz_get_scene_height(compz) * shell->pick.fullscreen_scale <= height)
+					if (shell->pick.fullscreen_width <= width || shell->pick.fullscreen_height <= height)
 						screen = nemoshell_get_fullscreen_on(shell, tp0->x, tp0->y, NEMOSHELL_FULLSCREEN_PICK_TYPE);
 
 					if (screen != NULL) {
@@ -429,8 +428,7 @@ static void pick_shellgrab_singletap_up(struct touchpoint_grab *base, uint32_t t
 				bin->resize_edges = WL_SHELL_SURFACE_RESIZE_LEFT | WL_SHELL_SURFACE_RESIZE_TOP;
 
 				if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_PICKSCREEN_STATE) != 0) {
-					if (nemocompz_get_scene_width(compz) * shell->pick.fullscreen_scale <= width ||
-							nemocompz_get_scene_height(compz) * shell->pick.fullscreen_scale <= height)
+					if (shell->pick.fullscreen_width <= width || shell->pick.fullscreen_height <= height)
 						screen = nemoshell_get_fullscreen_on(shell, tp->x, tp->y, NEMOSHELL_FULLSCREEN_PICK_TYPE);
 
 					if (screen != NULL) {
@@ -756,8 +754,7 @@ static void pick_shellgrab_pointer_button(struct nemopointer_grab *base, uint32_
 					bin->resize_edges = WL_SHELL_SURFACE_RESIZE_LEFT | WL_SHELL_SURFACE_RESIZE_TOP;
 
 					if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_PICKSCREEN_STATE) != 0) {
-						if (nemocompz_get_scene_width(compz) * shell->pick.fullscreen_scale <= width ||
-								nemocompz_get_scene_height(compz) * shell->pick.fullscreen_scale <= height)
+						if (shell->pick.fullscreen_width <= width || shell->pick.fullscreen_height <= height)
 							screen = nemoshell_get_fullscreen_on(shell, pointer->x, pointer->y, NEMOSHELL_FULLSCREEN_PICK_TYPE);
 
 						if (screen != NULL) {

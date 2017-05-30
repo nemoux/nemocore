@@ -111,9 +111,9 @@ struct nemoshell {
 
 		double rotate_distance;
 		double scale_distance;
-
-		double fullscreen_scale;
 		double resize_interval;
+
+		uint32_t fullscreen_width, fullscreen_height;
 	} pick;
 
 	struct {

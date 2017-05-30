@@ -7,6 +7,7 @@
 
 #include <assert.h>
 #include <signal.h>
+#include <limits.h>
 #include <wayland-server.h>
 #include <wayland-xdg-shell-server-protocol.h>
 #include <wayland-nemo-shell-server-protocol.h>
@@ -787,8 +788,10 @@ struct nemoshell *nemoshell_create(struct nemocompz *compz)
 	shell->pick.flags = NEMOSHELL_PICK_ALL_FLAGS;
 	shell->pick.rotate_distance = 25.0f;
 	shell->pick.scale_distance = 25.0f;
-	shell->pick.fullscreen_scale = 1.25f;
 	shell->pick.resize_interval = 50.0f;
+
+	shell->pick.fullscreen_width = UINT_MAX;
+	shell->pick.fullscreen_height = UINT_MAX;
 
 	shell->bin.min_width = 0;
 	shell->bin.min_height = 0;
