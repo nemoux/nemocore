@@ -56,6 +56,10 @@ typedef enum {
 } NemoShellFullscreenType;
 
 typedef enum {
+	NEMOSHELL_FULLSCREEN_FIXED_STATE = (1 << 0)
+} NemoShellFullscreenState;
+
+typedef enum {
 	NEMOSHELL_FULLSCREEN_NONE_FOCUS = 0,
 	NEMOSHELL_FULLSCREEN_ALL_FOCUS = 1,
 	NEMOSHELL_FULLSCREEN_LAST_FOCUS
@@ -264,8 +268,7 @@ struct shellscreen {
 	uint32_t type;
 	uint32_t focus;
 	uint32_t target;
-
-	int fixed;
+	uint32_t state;
 
 	int32_t sx, sy, sw, sh;
 	int32_t dx, dy, dw, dh, dr;
@@ -445,6 +448,26 @@ static uint32_t nemoshell_bin_get_pid(struct shellbin *bin)
 static struct nemoview *nemoshell_bin_get_view(struct shellbin *bin)
 {
 	return bin->view;
+}
+
+static inline void nemoshell_screen_set_state(struct shellscreen *screen, uint32_t state)
+{
+	screen->state |= state;
+}
+
+static inline void nemoshell_screen_put_state(struct shellscreen *screen, uint32_t state)
+{
+	screen->state &= ~state;
+}
+
+static inline int nemoshell_screen_has_state(struct shellscreen *screen, uint32_t state)
+{
+	return screen->state & state;
+}
+
+static inline int nemoshell_screen_has_state_all(struct shellscreen *screen, uint32_t state)
+{
+	return (screen->state & state) == state;
 }
 
 static inline void clientstate_set_pid(struct clientstate *state, uint32_t pid)

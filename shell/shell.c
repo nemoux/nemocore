@@ -189,7 +189,7 @@ static void shellbin_configure_canvas(struct nemocanvas *canvas, int32_t sx, int
 		config_changed = 1;
 	}
 
-	if (!nemoview_has_state(view, NEMOVIEW_MAP_STATE)) {
+	if (nemoview_has_state(view, NEMOVIEW_MAP_STATE) == 0) {
 		nemoshell_use_client_state(bin->shell, bin);
 
 		if (bin->initial.has_position == 0) {
@@ -1344,7 +1344,7 @@ void nemoshell_set_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin,
 	wl_list_insert(&screen->bin_list, &bin->screen_link);
 
 	if (screen->has_screen != 0) {
-		nemoshell_set_fullscreen_bin_overlay(shell, bin, screen->id, screen->fixed, nemocompz_get_screen(shell->compz, screen->nodeid, screen->screenid));
+		nemoshell_set_fullscreen_bin_overlay(shell, bin, screen->id, nemoshell_screen_has_state(screen, NEMOSHELL_FULLSCREEN_FIXED_STATE), nemocompz_get_screen(shell->compz, screen->nodeid, screen->screenid));
 		return;
 	}
 
@@ -1366,7 +1366,7 @@ void nemoshell_set_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin,
 	bin->screen.r = screen->dr * M_PI / 180.0f;
 	bin->has_screen = 1;
 
-	if (screen->fixed != 0)
+	if (nemoshell_screen_has_state(screen, NEMOSHELL_FULLSCREEN_FIXED_STATE) != 0)
 		nemoshell_bin_set_state(bin, NEMOSHELL_BIN_FIXED_STATE);
 	else
 		nemoshell_bin_put_state(bin, NEMOSHELL_BIN_FIXED_STATE);
@@ -1471,7 +1471,7 @@ void nemoshell_set_maximized_bin(struct nemoshell *shell, struct shellbin *bin, 
 	bin->screen.r = screen->dr * M_PI / 180.0f;
 	bin->has_screen = 1;
 
-	if (screen->fixed != 0)
+	if (nemoshell_screen_has_state(screen, NEMOSHELL_FULLSCREEN_FIXED_STATE) != 0)
 		nemoshell_bin_set_state(bin, NEMOSHELL_BIN_FIXED_STATE);
 	else
 		nemoshell_bin_put_state(bin, NEMOSHELL_BIN_FIXED_STATE);

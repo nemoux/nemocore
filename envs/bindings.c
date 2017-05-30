@@ -174,6 +174,23 @@ void nemoenvs_handle_right_button(struct nemocompz *compz, struct nemopointer *p
 
 void nemoenvs_handle_touch_event(struct nemocompz *compz, struct touchpoint *tp, uint32_t time, void *data)
 {
+	struct nemoenvs *envs = (struct nemoenvs *)data;
+	struct nemoshell *shell = envs->shell;
+	struct shellscreen *screen;
+
+	screen = nemoshell_get_fullscreen_on(shell, tp->x, tp->y, NEMOSHELL_FULLSCREEN_PITCH_TYPE);
+	if (screen != NULL) {
+		struct shellbin *sbin, *nbin;
+
+		wl_list_for_each_safe(sbin, nbin, &shell->bin_list, link) {
+			wl_list_remove(&sbin->screen_link);
+			wl_list_init(&sbin->screen_link);
+
+			if (nemoshell_move_canvas_by_touchpoint(shell, tp, sbin) == 0)
+				break;
+		}
+	}
+
 	if (tp->focus != NULL) {
 		nemoview_above_layer(tp->focus, NULL);
 
