@@ -143,8 +143,8 @@ static void move_shellgrab_dispatch_effect_done(struct nemoeffect *base)
 
 	if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_PITCHSCREEN_STATE) != 0) {
 		nemoview_transform_to_global(bin->view,
-				bin->view->content->width * 0.5f,
-				bin->view->content->height * 0.5f,
+				bin->view->content->width * bin->view->geometry.fx,
+				bin->view->content->height * bin->view->geometry.fy,
 				&tx, &ty);
 
 		screen = nemoshell_get_fullscreen_on(shell, tx, ty, NEMOSHELL_FULLSCREEN_PITCH_TYPE);
