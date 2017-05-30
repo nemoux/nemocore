@@ -119,7 +119,7 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 
 				if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_PICKSCREEN_STATE) != 0) {
 					screen = nemoshell_get_fullscreen_on(shell, tp0->x, tp0->y, NEMOSHELL_FULLSCREEN_PICK_TYPE);
-					if (screen != NULL && (screen->sw <= width || screen->sh <= height)) {
+					if (screen != NULL && (screen->sw <= width && screen->sh <= height)) {
 						width = screen->dw;
 						height = screen->dh;
 
@@ -427,7 +427,7 @@ static void pick_shellgrab_singletap_up(struct touchpoint_grab *base, uint32_t t
 
 				if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_PICKSCREEN_STATE) != 0) {
 					screen = nemoshell_get_fullscreen_on(shell, tp->x, tp->y, NEMOSHELL_FULLSCREEN_PICK_TYPE);
-					if (screen != NULL && (screen->sw <= width || screen->sh <= height)) {
+					if (screen != NULL && (screen->sw <= width && screen->sh <= height)) {
 						width = screen->dw;
 						height = screen->dh;
 
