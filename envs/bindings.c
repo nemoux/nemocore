@@ -182,7 +182,7 @@ void nemoenvs_handle_touch_event(struct nemocompz *compz, struct touchpoint *tp,
 	if (screen != NULL) {
 		struct shellbin *sbin, *nbin;
 
-		wl_list_for_each_safe(sbin, nbin, &shell->bin_list, link) {
+		wl_list_for_each_safe(sbin, nbin, &screen->bin_list, screen_link) {
 			wl_list_remove(&sbin->screen_link);
 			wl_list_init(&sbin->screen_link);
 
