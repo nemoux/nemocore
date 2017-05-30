@@ -321,10 +321,6 @@ static void nemoenvs_handle_nemoshell_pick(struct nemoshell *shell, struct itemo
 			shell->pick.rotate_distance = strtod(value, NULL);
 		} else if (strcmp(name, "scale_distance") == 0) {
 			shell->pick.scale_distance = strtod(value, NULL);
-		} else if (strcmp(name, "fullscreen_width") == 0) {
-			shell->pick.fullscreen_width = strtoul(value, NULL, 10);
-		} else if (strcmp(name, "fullscreen_height") == 0) {
-			shell->pick.fullscreen_height = strtoul(value, NULL, 10);
 		} else if (strcmp(name, "resize_interval") == 0) {
 			shell->pick.resize_interval = strtod(value, NULL);
 		} else if (strcmp(name, "scale") == 0) {

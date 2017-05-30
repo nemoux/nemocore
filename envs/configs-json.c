@@ -454,8 +454,6 @@ static void nemoenvs_handle_nemoshell_pick(struct nemoenvs *envs, struct json_ob
 	shell->pick.rotate_distance = nemojson_object_get_double(jobj, "rotateDistance", 0.0f);
 	shell->pick.scale_distance = nemojson_object_get_double(jobj, "scaleDistance", 0.0f);
 	shell->pick.resize_interval = nemojson_object_get_double(jobj, "resizeInterval", 0.0f);
-	shell->pick.fullscreen_width = nemojson_object_get_integer(jobj, "fullscreenWidth", UINT_MAX);
-	shell->pick.fullscreen_height = nemojson_object_get_integer(jobj, "fullscreenHeight", UINT_MAX);
 
 	if (nemojson_object_get_boolean(jobj, "scale", 1) == 0)
 		shell->pick.flags &= ~NEMOSHELL_PICK_SCALE_FLAG;

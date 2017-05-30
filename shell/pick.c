@@ -118,10 +118,8 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 				bin->resize_edges = WL_SHELL_SURFACE_RESIZE_LEFT | WL_SHELL_SURFACE_RESIZE_TOP;
 
 				if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_PICKSCREEN_STATE) != 0) {
-					if (shell->pick.fullscreen_width <= width || shell->pick.fullscreen_height <= height)
-						screen = nemoshell_get_fullscreen_on(shell, tp0->x, tp0->y, NEMOSHELL_FULLSCREEN_PICK_TYPE);
-
-					if (screen != NULL) {
+					screen = nemoshell_get_fullscreen_on(shell, tp0->x, tp0->y, NEMOSHELL_FULLSCREEN_PICK_TYPE);
+					if (screen != NULL && (screen->sw <= width || screen->sh <= height)) {
 						width = screen->dw;
 						height = screen->dh;
 
@@ -428,10 +426,8 @@ static void pick_shellgrab_singletap_up(struct touchpoint_grab *base, uint32_t t
 				bin->resize_edges = WL_SHELL_SURFACE_RESIZE_LEFT | WL_SHELL_SURFACE_RESIZE_TOP;
 
 				if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_PICKSCREEN_STATE) != 0) {
-					if (shell->pick.fullscreen_width <= width || shell->pick.fullscreen_height <= height)
-						screen = nemoshell_get_fullscreen_on(shell, tp->x, tp->y, NEMOSHELL_FULLSCREEN_PICK_TYPE);
-
-					if (screen != NULL) {
+					screen = nemoshell_get_fullscreen_on(shell, tp->x, tp->y, NEMOSHELL_FULLSCREEN_PICK_TYPE);
+					if (screen != NULL && (screen->sw <= width || screen->sh <= height)) {
 						width = screen->dw;
 						height = screen->dh;
 
@@ -753,25 +749,7 @@ static void pick_shellgrab_pointer_button(struct nemopointer_grab *base, uint32_
 				} else if (nemoshell_bin_has_flags(bin, NEMOSHELL_SURFACE_RESIZABLE_FLAG) != 0) {
 					bin->resize_edges = WL_SHELL_SURFACE_RESIZE_LEFT | WL_SHELL_SURFACE_RESIZE_TOP;
 
-					if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_PICKSCREEN_STATE) != 0) {
-						if (shell->pick.fullscreen_width <= width || shell->pick.fullscreen_height <= height)
-							screen = nemoshell_get_fullscreen_on(shell, pointer->x, pointer->y, NEMOSHELL_FULLSCREEN_PICK_TYPE);
-
-						if (screen != NULL) {
-							nemoshell_kill_fullscreen_bin(shell, screen->target);
-
-							nemoshell_set_fullscreen_bin(shell, bin, screen);
-
-							if (screen->focus == NEMOSHELL_FULLSCREEN_ALL_FOCUS) {
-								nemoseat_set_keyboard_focus(compz->seat, bin->view);
-								nemoseat_set_pointer_focus(compz->seat, bin->view);
-							}
-						} else {
-							bin->callback->send_configure(bin->canvas, width, height);
-						}
-					} else {
-						bin->callback->send_configure(bin->canvas, width, height);
-					}
+					bin->callback->send_configure(bin->canvas, width, height);
 
 					bin->has_scale = 1;
 					bin->scale.serial = bin->next_serial;
