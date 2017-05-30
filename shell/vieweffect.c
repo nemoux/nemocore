@@ -13,6 +13,8 @@
 #include <compz.h>
 #include <nemomisc.h>
 
+#define NEMOSHELL_VIEW_PITCH_EPSILON		(0.85f)
+
 static int vieweffect_handle_frame(struct nemoeffect *base, uint32_t msecs)
 {
 	struct vieweffect *effect = (struct vieweffect *)container_of(base, struct vieweffect, base);
@@ -33,7 +35,7 @@ retry:
 
 			effect->type &= ~NEMOVIEW_PITCH_EFFECT;
 		} else if (nemocompz_contain_view_near(compz, view, dx, dy) == 0) {
-			effect->pitch.velocity *= 0.7f;
+			effect->pitch.velocity *= NEMOSHELL_VIEW_PITCH_EPSILON;
 
 			goto retry;
 		} else {
