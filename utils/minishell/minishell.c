@@ -371,6 +371,7 @@ int main(int argc, char *argv[])
 		{ "config",							required_argument,	NULL,		'c' },
 		{ "theme",							required_argument,	NULL,		't' },
 		{ "service",						required_argument,	NULL,		's' },
+		{ "framecheck",					required_argument,	NULL,		'f' },
 		{ "debug",							no_argument,				NULL,		'g' },
 		{ "help",								no_argument,				NULL,		'h' },
 		{ 0 }
@@ -388,9 +389,10 @@ int main(int argc, char *argv[])
 	char *seat = env_get_string("NEMOSHELL_SEAT_NAME", "seat0");
 	int xdisplay = env_get_integer("NEMOSHELL_XDISPLAY_NUMBER", 0);
 	int tty = env_get_integer("NEMOSHELL_TTY", 0);
+	int framecheck = env_get_integer("NEMOSHELL_FRAMECHECK", 0);
 	int opt;
 
-	while (opt = getopt_long(argc, argv, "r:e:x:d:c:t:s:gh", options, NULL)) {
+	while (opt = getopt_long(argc, argv, "r:e:x:d:c:t:s:f:gh", options, NULL)) {
 		if (opt == -1)
 			break;
 
@@ -421,6 +423,10 @@ int main(int argc, char *argv[])
 
 			case 's':
 				service = strdup(optarg);
+				break;
+
+			case 'f':
+				framecheck = strtoul(optarg, NULL, 10);
 				break;
 
 			case 'g':
@@ -456,6 +462,7 @@ int main(int argc, char *argv[])
 	nemoshell_set_update_layer(shell, minishell_update_layer);
 	nemoshell_set_update_transform(shell, minishell_update_transform);
 	nemoshell_set_enter_idle(shell, minishell_enter_idle);
+	nemoshell_set_frame_timeout(shell, framecheck);
 	nemoshell_set_userdata(shell, mini);
 
 	mini->compz = compz;
