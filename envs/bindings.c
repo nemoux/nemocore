@@ -181,13 +181,19 @@ void nemoenvs_handle_touch_event(struct nemocompz *compz, struct touchpoint *tp,
 	screen = nemoshell_get_fullscreen_on(shell, tp->x, tp->y, NEMOSHELL_FULLSCREEN_PITCH_TYPE);
 	if (screen != NULL) {
 		struct shellbin *sbin, *nbin;
+		uint32_t target = screen->target;
 
-		wl_list_for_each_safe(sbin, nbin, &screen->bin_list, screen_link) {
-			wl_list_remove(&sbin->screen_link);
-			wl_list_init(&sbin->screen_link);
+		wl_list_for_each(screen, &shell->fullscreen_list, link) {
+			if (screen->target & target == 0)
+				continue;
 
-			if (nemoshell_move_canvas_by_touchpoint(shell, tp, sbin) == 0)
-				break;
+			wl_list_for_each_safe(sbin, nbin, &screen->bin_list, screen_link) {
+				wl_list_remove(&sbin->screen_link);
+				wl_list_init(&sbin->screen_link);
+
+				if (nemoshell_move_canvas_by_touchpoint(shell, tp, sbin) == 0)
+					break;
+			}
 		}
 	}
 
