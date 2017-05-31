@@ -183,6 +183,7 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 			bin->config.fullscreen == 0 &&
 			bin->config.maximized == 0 &&
 			bin->shell->pick.flags & NEMOSHELL_PICK_TRANSLATE_FLAG &&
+			nemoview_has_state(bin->view, NEMOVIEW_EFFECT_STATE) == 0 &&
 			nemoshell_check_touchgrab_duration(&move->touch, bin->shell->pitch.samples, bin->shell->pitch.max_duration) > 0) {
 		struct nemoshell *shell = bin->shell;
 		struct vieweffect *effect;

@@ -84,6 +84,8 @@ struct vieweffect *vieweffect_create(struct nemoview *view)
 	effect->destroy_listener.notify = vieweffect_handle_destroy;
 	wl_signal_add(&view->destroy_signal, &effect->destroy_listener);
 
+	nemoview_set_state(view, NEMOVIEW_EFFECT_STATE);
+
 	return effect;
 }
 
@@ -92,6 +94,8 @@ void vieweffect_destroy(struct vieweffect *effect)
 	wl_list_remove(&effect->base.link);
 
 	wl_list_remove(&effect->destroy_listener.link);
+
+	nemoview_put_state(effect->view, NEMOVIEW_EFFECT_STATE);
 
 	free(effect);
 }
