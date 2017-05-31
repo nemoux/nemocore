@@ -102,7 +102,7 @@ int nemoshell_move_canvas_by_pointer(struct nemoshell *shell, struct nemopointer
 	if (bin == NULL || pointer->button_count == 0)
 		return -1;
 
-	if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_FIXED_STATE) != 0)
+	if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_FIXED_STATE | NEMOSHELL_BIN_FORCE_STATE) != 0)
 		return 0;
 
 	if (bin->config.fullscreen != 0 || bin->config.maximized != 0)
@@ -141,7 +141,7 @@ static void move_shellgrab_dispatch_effect_done(struct nemoeffect *base)
 	struct shellscreen *screen;
 	float tx, ty;
 
-	if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_PITCHSCREEN_STATE) != 0) {
+	if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_FORCE_STATE) == 0 && nemoshell_bin_has_state(bin, NEMOSHELL_BIN_PITCHSCREEN_STATE) != 0) {
 		nemoview_transform_to_global(bin->view,
 				bin->view->content->width * bin->view->geometry.fx,
 				bin->view->content->height * bin->view->geometry.fy,
@@ -164,6 +164,8 @@ static void move_shellgrab_dispatch_effect_done(struct nemoeffect *base)
 			}
 		}
 	}
+
+	nemoshell_bin_put_state(bin, NEMOSHELL_BIN_FORCE_STATE);
 
 	vieweffect_destroy(effect);
 }
@@ -207,6 +209,8 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		vieweffect_dispatch(bin->shell->compz, effect);
 
 		needs_notify = 0;
+	} else {
+		nemoshell_bin_put_state(bin, NEMOSHELL_BIN_FORCE_STATE);
 	}
 
 	nemoshell_end_touchpoint_shellgrab(grab);
@@ -282,6 +286,9 @@ static void move_shellgrab_touchpoint_cancel(struct touchpoint_grab *base)
 	struct shellgrab *grab = (struct shellgrab *)container_of(base, struct shellgrab, base.touchpoint);
 	struct shellgrab_move *move = (struct shellgrab_move *)container_of(grab, struct shellgrab_move, base);
 
+	if (grab->bin != NULL)
+		nemoshell_bin_put_state(grab->bin, NEMOSHELL_BIN_FORCE_STATE);
+
 	nemoshell_end_touchpoint_shellgrab(grab);
 	nemoshell_end_touchgrab(&move->touch);
 	free(move);
@@ -303,7 +310,7 @@ int nemoshell_move_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 	if (bin == NULL)
 		return -1;
 
-	if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_FIXED_STATE) != 0)
+	if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_FIXED_STATE | NEMOSHELL_BIN_FORCE_STATE) != 0)
 		return 0;
 
 	if (bin->config.fullscreen != 0 || bin->config.maximized != 0)
@@ -376,6 +383,8 @@ int nemoshell_move_canvas_force(struct nemoshell *shell, struct touchpoint *tp, 
 	move->dy = bin->view->geometry.y - tp->y;
 
 	bin->reset_move = 0;
+
+	nemoshell_bin_set_state(bin, NEMOSHELL_BIN_FORCE_STATE);
 
 	if (shell->is_logging_grab != 0)
 		nemolog_message("MOVE", "[DOWN] %llu: x(%f) y(%f)\n", tp->gid, bin->view->geometry.x, bin->view->geometry.y);
