@@ -23,6 +23,8 @@ extern int nemoshell_move_canvas_by_pointer(struct nemoshell *shell, struct nemo
 extern int nemoshell_move_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoint *tp, struct shellbin *bin);
 extern int nemoshell_move_canvas(struct nemoshell *shell, struct shellbin *bin, uint32_t serial);
 
+extern int nemoshell_move_canvas_force(struct nemoshell *shell, struct touchpoint *tp, struct shellbin *bin);
+
 #ifdef __cplusplus
 NEMO_END_EXTERN_C
 #endif

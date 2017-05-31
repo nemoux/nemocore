@@ -191,7 +191,7 @@ void nemoenvs_handle_touch_event(struct nemocompz *compz, struct touchpoint *tp,
 				wl_list_remove(&sbin->screen_link);
 				wl_list_init(&sbin->screen_link);
 
-				if (nemoshell_move_canvas_by_touchpoint(shell, tp, sbin) == 0)
+				if (nemoshell_move_canvas_force(shell, tp, sbin) == 0)
 					break;
 			}
 		}

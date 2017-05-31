@@ -348,3 +348,40 @@ int nemoshell_move_canvas(struct nemoshell *shell, struct shellbin *bin, uint32_
 
 	return 0;
 }
+
+int nemoshell_move_canvas_force(struct nemoshell *shell, struct touchpoint *tp, struct shellbin *bin)
+{
+	struct shellgrab_move *move;
+
+	if (bin == NULL)
+		return -1;
+
+	if (nemoview_has_grab(bin->view) != 0)
+		touchpoint_done_grab(tp);
+
+	if (bin->config.fullscreen != 0 || bin->config.maximized != 0)
+		nemoshell_put_fullscreen_bin(shell, bin);
+
+	move = (struct shellgrab_move *)malloc(sizeof(struct shellgrab_move));
+	if (move == NULL)
+		return -1;
+	memset(move, 0, sizeof(struct shellgrab_move));
+
+	move->dx = bin->view->geometry.x - tp->x;
+	move->dy = bin->view->geometry.y - tp->y;
+
+	bin->reset_move = 0;
+
+	if (shell->is_logging_grab != 0)
+		nemolog_message("MOVE", "[DOWN] %llu: x(%f) y(%f)\n", tp->gid, bin->view->geometry.x, bin->view->geometry.y);
+
+	nemoshell_start_touchpoint_shellgrab(shell, &move->base, &move_shellgrab_touchpoint_interface, bin, tp);
+	nemoshell_start_touchgrab(shell, &move->touch, tp, NEMOSHELL_TOUCH_DEFAULT_TIMEOUT);
+
+	nemoview_transform_notify(bin->view);
+
+	move->base.bin_change_listener.notify = move_shellgrab_handle_bin_change;
+	wl_signal_add(&bin->change_signal, &move->base.bin_change_listener);
+
+	return 0;
+}
