@@ -130,7 +130,7 @@
 		</request>
 
 		<request name="set_fullscreen_target">
-			<arg name="type" type="string"/>
+			<arg name="id" type="string"/>
 		</request>
 
 		<request name="put_fullscreen_target">
