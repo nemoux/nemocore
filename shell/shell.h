@@ -208,6 +208,8 @@ struct shellbin {
 		enum wl_shell_surface_fullscreen_method type;
 		uint32_t framerate;
 
+		char *target;
+
 		float x, y;
 		int32_t width, height;
 		float r;

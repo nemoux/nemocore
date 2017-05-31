@@ -523,6 +523,9 @@ void nemoshell_destroy_bin(struct shellbin *bin)
 		nemoshell_set_parent_bin(child, NULL);
 	}
 
+	if (bin->fullscreen.target != NULL)
+		free(bin->fullscreen.target);
+
 	free(bin);
 }
 

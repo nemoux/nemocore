@@ -112,6 +112,8 @@ extern void nemocanvas_set_scope(struct nemocanvas *canvas, const char *cmds);
 extern void nemocanvas_put_scope(struct nemocanvas *canvas);
 extern void nemocanvas_set_fullscreen_type(struct nemocanvas *canvas, const char *type);
 extern void nemocanvas_put_fullscreen_type(struct nemocanvas *canvas, const char *type);
+extern void nemocanvas_set_fullscreen_target(struct nemocanvas *canvas, const char *id);
+extern void nemocanvas_put_fullscreen_target(struct nemocanvas *canvas);
 extern void nemocanvas_set_fullscreen(struct nemocanvas *canvas, const char *id);
 extern void nemocanvas_put_fullscreen(struct nemocanvas *canvas);
 extern void nemocanvas_move(struct nemocanvas *canvas, uint32_t serial);

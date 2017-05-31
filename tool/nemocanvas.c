@@ -593,6 +593,16 @@ void nemocanvas_put_fullscreen_type(struct nemocanvas *canvas, const char *type)
 	nemo_surface_put_fullscreen_type(canvas->nemo_surface, type);
 }
 
+void nemocanvas_set_fullscreen_target(struct nemocanvas *canvas, const char *id)
+{
+	nemo_surface_set_fullscreen_target(canvas->nemo_surface, id);
+}
+
+void nemocanvas_put_fullscreen_target(struct nemocanvas *canvas)
+{
+	nemo_surface_put_fullscreen_target(canvas->nemo_surface);
+}
+
 void nemocanvas_set_fullscreen(struct nemocanvas *canvas, const char *id)
 {
 	nemo_surface_set_fullscreen(canvas->nemo_surface, id);

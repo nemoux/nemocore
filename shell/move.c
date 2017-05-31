@@ -149,13 +149,18 @@ static void move_shellgrab_dispatch_effect_done(struct nemoeffect *base)
 
 		screen = nemoshell_get_fullscreen_on(shell, tx, ty, NEMOSHELL_FULLSCREEN_PITCH_TYPE);
 		if (screen != NULL) {
-			nemoshell_kill_fullscreen_bin(shell, screen->target);
+			if (bin->fullscreen.target != NULL)
+				screen = nemoshell_get_fullscreen(shell, bin->fullscreen.target);
 
-			nemoshell_set_fullscreen_bin(shell, bin, screen);
+			if (screen != NULL) {
+				nemoshell_kill_fullscreen_bin(shell, screen->target);
 
-			if (screen->focus == NEMOSHELL_FULLSCREEN_ALL_FOCUS) {
-				nemoseat_set_keyboard_focus(shell->compz->seat, bin->view);
-				nemoseat_set_pointer_focus(shell->compz->seat, bin->view);
+				nemoshell_set_fullscreen_bin(shell, bin, screen);
+
+				if (screen->focus == NEMOSHELL_FULLSCREEN_ALL_FOCUS) {
+					nemoseat_set_keyboard_focus(shell->compz->seat, bin->view);
+					nemoseat_set_pointer_focus(shell->compz->seat, bin->view);
+				}
 			}
 		}
 	}
