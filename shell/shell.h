@@ -336,10 +336,12 @@ extern int nemoshell_use_client_stage(struct nemoshell *shell, struct shellbin *
 
 extern struct shellscreen *nemoshell_get_fullscreen(struct nemoshell *shell, const char *id);
 extern void nemoshell_put_fullscreen(struct nemoshell *shell, const char *id);
+extern struct shellscreen *nemoshell_get_fullscreen_by(struct nemoshell *shell, const char *id);
 extern struct shellscreen *nemoshell_get_fullscreen_on(struct nemoshell *shell, int32_t x, int32_t y, uint32_t type);
 
 extern struct shellstage *nemoshell_get_stage(struct nemoshell *shell, const char *id);
 extern void nemoshell_put_stage(struct nemoshell *shell, const char *id);
+extern struct shellstage *nemoshell_get_stage_by(struct nemoshell *shell, const char *id);
 extern struct shellstage *nemoshell_get_stage_on(struct nemoshell *shell, int32_t x, int32_t y);
 
 extern void nemoshell_set_fullscreen_bin_legacy(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen);

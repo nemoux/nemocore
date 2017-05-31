@@ -1214,6 +1214,21 @@ void nemoshell_put_fullscreen(struct nemoshell *shell, const char *id)
 	}
 }
 
+struct shellscreen *nemoshell_get_fullscreen_by(struct nemoshell *shell, const char *id)
+{
+	struct shellscreen *screen;
+
+	if (id == NULL)
+		return NULL;
+
+	wl_list_for_each(screen, &shell->fullscreen_list, link) {
+		if (strcmp(screen->id, id) == 0)
+			return screen;
+	}
+
+	return NULL;
+}
+
 struct shellscreen *nemoshell_get_fullscreen_on(struct nemoshell *shell, int32_t x, int32_t y, uint32_t type)
 {
 	struct shellscreen *screen;
@@ -1268,6 +1283,21 @@ void nemoshell_put_stage(struct nemoshell *shell, const char *id)
 			break;
 		}
 	}
+}
+
+struct shellstage *nemoshell_get_stage_by(struct nemoshell *shell, const char *id)
+{
+	struct shellstage *stage;
+
+	if (id == NULL)
+		return NULL;
+
+	wl_list_for_each(stage, &shell->stage_list, link) {
+		if (strcmp(stage->id, id) == 0)
+			return stage;
+	}
+
+	return NULL;
 }
 
 struct shellstage *nemoshell_get_stage_on(struct nemoshell *shell, int32_t x, int32_t y)

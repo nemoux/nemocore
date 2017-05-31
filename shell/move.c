@@ -149,7 +149,7 @@ static void move_shellgrab_dispatch_effect_done(struct nemoeffect *base)
 	screen = nemoshell_get_fullscreen_on(shell, tx, ty, NEMOSHELL_FULLSCREEN_PITCH_TYPE);
 	if (screen != NULL) {
 		if (bin->fullscreen.target != NULL)
-			screen = nemoshell_get_fullscreen(shell, bin->fullscreen.target);
+			screen = nemoshell_get_fullscreen_by(shell, bin->fullscreen.target);
 
 		if (screen != NULL) {
 			nemoshell_kill_fullscreen_bin(shell, screen->target);
