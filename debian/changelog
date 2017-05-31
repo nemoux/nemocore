@@ -1,3 +1,9 @@
+nemocore (0.4.0) unstable; urgency=medium
+
+  * Release
+
+ -- Taehwan Kim <taehwan@nemoux.net>  Wed, 31 May 2017 15:04:39 +0900
+
 nemocore (0.3.2) unstable; urgency=medium
 
   * Fix the shell freezing bug
