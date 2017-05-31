@@ -1506,7 +1506,7 @@ void nemoshell_kill_fullscreen_bin(struct nemoshell *shell, uint32_t target)
 	struct shellbin *sbin, *nbin;
 
 	wl_list_for_each(screen, &shell->fullscreen_list, link) {
-		if (screen->target & target == 0)
+		if ((screen->target & target) == 0)
 			continue;
 
 		wl_list_for_each_safe(sbin, nbin, &screen->bin_list, screen_link) {
