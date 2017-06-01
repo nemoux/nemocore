@@ -530,7 +530,7 @@ static void drm_screen_repaint(struct nemoscreen *base)
 	if (drmModePageFlip(node->fd, screen->crtc_id,
 				screen->current->id,
 				DRM_MODE_PAGE_FLIP_EVENT, screen) < 0) {
-		nemolog_error("DRM", "failed to queue pageflip\n");
+		nemolog_error("DRM", "failed to queue pageflip current: devnode(%s), errno(%d)\n", node->devnode, errno);
 		goto finish_frame;
 	}
 
@@ -645,7 +645,7 @@ static int drm_screen_repaint_frame(struct nemoscreen *base, pixman_region32_t *
 					screen->next->id, 0, 0,
 					&screen->connector_id, 1,
 					&mode->modeinfo) < 0) {
-			nemolog_error("DRM", "failed to set mode\n");
+			nemolog_error("DRM", "failed to set mode: devnode(%s), errno(%d)\n", node->devnode, errno);
 			goto err1;
 		}
 
@@ -655,7 +655,7 @@ static int drm_screen_repaint_frame(struct nemoscreen *base, pixman_region32_t *
 	if (drmModePageFlip(node->fd, screen->crtc_id,
 				screen->next->id,
 				DRM_MODE_PAGE_FLIP_EVENT, screen) < 0) {
-		nemolog_error("DRM", "failed to queue pageflip\n");
+		nemolog_error("DRM", "failed to queue pageflip next: devnode(%s), errno(%d)\n", node->devnode, errno);
 		goto err1;
 	}
 
