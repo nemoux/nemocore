@@ -197,36 +197,26 @@ static void drm_handle_page_flip(int fd, unsigned int frame, unsigned int secs, 
 {
 	struct drmscreen *screen = (struct drmscreen *)data;
 
+	screen->base.msc += frame;
+
 	if (screen->pageflip_pending != 0) {
 		drm_release_screen_frame(screen, screen->current);
 
 		screen->current = screen->next;
 		screen->next = NULL;
+
+		screen->pageflip_pending = 0;
 	}
 
-	screen->base.msc += frame;
-	screen->pageflip_pending = 0;
-
-	if (screen->vblank_pending == 0) {
-		nemoscreen_finish_frame(&screen->base, secs, usecs,
-				PRESENTATION_FEEDBACK_KIND_VSYNC |
-				PRESENTATION_FEEDBACK_KIND_HW_COMPLETION |
-				PRESENTATION_FEEDBACK_KIND_HW_CLOCK);
-	}
+	nemoscreen_finish_frame(&screen->base, secs, usecs,
+			PRESENTATION_FEEDBACK_KIND_VSYNC |
+			PRESENTATION_FEEDBACK_KIND_HW_COMPLETION |
+			PRESENTATION_FEEDBACK_KIND_HW_CLOCK);
 }
 
 static void drm_handle_vblank(int fd, unsigned int frame, unsigned int secs, unsigned int usecs, void *data)
 {
 	struct drmscreen *screen = (struct drmscreen *)data;
-
-	screen->base.msc += frame;
-	screen->vblank_pending = 0;
-
-	if (screen->pageflip_pending == 0) {
-		nemoscreen_finish_frame(&screen->base, secs, usecs,
-				PRESENTATION_FEEDBACK_KIND_HW_COMPLETION |
-				PRESENTATION_FEEDBACK_KIND_HW_CLOCK);
-	}
 }
 
 static int drm_dispatch_event(int fd, uint32_t mask, void *data)

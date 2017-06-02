@@ -41,7 +41,6 @@ struct drmscreen {
 	uint32_t connector_id;
 	uint32_t pipe;
 
-	int vblank_pending;
 	int pageflip_pending;
 
 	drmModeCrtcPtr orig_crtc;
