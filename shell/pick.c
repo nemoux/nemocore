@@ -328,7 +328,7 @@ int nemoshell_pick_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 	if (nemoview_has_grab(bin->view) != 0)
 		wl_signal_emit(&bin->ungrab_signal, bin);
 
-	if (bin->config.fullscreen != 0 || bin->config.maximized != 0)
+	if (nemoshell_bin_is_fullscreen(bin) != 0 || nemoshell_bin_is_maximized(bin) != 0)
 		nemoshell_put_fullscreen_bin(shell, bin);
 
 	pick0 = (struct shellgrab_pick *)malloc(sizeof(struct shellgrab_pick));
@@ -602,7 +602,7 @@ int nemoshell_pick_canvas_by_singletap(struct nemoshell *shell, struct touchpoin
 	if (nemoview_has_grab(bin->view) != 0)
 		wl_signal_emit(&bin->ungrab_signal, bin);
 
-	if (bin->config.fullscreen != 0 || bin->config.maximized != 0)
+	if (nemoshell_bin_is_fullscreen(bin) != 0 || nemoshell_bin_is_maximized(bin) != 0)
 		nemoshell_put_fullscreen_bin(shell, bin);
 
 	pick = (struct shellgrab_pick *)malloc(sizeof(struct shellgrab_pick));
@@ -800,7 +800,7 @@ int nemoshell_pick_canvas_by_pointer(struct nemoshell *shell, struct nemopointer
 	if (nemoview_has_grab(bin->view) != 0)
 		wl_signal_emit(&bin->ungrab_signal, bin);
 
-	if (bin->config.fullscreen != 0 || bin->config.maximized != 0)
+	if (nemoshell_bin_is_fullscreen(bin) != 0 || nemoshell_bin_is_maximized(bin) != 0)
 		nemoshell_put_fullscreen_bin(shell, bin);
 
 	pick = (struct shellgrab_pick *)malloc(sizeof(struct shellgrab_pick));

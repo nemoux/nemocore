@@ -438,6 +438,16 @@ static inline int32_t nemoshell_bin_get_geometry_height(struct shellbin *bin)
 	return bin->has_set_geometry == 0 ? bin->view->content->height : bin->geometry.height;
 }
 
+static inline int nemoshell_bin_is_fullscreen(struct shellbin *bin)
+{
+	return bin->config.fullscreen != 0 || bin->next_config.fullscreen != 0 || bin->requested_config.fullscreen != 0;
+}
+
+static inline int nemoshell_bin_is_maximized(struct shellbin *bin)
+{
+	return bin->config.maximized != 0 || bin->next_config.maximized != 0 || bin->requested_config.maximized != 0;
+}
+
 static void nemoshell_bin_set_pid(struct shellbin *bin, uint32_t pid)
 {
 	bin->pid = pid;
