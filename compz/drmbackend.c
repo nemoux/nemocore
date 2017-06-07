@@ -43,6 +43,8 @@ static int drmbackend_add_udev(struct drmbackend *drm, struct udev_device *devic
 	if (node == NULL)
 		goto err1;
 
+	node->pageflip_timeout = NEMOUX_DRM_PAGEFLIP_TIMEOUT;
+
 	return 0;
 
 err1:
@@ -71,6 +73,8 @@ static int drmbackend_add_dev(struct drmbackend *drm, const char *devnode)
 	node = drm_create_node(compz, nodeid, devnode, fd);
 	if (node == NULL)
 		goto err1;
+
+	node->pageflip_timeout = NEMOUX_DRM_PAGEFLIP_TIMEOUT;
 
 	return 0;
 

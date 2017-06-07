@@ -57,6 +57,8 @@ struct drmscreen {
 	int current_image;
 
 	pixman_region32_t damage;
+
+	struct wl_event_source *pageflip_timer;
 };
 
 struct drmnode {
@@ -83,6 +85,8 @@ struct drmnode {
 	uint32_t format;
 
 	struct wl_listener session_listener;
+
+	uint32_t pageflip_timeout;
 };
 
 extern struct drmnode *drm_create_node(struct nemocompz *compz, uint32_t nodeid, const char *path, int fd);
