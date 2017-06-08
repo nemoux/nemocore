@@ -134,15 +134,15 @@ pixman_image_t *pixman_load_png_file(const char *path)
 	fread(header, 1, 8, fp);
 
 	if (png_sig_cmp(header, 0, 8))
-		goto out;
+		goto out1;
 
 	pngptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 	if (pngptr == NULL)
-		goto out;
+		goto out1;
 
 	infoptr = png_create_info_struct(pngptr);
 	if (infoptr == NULL)
-		goto out;
+		goto out2;
 
 	png_init_io(pngptr, fp);
 	png_set_sig_bytes(pngptr, 8);
@@ -171,41 +171,38 @@ pixman_image_t *pixman_load_png_file(const char *path)
 			colortype == PNG_COLOR_TYPE_PALETTE)
 		png_set_filler(pngptr, 0xff, PNG_FILLER_AFTER);
 
+	if (colortype == PNG_COLOR_TYPE_RGB ||
+			colortype == PNG_COLOR_TYPE_RGB_ALPHA)
+		png_set_bgr(pngptr);
+
 	if (colortype == PNG_COLOR_TYPE_GRAY ||
 			colortype == PNG_COLOR_TYPE_GRAY_ALPHA)
 		png_set_gray_to_rgb(pngptr);
 
 	png_read_update_info(pngptr, infoptr);
 
+	image = pixman_image_create_bits_no_clear(PIXMAN_a8r8g8b8, width, height, NULL, width * 4);
+	if (image == NULL)
+		goto out3;
+	data = pixman_image_get_data(image);
+
 	rowpointers = (png_bytep *)malloc(sizeof(png_bytep) * height);
-	for (i = 0; i < height; i++)
-		rowpointers[i] = (png_byte *)malloc(png_get_rowbytes(pngptr, infoptr));
+
+	for (i = 0; i < height; i++) {
+		rowpointers[i] = (png_bytep)&data[i * width];
+	}
 
 	png_read_image(pngptr, rowpointers);
 
-	image = pixman_image_create_bits_no_clear(PIXMAN_a8r8g8b8, width, height, NULL, width * 4);
-	if (image == NULL)
-		goto out;
-
-	data = pixman_image_get_data(image);
-
-	for (i = 0; i < height; i++) {
-		src = (uint8_t *)rowpointers[i];
-		dst = (uint8_t *)&data[i * width];
-
-		for (j = 0; j < width; j++) {
-			dst[j * 4 + 2] = src[j * 4 + 0];
-			dst[j * 4 + 1] = src[j * 4 + 1];
-			dst[j * 4 + 0] = src[j * 4 + 2];
-			dst[j * 4 + 3] = src[j * 4 + 3];
-		}
-	}
-
-	for (i = 0; i < height; i++)
-		free(rowpointers[i]);
 	free(rowpointers);
 
-out:
+out3:
+	png_destroy_info_struct(pngptr, &infoptr);
+
+out2:
+	png_destroy_read_struct(&pngptr, &infoptr, &infoptr);
+
+out1:
 	fclose(fp);
 
 	return image;
@@ -248,11 +245,11 @@ pixman_image_t *pixman_load_png_data(uint32_t *data, int length)
 
 	pngptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 	if (pngptr == NULL)
-		goto out;
+		goto out1;
 
 	infoptr = png_create_info_struct(pngptr);
 	if (infoptr == NULL)
-		goto out;
+		goto out2;
 
 	png_set_read_fn(pngptr, (void *)&buffer, pixman_read_callback_for_png);
 
@@ -282,45 +279,38 @@ pixman_image_t *pixman_load_png_data(uint32_t *data, int length)
 			colortype == PNG_COLOR_TYPE_PALETTE)
 		png_set_filler(pngptr, 0xff, PNG_FILLER_AFTER);
 
+	if (colortype == PNG_COLOR_TYPE_RGB ||
+			colortype == PNG_COLOR_TYPE_RGB_ALPHA)
+		png_set_bgr(pngptr);
+
 	if (colortype == PNG_COLOR_TYPE_GRAY ||
 			colortype == PNG_COLOR_TYPE_GRAY_ALPHA)
 		png_set_gray_to_rgb(pngptr);
 
 	png_read_update_info(pngptr, infoptr);
 
+	image = pixman_image_create_bits_no_clear(PIXMAN_a8r8g8b8, width, height, NULL, width * 4);
+	if (image == NULL)
+		goto out3;
+	data = pixman_image_get_data(image);
+
 	rowpointers = (png_bytep *)malloc(sizeof(png_bytep) * height);
-	for (i = 0; i < height; i++)
-		rowpointers[i] = (png_byte *)malloc(png_get_rowbytes(pngptr, infoptr));
+
+	for (i = 0; i < height; i++) {
+		rowpointers[i] = (png_bytep)&data[i * width];
+	}
 
 	png_read_image(pngptr, rowpointers);
 
-	image = pixman_image_create_bits_no_clear(PIXMAN_a8r8g8b8, width, height, NULL, width * 4);
-	if (image == NULL)
-		goto out;
-
-	data = pixman_image_get_data(image);
-
-	for (i = 0; i < height; i++) {
-		src = (char *)rowpointers[i];
-		dst = (char *)&data[i * width];
-
-		for (j = 0; j < width; j++) {
-			dst[j * 4 + 2] = src[j * 4 + 0];
-			dst[j * 4 + 1] = src[j * 4 + 1];
-			dst[j * 4 + 0] = src[j * 4 + 2];
-			dst[j * 4 + 3] = src[j * 4 + 3];
-		}
-	}
-
-	for (i = 0; i < height; i++)
-		free(rowpointers[i]);
 	free(rowpointers);
 
+out3:
 	png_destroy_info_struct(pngptr, &infoptr);
 
+out2:
 	png_destroy_read_struct(&pngptr, &infoptr, &infoptr);
 
-out:
+out1:
 	return image;
 }
 
