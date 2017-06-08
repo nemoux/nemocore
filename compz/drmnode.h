@@ -58,7 +58,9 @@ struct drmscreen {
 
 	pixman_region32_t damage;
 
+#ifdef NEMOUX_DRM_PAGEFLIP_TIMEOUT
 	struct wl_event_source *pageflip_timer;
+#endif
 };
 
 struct drmnode {
@@ -86,7 +88,9 @@ struct drmnode {
 
 	struct wl_listener session_listener;
 
+#ifdef NEMOUX_DRM_PAGEFLIP_TIMEOUT
 	uint32_t pageflip_timeout;
+#endif
 };
 
 extern struct drmnode *drm_create_node(struct nemocompz *compz, uint32_t nodeid, const char *path, int fd);

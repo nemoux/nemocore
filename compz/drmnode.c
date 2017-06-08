@@ -199,7 +199,9 @@ static void drm_handle_page_flip(int fd, unsigned int frame, unsigned int secs, 
 
 	screen->base.msc += frame;
 
+#ifdef NEMOUX_DRM_PAGEFLIP_TIMEOUT
 	wl_event_source_timer_update(screen->pageflip_timer, 0);
+#endif
 
 	if (screen->pageflip_pending != 0) {
 		drm_release_screen_frame(screen, screen->current);
@@ -526,7 +528,9 @@ static void drm_screen_repaint(struct nemoscreen *base)
 		goto finish_frame;
 	}
 
+#ifdef NEMOUX_DRM_PAGEFLIP_TIMEOUT
 	wl_event_source_timer_update(screen->pageflip_timer, node->pageflip_timeout);
+#endif
 
 postpone_frame:
 	return;
@@ -653,7 +657,9 @@ static int drm_screen_repaint_frame(struct nemoscreen *base, pixman_region32_t *
 		goto err1;
 	}
 
+#ifdef NEMOUX_DRM_PAGEFLIP_TIMEOUT
 	wl_event_source_timer_update(screen->pageflip_timer, node->pageflip_timeout);
+#endif
 
 	screen->pageflip_pending = 1;
 
@@ -707,7 +713,9 @@ static void drm_screen_destroy(struct nemoscreen *base)
 		drm_finish_egl_screen(screen);
 	}
 
+#ifdef NEMOUX_DRM_PAGEFLIP_TIMEOUT
 	wl_event_source_remove(screen->pageflip_timer);
+#endif
 
 	wl_list_remove(&base->link);
 
@@ -788,6 +796,7 @@ static void drm_screen_set_gamma(struct nemoscreen *base, uint16_t size, uint16_
 {
 }
 
+#ifdef NEMOUX_DRM_PAGEFLIP_TIMEOUT
 static int drm_screen_dispatch_pageflip_timeout(void *data)
 {
 	struct drmscreen *screen = (struct drmscreen *)data;
@@ -800,6 +809,7 @@ static int drm_screen_dispatch_pageflip_timeout(void *data)
 
 	return 1;
 }
+#endif
 
 static int drm_create_screen_for_connector(struct drmnode *node, drmModeRes *resources, drmModeConnector *connector)
 {
@@ -851,7 +861,9 @@ static int drm_create_screen_for_connector(struct drmnode *node, drmModeRes *res
 
 	wl_list_init(&screen->base.mode_list);
 
+#ifdef NEMOUX_DRM_PAGEFLIP_TIMEOUT
 	screen->pageflip_timer = wl_event_loop_add_timer(compz->loop, drm_screen_dispatch_pageflip_timeout, screen);
+#endif
 
 	if (connector->connector_type < ARRAY_LENGTH(connector_names))
 		typename = connector_names[connector->connector_type];
