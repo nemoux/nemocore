@@ -322,7 +322,7 @@ int nemoshell_pick_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 	if (bin == NULL)
 		return -1;
 
-	if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_FIXED_STATE | NEMOSHELL_BIN_FORCE_STATE) != 0)
+	if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_FIXED_STATE) != 0)
 		return 0;
 
 	if (nemoview_has_grab(bin->view) != 0)
@@ -596,7 +596,7 @@ int nemoshell_pick_canvas_by_singletap(struct nemoshell *shell, struct touchpoin
 	if (bin == NULL)
 		return -1;
 
-	if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_FIXED_STATE | NEMOSHELL_BIN_FORCE_STATE) != 0)
+	if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_FIXED_STATE) != 0)
 		return 0;
 
 	if (nemoview_has_grab(bin->view) != 0)
@@ -794,7 +794,7 @@ int nemoshell_pick_canvas_by_pointer(struct nemoshell *shell, struct nemopointer
 	if (bin == NULL)
 		return -1;
 
-	if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_FIXED_STATE | NEMOSHELL_BIN_FORCE_STATE) != 0)
+	if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_FIXED_STATE) != 0)
 		return 0;
 
 	if (nemoview_has_grab(bin->view) != 0)
