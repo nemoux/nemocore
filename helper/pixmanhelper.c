@@ -13,45 +13,17 @@
 #include <pixmanhelper.h>
 #include <nemomisc.h>
 
-static void a8r8g8b8_to_rgba_np(uint8_t *dst, uint8_t *src, int width, int height, int stride)
-{
-	int i, j;
-
-	for (i = 0; i < height; i++) {
-		for (j = 0; j < width; j++) {
-			uint8_t a, r, g, b, t;
-
-			a = src[i * stride + j * 4 + 3];
-			r = src[i * stride + j * 4 + 2];
-			g = src[i * stride + j * 4 + 1];
-			b = src[i * stride + j * 4 + 0];
-
-			if (a != 0) {
-#define DIVIDE(c, a, t)		t = ((c) * 255) / a; (c) = t < 0 ? 0 : t > 255 ? 255 : t;
-				DIVIDE(r, a, t);
-				DIVIDE(g, a, t);
-				DIVIDE(b, a, t);
-			}
-
-			dst[i * stride + j * 4 + 3] = a;
-			dst[i * stride + j * 4 + 2] = b;
-			dst[i * stride + j * 4 + 1] = g;
-			dst[i * stride + j * 4 + 0] = r;
-		}
-	}
-}
-
 int pixman_save_png_file(pixman_image_t *image, const char *path)
 {
 	int width = pixman_image_get_width(image);
 	int height = pixman_image_get_height(image);
 	uint8_t *data;
 	pixman_image_t *copy;
-	png_struct *write_struct;
-	png_info *info_struct;
-	pixman_bool_t result = 0;
+	pixman_bool_t r = 0;
+	png_structp pngptr;
+	png_infop infoptr;
+	png_bytep *rowpointers;
 	FILE *fp;
-	png_bytep *row_pointers;
 	int i;
 
 	fp = fopen(path, "wb");
@@ -62,46 +34,46 @@ int pixman_save_png_file(pixman_image_t *image, const char *path)
 	if (data == NULL)
 		goto out1;
 
-	row_pointers = (png_bytep *)malloc(height * sizeof(png_bytep));
-	if (row_pointers == NULL)
+	rowpointers = (png_bytep *)malloc(height * sizeof(png_bytep));
+	if (rowpointers == NULL)
 		goto out2;
 
 	copy = pixman_image_create_bits_no_clear(PIXMAN_a8r8g8b8, width, height, (uint32_t *)data, width * 4);
 
 	pixman_image_composite32(PIXMAN_OP_SRC, image, NULL, copy, 0, 0, 0, 0, 0, 0, width, height);
 
-	a8r8g8b8_to_rgba_np(data, data, width, height, width * 4);
-
 	for (i = 0; i < height; ++i)
-		row_pointers[i] = (png_bytep)(data + i * width * 4);
+		rowpointers[i] = (png_bytep)(data + i * width * 4);
 
-	if (!(write_struct = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL)))
+	if (!(pngptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL)))
 		goto out3;
 
-	if (!(info_struct = png_create_info_struct(write_struct)))
+	if (!(infoptr = png_create_info_struct(pngptr)))
 		goto out4;
 
-	png_init_io(write_struct, fp);
+	png_init_io(pngptr, fp);
 
-	png_set_IHDR(write_struct, info_struct, width, height,
+	png_set_IHDR(pngptr, infoptr, width, height,
 			8, PNG_COLOR_TYPE_RGB_ALPHA,
 			PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE,
 			PNG_FILTER_TYPE_BASE);
 
-	png_write_info(write_struct, info_struct);
+	png_write_info(pngptr, infoptr);
 
-	png_write_image(write_struct, row_pointers);
+	png_write_image(pngptr, rowpointers);
 
-	png_write_end(write_struct, NULL);
+	png_write_end(pngptr, NULL);
 
-	result = 1;
+	png_destroy_info_struct(pngptr, &infoptr);
+
+	r = 1;
 
 out4:
-	png_destroy_write_struct(&write_struct, &info_struct);
+	png_destroy_write_struct(&pngptr, &infoptr);
 
 out3:
 	pixman_image_unref(copy);
-	free(row_pointers);
+	free(rowpointers);
 
 out2:
 	free(data);
@@ -109,7 +81,7 @@ out2:
 out1:
 	fclose(fp);
 
-	return result;
+	return r;
 }
 
 pixman_image_t *pixman_load_png_file(const char *path)
