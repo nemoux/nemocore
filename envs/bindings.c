@@ -184,7 +184,7 @@ void nemoenvs_handle_touch_event(struct nemocompz *compz, struct touchpoint *tp,
 		uint32_t target = screen->target;
 
 		wl_list_for_each(screen, &shell->fullscreen_list, link) {
-			if (screen->target & target == 0)
+			if ((screen->target & target) == 0)
 				continue;
 
 			wl_list_for_each_safe(sbin, nbin, &screen->bin_list, screen_link) {
