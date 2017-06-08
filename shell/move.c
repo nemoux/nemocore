@@ -180,33 +180,58 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 		nemolog_message("MOVE", "[UP] %llu: (%u)\n", touchid, time);
 
 	if (bin != NULL &&
-			bin->config.fullscreen == 0 &&
-			bin->config.maximized == 0 &&
 			bin->shell->pick.flags & NEMOSHELL_PICK_TRANSLATE_FLAG &&
-			nemoview_has_state(bin->view, NEMOVIEW_EFFECT_STATE) == 0 &&
-			nemoshell_check_touchgrab_duration(&move->touch, bin->shell->pitch.samples, bin->shell->pitch.max_duration) > 0) {
-		struct nemoshell *shell = bin->shell;
-		struct vieweffect *effect;
-		float dx, dy;
+			nemoview_has_state(bin->view, NEMOVIEW_EFFECT_STATE) == 0) {
+		if (nemoshell_check_touchgrab_duration(&move->touch, bin->shell->pitch.samples, bin->shell->pitch.max_duration) > 0) {
+			struct nemoshell *shell = bin->shell;
+			struct vieweffect *effect;
+			float dx, dy;
 
-		nemoshell_update_touchgrab_velocity(&move->touch, shell->pitch.samples, &dx, &dy);
+			nemoshell_update_touchgrab_velocity(&move->touch, shell->pitch.samples, &dx, &dy);
 
-		effect = vieweffect_create(grab->bin->view);
-		effect->type = NEMOVIEW_PITCH_EFFECT;
-		effect->pitch.velocity = sqrtf(dx * dx + dy * dy) * shell->pitch.coefficient;
-		effect->pitch.dx = dx / effect->pitch.velocity;
-		effect->pitch.dy = dy / effect->pitch.velocity;
-		effect->pitch.friction = shell->pitch.friction;
+			effect = vieweffect_create(grab->bin->view);
+			effect->type = NEMOVIEW_PITCH_EFFECT;
+			effect->pitch.velocity = sqrtf(dx * dx + dy * dy) * shell->pitch.coefficient;
+			effect->pitch.dx = dx / effect->pitch.velocity;
+			effect->pitch.dy = dy / effect->pitch.velocity;
+			effect->pitch.friction = shell->pitch.friction;
 
-		if (shell->is_logging_grab != 0)
-			nemolog_message("MOVE", "[PITCH] %llu: dx(%f) dy(%f) (%u)\n", touchid, effect->pitch.dx, effect->pitch.dy, time);
+			if (shell->is_logging_grab != 0)
+				nemolog_message("MOVE", "[PITCH] %llu: dx(%f) dy(%f) (%u)\n", touchid, effect->pitch.dx, effect->pitch.dy, time);
 
-		if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_PITCHSCREEN_STATE) != 0) {
-			vieweffect_set_dispatch_done(effect, move_shellgrab_dispatch_effect_done);
-			vieweffect_set_userdata(effect, bin);
+			if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_PITCHSCREEN_STATE) != 0) {
+				vieweffect_set_dispatch_done(effect, move_shellgrab_dispatch_effect_done);
+				vieweffect_set_userdata(effect, bin);
+			}
+
+			vieweffect_dispatch(bin->shell->compz, effect);
+		} else {
+			struct nemoshell *shell = bin->shell;
+			struct shellscreen *screen;
+			float tx, ty;
+
+			nemoview_transform_to_global(bin->view,
+					bin->view->content->width * bin->view->geometry.fx,
+					bin->view->content->height * bin->view->geometry.fy,
+					&tx, &ty);
+
+			screen = nemoshell_get_fullscreen_on(shell, tx, ty, NEMOSHELL_FULLSCREEN_PITCH_TYPE);
+			if (screen != NULL) {
+				if (bin->fullscreen.target != NULL)
+					screen = nemoshell_get_fullscreen_by(shell, bin->fullscreen.target);
+
+				if (screen != NULL) {
+					nemoshell_kill_fullscreen_bin(shell, screen->target);
+
+					nemoshell_set_fullscreen_bin(shell, bin, screen);
+
+					if (screen->focus == NEMOSHELL_FULLSCREEN_ALL_FOCUS) {
+						nemoseat_set_keyboard_focus(shell->compz->seat, bin->view);
+						nemoseat_set_pointer_focus(shell->compz->seat, bin->view);
+					}
+				}
+			}
 		}
-
-		vieweffect_dispatch(bin->shell->compz, effect);
 
 		needs_notify = 0;
 	}
@@ -239,10 +264,7 @@ static void move_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 
 	touchpoint_motion(tp, x, y);
 
-	if (bin != NULL &&
-			bin->config.fullscreen == 0 &&
-			bin->config.maximized == 0 &&
-			bin->shell->pick.flags & NEMOSHELL_PICK_TRANSLATE_FLAG) {
+	if (bin != NULL && bin->shell->pick.flags & NEMOSHELL_PICK_TRANSLATE_FLAG) {
 		int32_t cx, cy;
 
 		if (bin->reset_move != 0) {
