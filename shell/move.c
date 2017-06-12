@@ -205,7 +205,7 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 			}
 
 			vieweffect_dispatch(bin->shell->compz, effect);
-		} else {
+		} else if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_PITCHSCREEN_STATE) != 0) {
 			struct nemoshell *shell = bin->shell;
 			struct shellscreen *screen;
 			float tx, ty;
