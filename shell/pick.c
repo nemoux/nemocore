@@ -77,7 +77,11 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 
 	if (bin != NULL && pick->done == 0) {
 		struct nemoshell *shell = bin->shell;
+		struct nemocompz *compz = shell->compz;
 		struct touchpoint *tp1 = pick->other->base.base.touchpoint.touchpoint;
+		struct shellscreen *screen = NULL;
+		int32_t width = nemoshell_bin_get_geometry_width(bin) * bin->view->geometry.sx;
+		int32_t height = nemoshell_bin_get_geometry_height(bin) * bin->view->geometry.sy;
 
 		if (bin->reset_pivot != 0) {
 			if (bin->view->geometry.has_pivot == 0) {
@@ -96,61 +100,90 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 			bin->reset_move = 0;
 		}
 
-		if (bin->view->geometry.sx != 1.0f || bin->view->geometry.sy != 1.0f) {
-			struct nemocompz *compz = shell->compz;
-			struct shellscreen *screen = NULL;
-			int32_t width = nemoshell_bin_get_geometry_width(bin) * bin->view->geometry.sx;
-			int32_t height = nemoshell_bin_get_geometry_height(bin) * bin->view->geometry.sy;
-
-			if (shell->is_logging_grab != 0)
-				nemolog_message("PICK", "[UP:SCALE] %llu: sx(%f) sy(%f) width(%d) height(%d) (%u)\n", touchid, bin->view->geometry.sx, bin->view->geometry.sy, width, height, time);
-
-			if (bin->min_width >= width && bin->min_height >= height) {
-				if (nemoview_has_state(bin->view, NEMOVIEW_CLOSE_STATE) == 0) {
-					if (bin->type == NEMOSHELL_SURFACE_XWAYLAND_TYPE)
-						kill(-bin->pid, SIGKILL);
-					else
-						kill(bin->pid, SIGKILL);
-				} else {
-					nemoshell_send_bin_close(bin);
-				}
-			} else if (nemoshell_bin_has_flags(bin, NEMOSHELL_SURFACE_RESIZABLE_FLAG) != 0) {
-				bin->resize_edges = WL_SHELL_SURFACE_RESIZE_LEFT | WL_SHELL_SURFACE_RESIZE_TOP;
-
-				if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_PICKSCREEN_STATE) != 0) {
-					screen = nemoshell_get_fullscreen_on(shell, tp0->x, tp0->y, NEMOSHELL_FULLSCREEN_PICK_TYPE);
-					if (screen != NULL && (screen->sw <= width && screen->sh <= height)) {
-						width = screen->dw;
-						height = screen->dh;
-
-						nemoshell_kill_fullscreen_bin(shell, screen->target);
-
-						nemoshell_set_fullscreen_bin(shell, bin, screen);
-
-						nemoseat_put_touchpoint_by_view(compz->seat, bin->view);
-
-						if (screen->focus == NEMOSHELL_FULLSCREEN_ALL_FOCUS) {
-							nemoseat_set_keyboard_focus(compz->seat, bin->view);
-							nemoseat_set_pointer_focus(compz->seat, bin->view);
-						}
-					} else {
-						bin->callback->send_configure(bin->canvas, width, height);
-					}
-				} else {
-					bin->callback->send_configure(bin->canvas, width, height);
-				}
-
-				bin->has_scale = 1;
-				bin->scale.serial = bin->next_serial;
-				bin->scale.width = width;
-				bin->scale.height = height;
+		if (bin->min_width >= width && bin->min_height >= height) {
+			if (nemoview_has_state(bin->view, NEMOVIEW_CLOSE_STATE) == 0) {
+				if (bin->type == NEMOSHELL_SURFACE_XWAYLAND_TYPE)
+					kill(-bin->pid, SIGKILL);
+				else
+					kill(bin->pid, SIGKILL);
+			} else {
+				nemoshell_send_bin_close(bin);
 			}
+
+			goto closed;
+		}
+
+		if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_PITCHSCREEN_STATE) != 0) {
+			float tx, ty;
+
+			nemoview_transform_to_global(bin->view,
+					bin->view->content->width * bin->view->geometry.fx,
+					bin->view->content->height * bin->view->geometry.fy,
+					&tx, &ty);
+
+			screen = nemoshell_get_fullscreen_on(shell, tx, ty, NEMOSHELL_FULLSCREEN_PITCH_TYPE);
+			if (screen != NULL) {
+				if (bin->fullscreen.target != NULL)
+					screen = nemoshell_get_fullscreen_by(shell, bin->fullscreen.target);
+
+				if (screen != NULL) {
+					width = screen->dw;
+					height = screen->dh;
+
+					nemoshell_kill_fullscreen_bin(shell, screen->target);
+
+					nemoshell_set_fullscreen_bin(shell, bin, screen);
+
+					nemoseat_put_touchpoint_by_view(compz->seat, bin->view);
+
+					if (screen->focus == NEMOSHELL_FULLSCREEN_ALL_FOCUS) {
+						nemoseat_set_keyboard_focus(shell->compz->seat, bin->view);
+						nemoseat_set_pointer_focus(shell->compz->seat, bin->view);
+					}
+
+					goto resized;
+				}
+			}
+		}
+
+		if (nemoshell_bin_has_flags(bin, NEMOSHELL_SURFACE_RESIZABLE_FLAG) != 0) {
+			bin->resize_edges = WL_SHELL_SURFACE_RESIZE_LEFT | WL_SHELL_SURFACE_RESIZE_TOP;
+
+			if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_PICKSCREEN_STATE) != 0) {
+				screen = nemoshell_get_fullscreen_on(shell, tp0->x, tp0->y, NEMOSHELL_FULLSCREEN_PICK_TYPE);
+				if (screen != NULL && (screen->sw <= width && screen->sh <= height)) {
+					width = screen->dw;
+					height = screen->dh;
+
+					nemoshell_kill_fullscreen_bin(shell, screen->target);
+
+					nemoshell_set_fullscreen_bin(shell, bin, screen);
+
+					nemoseat_put_touchpoint_by_view(compz->seat, bin->view);
+
+					if (screen->focus == NEMOSHELL_FULLSCREEN_ALL_FOCUS) {
+						nemoseat_set_keyboard_focus(compz->seat, bin->view);
+						nemoseat_set_pointer_focus(compz->seat, bin->view);
+					}
+
+					goto resized;
+				}
+			}
+
+			bin->callback->send_configure(bin->canvas, width, height);
+
+resized:
+			bin->has_scale = 1;
+			bin->scale.serial = bin->next_serial;
+			bin->scale.width = width;
+			bin->scale.height = height;
 		}
 
 		nemoview_transform_notify(bin->view);
 
 		touchpoint_update_grab(tp1);
 
+closed:
 		pick->other->done = 1;
 	}
 
@@ -218,12 +251,8 @@ static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 		}
 
 		if ((shell->pick.flags & NEMOSHELL_PICK_ROTATE_FLAG) && (pick->type & NEMOSHELL_PICK_ROTATE_FLAG)) {
-			if (d > shell->pick.rotate_distance) {
+			if (d > shell->pick.rotate_distance)
 				nemoview_set_rotation(bin->view, bin->view->geometry.r + pick->rotate.r - r);
-
-				if (shell->is_logging_grab != 0)
-					nemolog_message("PICK", "[FRAME:ROTATE] %llu: r(%f) (%u)\n", touchid, bin->view->geometry.r, time);
-			}
 
 			pick->rotate.r = pick->other->rotate.r = r;
 		}
@@ -247,9 +276,6 @@ static void pick_shellgrab_touchpoint_frame(struct touchpoint_grab *base, uint32
 							bin->view->geometry.sx * s,
 							bin->view->geometry.sy * s);
 				}
-
-				if (shell->is_logging_grab != 0)
-					nemolog_message("PICK", "[FRAME:SCALE] %llu: sx(%f) sy(%f) (%u)\n", touchid, bin->view->geometry.sx, bin->view->geometry.sy, time);
 			}
 
 			pick->scale.distance = pick->other->scale.distance = d;
@@ -372,13 +398,6 @@ int nemoshell_pick_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 
 	pick0->other = pick1;
 	pick1->other = pick0;
-
-	if (shell->is_logging_grab != 0)
-		nemolog_message("PICK", "[DOWN] %llu+%llu: x(%f) y(%f) sx(%f) sy(%f) r(%f)\n",
-				tp0->gid, tp1->gid,
-				bin->view->geometry.x, bin->view->geometry.y,
-				bin->view->geometry.sx, bin->view->geometry.sy,
-				bin->view->geometry.r);
 
 	nemoshell_start_touchpoint_shellgrab(shell, &pick0->base, &pick_shellgrab_touchpoint_interface, bin, tp0);
 	nemoshell_start_touchpoint_shellgrab(shell, &pick1->base, &pick_shellgrab_touchpoint_interface, bin, tp1);

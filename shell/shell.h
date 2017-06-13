@@ -126,8 +126,6 @@ struct nemoshell {
 	nemoshell_update_transform_t update_transform;
 	nemoshell_enter_idle_t enter_idle;
 	void *userdata;
-
-	int is_logging_grab;
 };
 
 struct shellclient {

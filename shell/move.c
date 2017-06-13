@@ -176,9 +176,6 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 
 	touchpoint_up(tp);
 
-	if (bin != NULL && bin->shell->is_logging_grab != 0)
-		nemolog_message("MOVE", "[UP] %llu: (%u)\n", touchid, time);
-
 	if (bin != NULL &&
 			bin->shell->pick.flags & NEMOSHELL_PICK_TRANSLATE_FLAG &&
 			nemoview_has_state(bin->view, NEMOVIEW_EFFECT_STATE) == 0) {
@@ -195,9 +192,6 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 			effect->pitch.dx = dx / effect->pitch.velocity;
 			effect->pitch.dy = dy / effect->pitch.velocity;
 			effect->pitch.friction = shell->pitch.friction;
-
-			if (shell->is_logging_grab != 0)
-				nemolog_message("MOVE", "[PITCH] %llu: dx(%f) dy(%f) (%u)\n", touchid, effect->pitch.dx, effect->pitch.dy, time);
 
 			if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_PITCHSCREEN_STATE) != 0) {
 				vieweffect_set_dispatch_done(effect, move_shellgrab_dispatch_effect_done);
@@ -279,9 +273,6 @@ static void move_shellgrab_touchpoint_motion(struct touchpoint_grab *base, uint3
 
 		nemoview_set_position(bin->view, cx, cy);
 		nemoview_schedule_repaint(bin->view);
-
-		if (bin->shell->is_logging_grab != 0)
-			nemolog_message("MOVE", "[MOTION] %llu: x(%f) y(%f) (%u)\n", touchid, bin->view->geometry.x, bin->view->geometry.y, time);
 	}
 }
 
@@ -346,9 +337,6 @@ int nemoshell_move_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 
 	bin->reset_move = 0;
 
-	if (shell->is_logging_grab != 0)
-		nemolog_message("MOVE", "[DOWN] %llu: x(%f) y(%f)\n", tp->gid, bin->view->geometry.x, bin->view->geometry.y);
-
 	nemoshell_start_touchpoint_shellgrab(shell, &move->base, &move_shellgrab_touchpoint_interface, bin, tp);
 	nemoshell_start_touchgrab(shell, &move->touch, tp, NEMOSHELL_TOUCH_DEFAULT_TIMEOUT);
 
@@ -400,9 +388,6 @@ int nemoshell_move_canvas_force(struct nemoshell *shell, struct touchpoint *tp, 
 	move->dy = bin->view->geometry.y - tp->y;
 
 	bin->reset_move = 0;
-
-	if (shell->is_logging_grab != 0)
-		nemolog_message("MOVE", "[DOWN] %llu: x(%f) y(%f)\n", tp->gid, bin->view->geometry.x, bin->view->geometry.y);
 
 	nemoshell_start_touchpoint_shellgrab(shell, &move->base, &move_shellgrab_touchpoint_interface, bin, tp);
 	nemoshell_start_touchgrab(shell, &move->touch, tp, NEMOSHELL_TOUCH_DEFAULT_TIMEOUT);
