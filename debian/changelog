@@ -1,3 +1,10 @@
+nemocore (0.5.3) unstable; urgency=medium
+
+  [ haruband ]
+  * envs: Fix screen's target check bugs
+
+ -- bluezery <ohpowel@gmail.com>  Thu, 08 Jun 2017 18:07:56 +0900
+
 nemocore (0.5.2) unstable; urgency=medium
 
   [ haruband ]
