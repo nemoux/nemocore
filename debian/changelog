@@ -1,3 +1,23 @@
+nemocore (0.6.0) unstable; urgency=medium
+
+  [ haruband ]
+  * shell: Fix pitch screen check bugs in move grab
+  * compz: Add return value
+  * shell: Remove touchpoint done grab
+  * shell: Remove pointer and singletap supports from pick grab
+
+  [ Taehwan Kim ]
+  * debian: Add missing changelog
+  * debian: Restart if exit code is 0, not if 1
+
+  [ haruband ]
+  * shell: Fix pick grab mechanism
+
+  [ bluezery ]
+  * debian: Add missing changelog
+
+ -- Taehwan Kim <taehwan@nemoux.net>  Tue, 13 Jun 2017 22:02:24 +0900
+
 nemocore (0.5.3) unstable; urgency=medium
 
   [ haruband ]
