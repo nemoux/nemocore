@@ -390,6 +390,7 @@ int main(int argc, char *argv[])
 	int xdisplay = env_get_integer("NEMOSHELL_XDISPLAY_NUMBER", 0);
 	int tty = env_get_integer("NEMOSHELL_TTY", 0);
 	int framecheck = env_get_integer("NEMOSHELL_FRAMECHECK", 0);
+	int retval;
 	int opt;
 
 	while (opt = getopt_long(argc, argv, "r:e:x:d:c:t:s:f:gh", options, NULL)) {
@@ -520,7 +521,7 @@ int main(int argc, char *argv[])
 		nemotimer_set_timeout(mini->screenshot.timer, mini->screenshot.interval);
 	}
 
-	nemocompz_run(compz);
+	retval = nemocompz_run(compz);
 
 	nemoenvs_destroy(mini->envs);
 
@@ -530,5 +531,5 @@ int main(int argc, char *argv[])
 
 	free(mini);
 
-	return 0;
+	return retval;
 }

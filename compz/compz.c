@@ -497,7 +497,7 @@ int nemocompz_run(struct nemocompz *compz)
 		wl_display_run(compz->display);
 	}
 
-	return 0;
+	return compz->retval;
 }
 
 void nemocompz_exit(struct nemocompz *compz)

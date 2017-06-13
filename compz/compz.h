@@ -59,6 +59,8 @@ struct nemocompz {
 	struct wl_event_loop *loop;
 	char *name;
 
+	int retval;
+
 	struct wl_signal destroy_signal;
 
 	int state;
@@ -211,6 +213,16 @@ extern void nemocompz_watch_task(struct nemocompz *compz, struct nemotask *task)
 static inline struct wl_event_loop *nemocompz_get_wayland_event_loop(struct nemocompz *compz)
 {
 	return compz->loop;
+}
+
+static inline void nemocompz_set_return_value(struct nemocompz *compz, int retval)
+{
+	compz->retval = retval;
+}
+
+static inline int nemocompz_get_return_value(struct nemocompz *compz)
+{
+	return compz->retval;
 }
 
 #ifdef __cplusplus

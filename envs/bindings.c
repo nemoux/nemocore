@@ -76,6 +76,8 @@ void nemoenvs_handle_escape_key(struct nemocompz *compz, struct nemokeyboard *ke
 	if (state == WL_KEYBOARD_KEY_STATE_PRESSED) {
 		nemolog_message("SHELL", "exit nemoshell by escape key\n");
 
+		nemocompz_set_return_value(compz, 1);
+
 		nemocompz_destroy_clients(compz);
 		nemocompz_exit(compz);
 	}
