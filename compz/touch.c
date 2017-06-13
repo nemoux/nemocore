@@ -564,12 +564,6 @@ void touchpoint_update_grab(struct touchpoint *tp)
 	tp->grab_y = tp->y;
 }
 
-void touchpoint_done_grab(struct touchpoint *tp)
-{
-	tp->grab->interface->up(tp->grab, time_current_msecs(), tp->gid);
-	tp->grab->interface->down(tp->grab, time_current_msecs(), tp->gid, tp->x, tp->y);
-}
-
 struct touchnode *nemotouch_create_node(struct nemocompz *compz, const char *devnode)
 {
 	struct touchnode *node;

@@ -121,7 +121,6 @@ extern void touchpoint_start_grab(struct touchpoint *tp, struct touchpoint_grab 
 extern void touchpoint_end_grab(struct touchpoint *tp);
 extern void touchpoint_cancel_grab(struct touchpoint *tp);
 extern void touchpoint_update_grab(struct touchpoint *tp);
-extern void touchpoint_done_grab(struct touchpoint *tp);
 
 extern struct touchnode *nemotouch_create_node(struct nemocompz *compz, const char *devnode);
 extern void nemotouch_destroy_node(struct touchnode *node);

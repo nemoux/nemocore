@@ -331,7 +331,7 @@ int nemoshell_move_canvas_by_touchpoint(struct nemoshell *shell, struct touchpoi
 		return 0;
 
 	if (nemoview_has_grab(bin->view) != 0)
-		touchpoint_done_grab(tp);
+		wl_signal_emit(&bin->ungrab_signal, bin);
 
 	if (nemoshell_bin_is_fullscreen(bin) != 0 || nemoshell_bin_is_maximized(bin) != 0)
 		nemoshell_put_fullscreen_bin(shell, bin);
@@ -386,7 +386,7 @@ int nemoshell_move_canvas_force(struct nemoshell *shell, struct touchpoint *tp, 
 		return -1;
 
 	if (nemoview_has_grab(bin->view) != 0)
-		touchpoint_done_grab(tp);
+		wl_signal_emit(&bin->ungrab_signal, bin);
 
 	if (nemoshell_bin_is_fullscreen(bin) != 0 || nemoshell_bin_is_maximized(bin) != 0)
 		nemoshell_put_fullscreen_bin(shell, bin);
