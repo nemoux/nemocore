@@ -1,3 +1,16 @@
+nemocore (0.5.2) unstable; urgency=medium
+
+  [ haruband ]
+  * pixmanhelper: Fix pixel format bugs
+  * compz: Add drm pageflip timeout macro checks
+  * pixmanhelper: Fix png loading mechaniams
+  * pixmanhelper: Fix png save mechanisms
+  * shell: Remove force state from shellbin
+  * shell: Fix fullscreen cancel bugs in move grab
+  * shell: Fix fullscreen cancel in move grab
+
+ -- Taehwan Kim <taehwan@nemoux.net>  Thu, 08 Jun 2017 17:00:32 +0900
+
 nemocore (0.5.1) unstable; urgency=medium
 
   [ haruband ]

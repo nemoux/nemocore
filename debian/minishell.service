@@ -14,6 +14,8 @@ ExecStartPre=/bin/chmod 0700 /run/user/root
 ExecStart=/bin/openvt -s -w -- /usr/bin/minishell -d nemodb -c _shell_ -t _theme_
 Restart=always
 RestartSec=2
+RestartForceExitStatus=0
+RestartPreventExitStatus=1
 
 [Install]
 WantedBy=multi-user.target
