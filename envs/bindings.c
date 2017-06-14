@@ -120,8 +120,20 @@ void nemoenvs_handle_left_button(struct nemocompz *compz, struct nemopointer *po
 			screen = nemocompz_get_screen_on(compz, pointer->x, pointer->y);
 			if (screen != NULL) {
 				pixman_image_t *image;
+				pixman_transform_t transform;
 
 				image = pixman_image_create_bits(PIXMAN_a8r8g8b8, screen->width, screen->height, NULL, screen->width * 4);
+				pixman_transform_init_identity(&transform);
+				pixman_transform_translate(&transform, NULL,
+						pixman_double_to_fixed(screen->width / -2.0f),
+						pixman_double_to_fixed(screen->height / -2.0f));
+				pixman_transform_scale(&transform, NULL,
+						pixman_double_to_fixed(1.0f),
+						pixman_double_to_fixed(-1.0f));
+				pixman_transform_translate(&transform, NULL,
+						pixman_double_to_fixed(screen->width / 2.0f),
+						pixman_double_to_fixed(screen->height / 2.0f));
+				pixman_image_set_transform(image, &transform);
 
 				nemoscreen_read_pixels(screen, PIXMAN_a8r8g8b8,
 						pixman_image_get_data(image),
