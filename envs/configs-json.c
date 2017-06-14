@@ -449,8 +449,6 @@ static void nemoenvs_handle_nemoshell_pick(struct nemoenvs *envs, struct json_ob
 	struct nemoshell *shell = envs->shell;
 	struct nemocompz *compz = shell->compz;
 
-	shell->pick.flags = NEMOSHELL_PICK_ALL_FLAGS;
-
 	shell->pick.rotate_distance = nemojson_object_get_double(jobj, "rotateDistance", 0.0f);
 	shell->pick.scale_distance = nemojson_object_get_double(jobj, "scaleDistance", 0.0f);
 	shell->pick.resize_interval = nemojson_object_get_double(jobj, "resizeInterval", 0.0f);

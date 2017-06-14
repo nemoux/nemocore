@@ -32,7 +32,7 @@ static void resize_grab_motion(struct nemopointer_grab *base, uint32_t time, flo
 
 	nemopointer_move(pointer, x, y);
 
-	if (bin != NULL && bin->shell->pick.flags & NEMOSHELL_PICK_RESIZE_FLAG) {
+	if (bin != NULL) {
 		nemoview_transform_from_global(bin->view, pointer->grab_x, pointer->grab_y, &fromx, &fromy);
 		nemoview_transform_from_global(bin->view, pointer->x, pointer->y, &tox, &toy);
 

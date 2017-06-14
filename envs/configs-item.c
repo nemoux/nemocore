@@ -311,8 +311,6 @@ static void nemoenvs_handle_nemoshell_pick(struct nemoshell *shell, struct itemo
 	const char *name;
 	const char *value;
 
-	shell->pick.flags = NEMOSHELL_PICK_ALL_FLAGS;
-
 	nemoitem_attr_for_each(attr, one) {
 		name = nemoitem_attr_get_name(attr);
 		value = nemoitem_attr_get_value(attr);
