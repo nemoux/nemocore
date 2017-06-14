@@ -340,7 +340,7 @@ static void minishell_dispatch_screenshot_timer(struct nemotimer *timer, void *d
 				pixman_double_to_fixed(screen->height / 2.0f));
 		pixman_image_set_transform(image, &transform);
 
-		nemoscreen_read_pixels(screen, PIXMAN_a8b8g8r8,
+		nemoscreen_read_pixels(screen, PIXMAN_a8r8g8b8,
 				pixman_image_get_data(image),
 				screen->x, screen->y,
 				screen->width, screen->height);

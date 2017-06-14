@@ -121,9 +121,9 @@ void nemoenvs_handle_left_button(struct nemocompz *compz, struct nemopointer *po
 			if (screen != NULL) {
 				pixman_image_t *image;
 
-				image = pixman_image_create_bits(PIXMAN_a8b8g8r8, screen->width, screen->height, NULL, screen->width * 4);
+				image = pixman_image_create_bits(PIXMAN_a8r8g8b8, screen->width, screen->height, NULL, screen->width * 4);
 
-				nemoscreen_read_pixels(screen, PIXMAN_a8b8g8r8,
+				nemoscreen_read_pixels(screen, PIXMAN_a8r8g8b8,
 						pixman_image_get_data(image),
 						screen->x, screen->y,
 						screen->width, screen->height);
