@@ -190,39 +190,39 @@ void nemoenvs_handle_touch_event(struct nemocompz *compz, struct touchpoint *tp,
 {
 	struct nemoenvs *envs = (struct nemoenvs *)data;
 	struct nemoshell *shell = envs->shell;
-	struct shellscreen *screen;
 
-	screen = nemoshell_get_fullscreen_on(shell, tp->x, tp->y, NEMOSHELL_FULLSCREEN_PITCH_TYPE);
-	if (screen != NULL) {
-		struct shellbin *sbin, *nbin;
-		uint32_t target = screen->target;
+	if (tp->state == TOUCHPOINT_DOWN_STATE) {
+		struct shellscreen *screen;
 
-		wl_list_for_each(screen, &shell->fullscreen_list, link) {
-			if ((screen->target & target) == 0)
-				continue;
+		screen = nemoshell_get_fullscreen_on(shell, tp->x, tp->y, NEMOSHELL_FULLSCREEN_PITCH_TYPE);
+		if (screen != NULL) {
+			struct shellbin *sbin, *nbin;
+			uint32_t target = screen->target;
 
-			wl_list_for_each_safe(sbin, nbin, &screen->bin_list, screen_link) {
-				wl_list_remove(&sbin->screen_link);
-				wl_list_init(&sbin->screen_link);
+			wl_list_for_each(screen, &shell->fullscreen_list, link) {
+				if ((screen->target & target) == 0)
+					continue;
 
-				if (nemoshell_move_canvas_force(shell, tp, sbin) == 0)
-					break;
+				wl_list_for_each_safe(sbin, nbin, &screen->bin_list, screen_link) {
+					wl_list_remove(&sbin->screen_link);
+					wl_list_init(&sbin->screen_link);
+
+					if (nemoshell_move_canvas_force(shell, tp, sbin) == 0)
+						break;
+				}
 			}
 		}
-	}
 
-	if (tp->focus != NULL) {
-		nemoview_above_layer(tp->focus, NULL);
-
-		if (tp->focus->canvas != NULL) {
+		if (tp->focus != NULL && tp->focus->canvas != NULL) {
 			struct nemocanvas *parent = nemosubcanvas_get_main_canvas(tp->focus->canvas);
 			struct shellbin *bin = nemoshell_get_bin(tp->focus->canvas);
 
 			if (bin != NULL) {
+				nemoview_above_layer(tp->focus, NULL);
+
 				datadevice_set_focus(tp->touch->seat, tp->focus);
 
 				if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_BINDABLE_STATE) != 0) {
-					struct nemoenvs *envs = (struct nemoenvs *)data;
 					struct touchpoint *tps[10];
 					int tapcount;
 
@@ -233,15 +233,42 @@ void nemoenvs_handle_touch_event(struct nemocompz *compz, struct touchpoint *tp,
 						nemoseat_get_distant_touchpoint(compz->seat, tps, tapcount, &tp0, &tp1);
 
 						if (nemoshell_bin_has_flags(bin, NEMOSHELL_BIN_SCALABLE_FLAG)) {
-							nemoshell_pick_canvas_by_touchpoint(bin->shell, tp0, tp1, NEMOSHELL_PICK_ROTATE_FLAG | NEMOSHELL_PICK_TRANSLATE_FLAG | NEMOSHELL_PICK_SCALE_FLAG, bin);
+							nemoshell_pick_canvas_by_touchpoint(shell, tp0, tp1, NEMOSHELL_PICK_ROTATE_FLAG | NEMOSHELL_PICK_TRANSLATE_FLAG | NEMOSHELL_PICK_SCALE_FLAG, bin);
 						} else {
-							nemoshell_pick_canvas_by_touchpoint(bin->shell, tp0, tp1, NEMOSHELL_PICK_ROTATE_FLAG | NEMOSHELL_PICK_TRANSLATE_FLAG, bin);
+							nemoshell_pick_canvas_by_touchpoint(shell, tp0, tp1, NEMOSHELL_PICK_ROTATE_FLAG | NEMOSHELL_PICK_TRANSLATE_FLAG, bin);
 						}
 					}
 				}
 			}
 		}
-	}
 
-	wl_signal_emit(&compz->activate_signal, tp->focus);
+		wl_signal_emit(&compz->activate_signal, tp->focus);
+	} else if (tp->state == TOUCHPOINT_UP_STATE) {
+		if (tp->focus != NULL && tp->focus->canvas != NULL) {
+			struct nemocanvas *parent = nemosubcanvas_get_main_canvas(tp->focus->canvas);
+			struct shellbin *bin = nemoshell_get_bin(tp->focus->canvas);
+
+			if (bin != NULL && nemoview_has_grab(bin->view) != 0) {
+				if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_BINDABLE_STATE) != 0) {
+					struct touchpoint *tps[10];
+					int tapcount;
+
+					tapcount = nemoseat_get_touchpoint_by_view(compz->seat, tp->focus, tps, 10);
+					if (tapcount >= 2) {
+						struct touchpoint *tp0, *tp1;
+
+						nemoseat_get_distant_touchpoint(compz->seat, tps, tapcount, &tp0, &tp1);
+
+						if (nemoshell_bin_has_flags(bin, NEMOSHELL_BIN_SCALABLE_FLAG)) {
+							nemoshell_pick_canvas_by_touchpoint(shell, tp0, tp1, NEMOSHELL_PICK_ROTATE_FLAG | NEMOSHELL_PICK_TRANSLATE_FLAG | NEMOSHELL_PICK_SCALE_FLAG, bin);
+						} else {
+							nemoshell_pick_canvas_by_touchpoint(shell, tp0, tp1, NEMOSHELL_PICK_ROTATE_FLAG | NEMOSHELL_PICK_TRANSLATE_FLAG, bin);
+						}
+					} else if (tapcount == 1) {
+						nemoshell_move_canvas_by_touchpoint(shell, tps[0], bin);
+					}
+				}
+			}
+		}
+	}
 }
