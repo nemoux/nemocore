@@ -157,6 +157,11 @@ static void move_shellgrab_dispatch_effect_done(struct nemoeffect *base)
 				nemoseat_set_keyboard_focus(shell->compz->seat, bin->view);
 				nemoseat_set_pointer_focus(shell->compz->seat, bin->view);
 			}
+
+			bin->has_scale = 1;
+			bin->scale.serial = bin->next_serial;
+			bin->scale.width = screen->dw;
+			bin->scale.height = screen->dh;
 		}
 	}
 
