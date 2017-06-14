@@ -102,7 +102,7 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 
 		if (bin->min_width >= width && bin->min_height >= height) {
 			if (nemoview_has_state(bin->view, NEMOVIEW_CLOSE_STATE) == 0) {
-				if (bin->type == NEMOSHELL_SURFACE_XWAYLAND_TYPE)
+				if (bin->type == NEMOSHELL_BIN_XWAYLAND_TYPE)
 					kill(-bin->pid, SIGKILL);
 				else
 					kill(bin->pid, SIGKILL);
@@ -146,7 +146,7 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 			}
 		}
 
-		if (nemoshell_bin_has_flags(bin, NEMOSHELL_SURFACE_RESIZABLE_FLAG) != 0) {
+		if (nemoshell_bin_has_flags(bin, NEMOSHELL_BIN_RESIZABLE_FLAG) != 0) {
 			bin->resize_edges = WL_SHELL_SURFACE_RESIZE_LEFT | WL_SHELL_SURFACE_RESIZE_TOP;
 
 			if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_PICKSCREEN_STATE) != 0) {

@@ -232,7 +232,7 @@ void nemoenvs_handle_touch_event(struct nemocompz *compz, struct touchpoint *tp,
 
 						nemoseat_get_distant_touchpoint(compz->seat, tps, tapcount, &tp0, &tp1);
 
-						if (nemoshell_bin_has_flags(bin, NEMOSHELL_SURFACE_SCALABLE_FLAG)) {
+						if (nemoshell_bin_has_flags(bin, NEMOSHELL_BIN_SCALABLE_FLAG)) {
 							nemoshell_pick_canvas_by_touchpoint(bin->shell, tp0, tp1, NEMOSHELL_PICK_ROTATE_FLAG | NEMOSHELL_PICK_TRANSLATE_FLAG | NEMOSHELL_PICK_SCALE_FLAG, bin);
 						} else {
 							nemoshell_pick_canvas_by_touchpoint(bin->shell, tp0, tp1, NEMOSHELL_PICK_ROTATE_FLAG | NEMOSHELL_PICK_TRANSLATE_FLAG, bin);

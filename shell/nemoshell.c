@@ -319,7 +319,7 @@ static void nemo_surface_set_fullscreen(struct wl_client *client, struct wl_reso
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = bin->shell;
 
-	if (nemoshell_bin_has_flags(bin, NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG)) {
+	if (nemoshell_bin_has_flags(bin, NEMOSHELL_BIN_MAXIMIZABLE_FLAG)) {
 		struct shellscreen *screen;
 
 		screen = nemoshell_get_fullscreen(shell, id);
@@ -343,7 +343,7 @@ static void nemo_surface_put_fullscreen(struct wl_client *client, struct wl_reso
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = bin->shell;
 
-	if (nemoshell_bin_has_flags(bin, NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG))
+	if (nemoshell_bin_has_flags(bin, NEMOSHELL_BIN_MAXIMIZABLE_FLAG))
 		nemoshell_put_fullscreen_bin(shell, bin);
 }
 
@@ -351,7 +351,7 @@ static void nemo_surface_move(struct wl_client *client, struct wl_resource *reso
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	if (nemoshell_bin_has_flags(bin, NEMOSHELL_SURFACE_MOVABLE_FLAG)) {
+	if (nemoshell_bin_has_flags(bin, NEMOSHELL_BIN_MOVABLE_FLAG)) {
 		nemoshell_move_canvas(bin->shell, bin, serial);
 	}
 }
@@ -361,7 +361,7 @@ static void nemo_surface_pick(struct wl_client *client, struct wl_resource *reso
 	struct nemoseat *seat = (struct nemoseat *)wl_resource_get_user_data(seat_resource);
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	if (nemoshell_bin_has_flags(bin, NEMOSHELL_SURFACE_PICKABLE_FLAG)) {
+	if (nemoshell_bin_has_flags(bin, NEMOSHELL_BIN_PICKABLE_FLAG)) {
 		uint32_t ptype = 0x0;
 
 		if (strstr(type, "rotate") != NULL)
@@ -503,9 +503,9 @@ static void nemo_get_nemo_surface(struct wl_client *client, struct wl_resource *
 	wl_resource_set_implementation(bin->resource, &nemo_surface_implementation, bin, nemoshell_unbind_nemo_surface);
 
 	if (strcmp(type, "normal") == 0) {
-		bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
+		bin->type = NEMOSHELL_BIN_NORMAL_TYPE;
 	} else if (strcmp(type, "overlay") == 0) {
-		bin->type = NEMOSHELL_SURFACE_OVERLAY_TYPE;
+		bin->type = NEMOSHELL_BIN_OVERLAY_TYPE;
 		bin->view->transform.type = NEMOVIEW_TRANSFORM_OVERLAY;
 	}
 

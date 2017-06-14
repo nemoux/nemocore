@@ -65,7 +65,7 @@ static void shell_surface_move(struct wl_client *client, struct wl_resource *res
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	if (nemoshell_bin_has_flags(bin, NEMOSHELL_SURFACE_MOVABLE_FLAG)) {
+	if (nemoshell_bin_has_flags(bin, NEMOSHELL_BIN_MOVABLE_FLAG)) {
 		nemoshell_move_canvas(bin->shell, bin, serial);
 	}
 }
@@ -74,7 +74,7 @@ static void shell_surface_resize(struct wl_client *client, struct wl_resource *r
 {
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 
-	if (nemoshell_bin_has_flags(bin, NEMOSHELL_SURFACE_RESIZABLE_FLAG) != 0) {
+	if (nemoshell_bin_has_flags(bin, NEMOSHELL_BIN_RESIZABLE_FLAG) != 0) {
 		nemoshell_resize_canvas(bin->shell, bin, serial, edges);
 	}
 }
@@ -86,7 +86,7 @@ static void shell_surface_set_toplevel(struct wl_client *client, struct wl_resou
 
 	nemoshell_clear_bin_config(bin);
 
-	bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
+	bin->type = NEMOSHELL_BIN_NORMAL_TYPE;
 
 	nemoshell_set_parent_bin(bin, NULL);
 }
@@ -101,7 +101,7 @@ static void shell_surface_set_fullscreen(struct wl_client *client, struct wl_res
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = bin->shell;
 
-	if (nemoshell_bin_has_flags(bin, NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG)) {
+	if (nemoshell_bin_has_flags(bin, NEMOSHELL_BIN_MAXIMIZABLE_FLAG)) {
 		struct nemoscreen *screen = output_resource != NULL ? (struct nemoscreen *)wl_resource_get_user_data(output_resource) : NULL;
 
 		if (screen == NULL)
@@ -121,7 +121,7 @@ static void shell_surface_set_popup(struct wl_client *client, struct wl_resource
 
 	nemoshell_clear_bin_config(bin);
 
-	bin->type = NEMOSHELL_SURFACE_POPUP_TYPE;
+	bin->type = NEMOSHELL_BIN_POPUP_TYPE;
 	bin->popup.x = x;
 	bin->popup.y = y;
 	bin->popup.serial = serial;
@@ -135,7 +135,7 @@ static void shell_surface_set_maximized(struct wl_client *client, struct wl_reso
 	struct shellbin *bin = (struct shellbin *)wl_resource_get_user_data(resource);
 	struct nemoshell *shell = bin->shell;
 
-	if (nemoshell_bin_has_flags(bin, NEMOSHELL_SURFACE_MAXIMIZABLE_FLAG)) {
+	if (nemoshell_bin_has_flags(bin, NEMOSHELL_BIN_MAXIMIZABLE_FLAG)) {
 		struct nemoscreen *screen = output_resource != NULL ? (struct nemoscreen *)wl_resource_get_user_data(output_resource) : NULL;
 
 		if (screen == NULL)
@@ -194,7 +194,7 @@ static void shell_get_shell_surface(struct wl_client *client, struct wl_resource
 		return;
 	}
 
-	bin->type = NEMOSHELL_SURFACE_NORMAL_TYPE;
+	bin->type = NEMOSHELL_BIN_NORMAL_TYPE;
 	bin->owner = sc;
 
 	nemoshell_bin_set_state(bin, NEMOSHELL_BIN_BINDABLE_STATE);
