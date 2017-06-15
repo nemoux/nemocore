@@ -248,7 +248,7 @@ void nemoenvs_handle_touch_event(struct nemocompz *compz, struct touchpoint *tp,
 			struct nemocanvas *parent = nemosubcanvas_get_main_canvas(tp->focus->canvas);
 			struct shellbin *bin = nemoshell_get_bin(tp->focus->canvas);
 
-			if (bin != NULL && nemoview_has_grab(bin->view) != 0) {
+			if (bin != NULL) {
 				if (nemoshell_bin_has_state(bin, NEMOSHELL_BIN_BINDABLE_STATE) != 0) {
 					struct touchpoint *tps[10];
 					int tapcount;

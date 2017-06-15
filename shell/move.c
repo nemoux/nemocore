@@ -244,8 +244,6 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 
 		nemocontent_touch_motion(tp, tp->focus->content, time, touchid, sx, sy, tp->x, tp->y);
 		nemocontent_touch_up(tp, tp->focus->content, time, touchid);
-
-		touchpoint_set_focus(tp, NULL);
 	}
 }
 

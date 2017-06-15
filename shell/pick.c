@@ -197,8 +197,6 @@ closed:
 
 		nemocontent_touch_motion(tp0, tp0->focus->content, time, tp0->gid, sx, sy, tp0->x, tp0->y);
 		nemocontent_touch_up(tp0, tp0->focus->content, time, tp0->gid);
-
-		touchpoint_set_focus(tp0, NULL);
 	}
 }
 

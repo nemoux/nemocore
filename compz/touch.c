@@ -407,9 +407,11 @@ void nemotouch_notify_up(struct nemotouch *touch, uint32_t time, int id)
 
 	tp->state = TOUCHPOINT_UP_STATE;
 
+	tp->grab->interface->up(tp->grab, time, tp->gid);
+
 	nemocompz_run_touch_binding(touch->seat->compz, tp, time);
 
-	tp->grab->interface->up(tp->grab, time, tp->gid);
+	touchpoint_set_focus(tp, NULL);
 
 	nemotouch_destroy_touchpoint(touch, tp);
 }
@@ -525,9 +527,11 @@ void nemotouch_flush_tuio(struct tuio *tuio)
 	wl_list_for_each_safe(tp, tnext, &touchpoint_list, link) {
 		tp->state = TOUCHPOINT_UP_STATE;
 
+		tp->grab->interface->up(tp->grab, msecs, tp->gid);
+
 		nemocompz_run_touch_binding(touch->seat->compz, tp, msecs);
 
-		tp->grab->interface->up(tp->grab, msecs, tp->gid);
+		touchpoint_set_focus(tp, NULL);
 
 		nemotouch_destroy_touchpoint(touch, tp);
 	}
