@@ -16,6 +16,10 @@ typedef enum {
 	TOUCHPOINT_LAST_STATE
 } TouchPointState;
 
+typedef enum {
+	TOUCHPOINT_GRAB_FLAG = (1 << 0)
+} TouchPointFlag;
+
 struct nemoseat;
 struct nemotouch;
 struct tuio;
@@ -40,6 +44,8 @@ struct touchpoint {
 	struct nemotouch *touch;
 
 	int state;
+
+	uint32_t flags;
 
 	uint64_t id;
 	uint64_t gid;
@@ -138,6 +144,26 @@ static inline void *nemotouch_set_nodedata(struct touchnode *node, void *data)
 static inline void *nemotouch_get_nodedata(struct touchnode *node)
 {
 	return node->userdata;
+}
+
+static inline void touchpoint_set_flags(struct touchpoint *tp, uint32_t flags)
+{
+	tp->flags |= flags;
+}
+
+static inline void touchpoint_put_flags(struct touchpoint *tp, uint32_t flags)
+{
+	tp->flags &= ~flags;
+}
+
+static inline int touchpoint_has_flags(struct touchpoint *tp, uint32_t flags)
+{
+	return tp->flags & flags;
+}
+
+static inline int touchpoint_has_flags_all(struct touchpoint *tp, uint32_t flags)
+{
+	return (tp->flags & flags) == flags;
 }
 
 #ifdef __cplusplus

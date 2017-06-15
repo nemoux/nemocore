@@ -550,6 +550,8 @@ void touchpoint_start_grab(struct touchpoint *tp, struct touchpoint_grab *grab)
 
 	tp->grab = grab;
 	grab->touchpoint = tp;
+
+	touchpoint_set_flags(tp, TOUCHPOINT_GRAB_FLAG);
 }
 
 void touchpoint_end_grab(struct touchpoint *tp)

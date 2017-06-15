@@ -244,7 +244,7 @@ void nemoenvs_handle_touch_event(struct nemocompz *compz, struct touchpoint *tp,
 
 		wl_signal_emit(&compz->activate_signal, tp->focus);
 	} else if (tp->state == TOUCHPOINT_UP_STATE) {
-		if (tp->focus != NULL && tp->focus->canvas != NULL) {
+		if (tp->focus != NULL && tp->focus->canvas != NULL && touchpoint_has_flags(tp, TOUCHPOINT_GRAB_FLAG) != 0) {
 			struct nemocanvas *parent = nemosubcanvas_get_main_canvas(tp->focus->canvas);
 			struct shellbin *bin = nemoshell_get_bin(tp->focus->canvas);
 
