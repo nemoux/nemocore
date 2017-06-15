@@ -186,6 +186,35 @@ void nemoenvs_handle_right_button(struct nemocompz *compz, struct nemopointer *p
 	}
 }
 
+static void nemoenvs_get_distant_touchpoint(struct touchpoint *tps[], int ntps, struct touchpoint **tp0, struct touchpoint **tp1)
+{
+	struct nemotouch *touch;
+	struct touchpoint *_tp0, *_tp1;
+	float dm = 0.0f;
+	float dd;
+	float dx, dy;
+	int i, j;
+
+	for (i = 0; i < ntps - 1; i++) {
+		_tp0 = tps[i];
+
+		for (j = i + 1; j < ntps; j++) {
+			_tp1 = tps[j];
+
+			dx = _tp1->x - _tp0->x;
+			dy = _tp1->y - _tp0->y;
+			dd = sqrtf(dx * dx + dy * dy);
+
+			if (dd > dm) {
+				dm = dd;
+
+				*tp0 = _tp0;
+				*tp1 = _tp1;
+			}
+		}
+	}
+}
+
 void nemoenvs_handle_touch_event(struct nemocompz *compz, struct touchpoint *tp, uint32_t time, void *data)
 {
 	struct nemoenvs *envs = (struct nemoenvs *)data;
@@ -230,7 +259,7 @@ void nemoenvs_handle_touch_event(struct nemocompz *compz, struct touchpoint *tp,
 					if (tapcount >= envs->legacy.pick_taps) {
 						struct touchpoint *tp0, *tp1;
 
-						nemoseat_get_distant_touchpoint(compz->seat, tps, tapcount, &tp0, &tp1);
+						nemoenvs_get_distant_touchpoint(tps, tapcount, &tp0, &tp1);
 
 						if (nemoshell_bin_has_flags(bin, NEMOSHELL_BIN_SCALABLE_FLAG)) {
 							nemoshell_pick_canvas_by_touchpoint(shell, tp0, tp1, NEMOSHELL_PICK_ROTATE_FLAG | NEMOSHELL_PICK_TRANSLATE_FLAG | NEMOSHELL_PICK_SCALE_FLAG, bin);
@@ -257,7 +286,7 @@ void nemoenvs_handle_touch_event(struct nemocompz *compz, struct touchpoint *tp,
 					if (tapcount >= 2) {
 						struct touchpoint *tp0, *tp1;
 
-						nemoseat_get_distant_touchpoint(compz->seat, tps, tapcount, &tp0, &tp1);
+						nemoenvs_get_distant_touchpoint(tps, tapcount, &tp0, &tp1);
 
 						if (nemoshell_bin_has_flags(bin, NEMOSHELL_BIN_SCALABLE_FLAG)) {
 							nemoshell_pick_canvas_by_touchpoint(shell, tp0, tp1, NEMOSHELL_PICK_ROTATE_FLAG | NEMOSHELL_PICK_TRANSLATE_FLAG | NEMOSHELL_PICK_SCALE_FLAG, bin);

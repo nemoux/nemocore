@@ -417,68 +417,6 @@ int nemoseat_put_touchpoint_by_view(struct nemoseat *seat, struct nemoview *view
 	return 0;
 }
 
-void nemoseat_bypass_touchpoint_by_view(struct nemoseat *seat, struct nemoview *view)
-{
-	struct nemocompz *compz = seat->compz;
-	struct nemotouch *touch;
-	struct touchpoint *tp;
-	struct nemoview *pick;
-	uint32_t msecs = time_current_msecs();
-	float tx, ty;
-
-	wl_list_for_each(touch, &seat->touch.device_list, link) {
-		wl_list_for_each(tp, &touch->touchpoint_list, link) {
-			if (tp->state == TOUCHPOINT_UP_STATE)
-				continue;
-
-			if (tp->focus == view) {
-				pick = nemocompz_pick_view(compz, tp->x, tp->y, &tx, &ty, NEMOVIEW_PICK_STATE);
-				if (pick != NULL) {
-					nemocontent_touch_up(tp, tp->focus->content, msecs, tp->gid);
-
-					touchpoint_set_focus(tp, pick);
-
-					nemocontent_touch_down(tp, tp->focus->content, msecs, tp->gid, tx, ty, tp->x, tp->y);
-
-					tp->grab_serial = wl_display_get_serial(compz->display);
-					tp->grab_time = msecs;
-
-					nemocompz_run_touch_binding(compz, tp, msecs);
-				}
-			}
-		}
-	}
-}
-
-void nemoseat_get_distant_touchpoint(struct nemoseat *seat, struct touchpoint *tps[], int ntps, struct touchpoint **tp0, struct touchpoint **tp1)
-{
-	struct nemotouch *touch;
-	struct touchpoint *_tp0, *_tp1;
-	float dm = 0.0f;
-	float dd;
-	float dx, dy;
-	int i, j;
-
-	for (i = 0; i < ntps - 1; i++) {
-		_tp0 = tps[i];
-
-		for (j = i + 1; j < ntps; j++) {
-			_tp1 = tps[j];
-
-			dx = _tp1->x - _tp0->x;
-			dy = _tp1->y - _tp0->y;
-			dd = sqrtf(dx * dx + dy * dy);
-
-			if (dd > dm) {
-				dm = dd;
-
-				*tp0 = _tp0;
-				*tp1 = _tp1;
-			}
-		}
-	}
-}
-
 struct wl_resource *nemoseat_find_resource_for_view(struct wl_list *list, struct nemoview *view)
 {
 	if (view == NULL || view->canvas == NULL || view->canvas->resource == NULL)
