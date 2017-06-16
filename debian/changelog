@@ -1,3 +1,19 @@
+nemocore (0.7.0) unstable; urgency=medium
+
+  [ haruband ]
+  * minishell: Fix screenshot pixel format bugs
+  * envs: Fix screenshot image transform
+  * shell: Fix NEMOSHELL_SURFACE_* to NEMOSHELL_BIN_*
+  * shell: Don't check pick flags for move and resize grab interfaces
+  * envs: Fix touch binding mechanisms
+  * shell: Add scale handling to move grab's fullscreen mode
+  * compz: Unset touch focus after handling binding callbacks
+  * compz: Add grab flag to touchpoint
+  * compz: Remove unnecessary functions from nemoseat
+  * compz: Don't need to unset focus before destroying touchpoint
+
+ -- Taehwan Kim <taehwan@nemoux.net>  Fri, 16 Jun 2017 01:19:50 +0900
+
 nemocore (0.6.0) unstable; urgency=medium
 
   [ haruband ]
