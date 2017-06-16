@@ -706,12 +706,13 @@ static int nemoshell_dispatch_frame_timeout(void *data)
 	wl_list_for_each(canvas, &compz->canvas_list, link) {
 		bin = nemoshell_get_bin(canvas);
 		if (bin != NULL) {
-			nemolog_message("SYSTEM", "  CANVAS[%d:%.1fx%.1f--%dx%d] frames(%d) damages(%d/%f)\n",
+			nemolog_message("SYSTEM", "  CANVAS[%d:%.1fx%.1f--%dx%d] screen(0x%x) frames(%d) damages(%d/%f)\n",
 					bin->pid,
 					bin->view->geometry.x,
 					bin->view->geometry.y,
 					bin->view->content->width,
 					bin->view->content->height,
+					canvas->base.screen_mask,
 					canvas->frame_count,
 					canvas->frame_damage,
 					canvas->frame_count > 0 ? (double)canvas->frame_damage / 1024.0f / 1024.0f / canvas->frame_count : 0.0f);
