@@ -225,7 +225,7 @@ void nemoview_unmap(struct nemoview *view)
 
 	nemoview_put_state(view, NEMOVIEW_MAP_STATE);
 
-	nemocontent_update_output(view->content, 0, 0);
+	nemocontent_update_output(view->content);
 
 	wl_list_remove(&view->layer_link);
 	wl_list_init(&view->layer_link);
@@ -319,7 +319,7 @@ void nemoview_update_output(struct nemoview *view)
 	view->node_mask = nodemask;
 	view->screen_mask = scrnmask;
 
-	nemocontent_update_output(view->content, nodemask, scrnmask);
+	nemocontent_update_output(view->content);
 }
 
 static void nemoview_update_transform_disable(struct nemoview *view)

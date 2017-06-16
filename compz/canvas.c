@@ -466,28 +466,28 @@ static pixman_box32_t nemocanvas_transform_to_buffer_rect(struct nemocontent *co
 			vp->buffer.transform, vp->buffer.scale, rect);
 }
 
-static void nemocanvas_update_output(struct nemocontent *content, uint32_t node_mask, uint32_t screen_mask)
+static void nemocanvas_update_output(struct nemocontent *content)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)container_of(content, struct nemocanvas, base);
 	struct nemoview *view;
-	uint32_t node_next = 0;
-	uint32_t screen_next = 0;
+	uint32_t node_mask = 0;
+	uint32_t screen_mask = 0;
 
 	wl_list_for_each(view, &canvas->view_list, link) {
-		node_next |= view->node_mask;
-		screen_next |= view->screen_mask;
+		node_mask |= view->node_mask;
+		screen_mask |= view->screen_mask;
 	}
 
-	if (content->node_mask != node_next) {
+	if (content->node_mask != node_mask) {
 		content->dirty = 1;
+		content->screen_dirty = screen_mask;
 
 		pixman_region32_union_rect(&content->damage, &content->damage,
 				0, 0, content->width, content->height);
 	}
 
-	content->node_mask = node_next;
-	content->screen_mask = screen_next;
-	content->screen_dirty = screen_next;
+	content->node_mask = node_mask;
+	content->screen_mask = screen_mask;
 }
 
 static void nemocanvas_update_transform(struct nemocontent *content, int visible, int32_t x, int32_t y, int32_t width, int32_t height)

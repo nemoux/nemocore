@@ -54,7 +54,7 @@ struct nemocontent {
 
 	int (*pick)(struct nemocontent *content, float x, float y);
 
-	void (*update_output)(struct nemocontent *content, uint32_t node_mask, uint32_t screen_mask);
+	void (*update_output)(struct nemocontent *content);
 	void (*update_transform)(struct nemocontent *content, int visible, int32_t x, int32_t y, int32_t width, int32_t height);
 	void (*update_layer)(struct nemocontent *content, int visible);
 	void (*update_fullscreen)(struct nemocontent *content, const char *id, int32_t x, int32_t y, int32_t width, int32_t height);
@@ -91,7 +91,7 @@ extern int32_t nemocontent_get_buffer_scale(struct nemocontent *content);
 extern void nemocontent_transform_to_buffer_point(struct nemocontent *content, float sx, float sy, float *bx, float *by);
 extern pixman_box32_t nemocontent_transform_to_buffer_rect(struct nemocontent *content, pixman_box32_t rect);
 
-extern void nemocontent_update_output(struct nemocontent *content, uint32_t node_mask, uint32_t screen_mask);
+extern void nemocontent_update_output(struct nemocontent *content);
 extern void nemocontent_update_transform(struct nemocontent *content, int visible, int32_t x, int32_t y, int32_t width, int32_t height);
 extern void nemocontent_update_layer(struct nemocontent *content, int visible);
 extern void nemocontent_update_fullscreen(struct nemocontent *content, const char *id, int32_t x, int32_t y, int32_t width, int32_t height);

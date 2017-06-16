@@ -93,21 +93,10 @@ pixman_box32_t nemocontent_transform_to_buffer_rect(struct nemocontent *content,
 	return rect;
 }
 
-void nemocontent_update_output(struct nemocontent *content, uint32_t node_mask, uint32_t screen_mask)
+void nemocontent_update_output(struct nemocontent *content)
 {
-	if (content->update_output != NULL) {
-		content->update_output(content, node_mask, screen_mask);
-	} else {
-		if (content->node_mask != node_mask) {
-			content->dirty = 1;
-
-			pixman_region32_union_rect(&content->damage, &content->damage,
-					0, 0, content->width, content->height);
-		}
-
-		content->node_mask = node_mask;
-		content->screen_mask = screen_mask;
-	}
+	if (content->update_output != NULL)
+		content->update_output(content);
 }
 
 void nemocontent_update_transform(struct nemocontent *content, int visible, int32_t x, int32_t y, int32_t width, int32_t height)
