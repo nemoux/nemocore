@@ -469,14 +469,9 @@ static pixman_box32_t nemocanvas_transform_to_buffer_rect(struct nemocontent *co
 static void nemocanvas_update_output(struct nemocontent *content, uint32_t node_mask, uint32_t screen_mask)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)container_of(content, struct nemocanvas, base);
-	struct nemocompz *compz = canvas->compz;
-	struct nemoscreen *screen;
 	struct nemoview *view;
-	struct wl_resource *resource;
-	struct wl_client *client;
 	uint32_t node_next = 0;
 	uint32_t screen_next = 0;
-	uint32_t frameout = UINT32_MAX;
 
 	wl_list_for_each(view, &canvas->view_list, link) {
 		node_next |= view->node_mask;
@@ -492,16 +487,7 @@ static void nemocanvas_update_output(struct nemocontent *content, uint32_t node_
 
 	content->node_mask = node_next;
 	content->screen_mask = screen_next;
-
-	wl_list_for_each(screen, &compz->screen_list, link) {
-		if (content->screen_mask & (1 << screen->id)) {
-			if (frameout > screen->frameout_timeout) {
-				content->screen_main = screen->id;
-
-				frameout = screen->frameout_timeout;
-			}
-		}
-	}
+	content->screen_dirty = screen_next;
 }
 
 static void nemocanvas_update_transform(struct nemocontent *content, int visible, int32_t x, int32_t y, int32_t width, int32_t height)
@@ -1440,6 +1426,7 @@ void nemocanvas_commit_state(struct nemocanvas *canvas, struct nemocanvas_state 
 	extents = pixman_region32_extents(&canvas->base.damage);
 	if (extents->x2 - extents->x1 > 0 && extents->y2 - extents->y1 > 0) {
 		canvas->base.dirty = 1;
+		canvas->base.screen_dirty = canvas->base.screen_mask;
 
 		canvas->frame_damage = canvas->frame_damage + (extents->x2 - extents->x1) * (extents->y2 - extents->y1);
 		canvas->frame_count++;
@@ -1496,16 +1483,6 @@ void nemocanvas_reset_pending_buffer(struct nemocanvas *canvas)
 	canvas->pending.sy = 0;
 	canvas->pending.newly_attached = 0;
 	canvas->pending.buffer_viewport.changed = 0;
-}
-
-void nemocanvas_damage_dirty(struct nemocanvas *canvas)
-{
-	pixman_region32_union_rect(&canvas->base.damage, &canvas->base.damage,
-			0, 0, canvas->base.width, canvas->base.height);
-
-	canvas->base.dirty = 1;
-
-	nemocanvas_schedule_repaint(canvas);
 }
 
 void nemocanvas_flush_damage(struct nemocanvas *canvas)

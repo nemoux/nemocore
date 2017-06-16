@@ -86,26 +86,30 @@ void nemoscreen_finish_frame(struct nemoscreen *screen, uint32_t secs, uint32_t 
 		wl_list_init(&feedback_list);
 
 		wl_list_for_each_safe(canvas, tmp, &compz->feedback_list, feedback_link) {
-			if (canvas->base.screen_main == screen->id) {
-				if (!wl_list_empty(&canvas->feedback_list)) {
-					struct nemoview *view;
-					struct nemofeedback *feedback;
-					uint32_t flags = 0xffffffff;
+			if (canvas->base.screen_mask & (1 << screen->id)) {
+				canvas->base.screen_dirty &= ~(1 << screen->id);
 
-					wl_list_for_each(view, &canvas->view_list, link) {
-						flags &= view->psf_flags;
+				if (canvas->base.screen_dirty == 0x0) {
+					if (!wl_list_empty(&canvas->feedback_list)) {
+						struct nemoview *view;
+						struct nemofeedback *feedback;
+						uint32_t flags = 0xffffffff;
+
+						wl_list_for_each(view, &canvas->view_list, link) {
+							flags &= view->psf_flags;
+						}
+
+						wl_list_for_each(feedback, &canvas->feedback_list, link) {
+							feedback->psf_flags = flags;
+						}
+
+						wl_list_insert_list(&feedback_list, &canvas->feedback_list);
+						wl_list_init(&canvas->feedback_list);
 					}
 
-					wl_list_for_each(feedback, &canvas->feedback_list, link) {
-						feedback->psf_flags = flags;
-					}
-
-					wl_list_insert_list(&feedback_list, &canvas->feedback_list);
-					wl_list_init(&canvas->feedback_list);
+					wl_list_remove(&canvas->feedback_link);
+					wl_list_init(&canvas->feedback_link);
 				}
-
-				wl_list_remove(&canvas->feedback_link);
-				wl_list_init(&canvas->feedback_link);
 			}
 		}
 

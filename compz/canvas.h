@@ -145,7 +145,6 @@ extern void nemocanvas_reset_pending_buffer(struct nemocanvas *canvas);
 extern void nemocanvas_state_prepare(struct nemocanvas_state *state);
 extern void nemocanvas_state_finish(struct nemocanvas_state *state);
 extern void nemocanvas_state_set_buffer(struct nemocanvas_state *state, struct nemobuffer *buffer);
-extern void nemocanvas_damage_dirty(struct nemocanvas *canvas);
 extern void nemocanvas_flush_damage(struct nemocanvas *canvas);
 
 extern struct nemoview *nemocanvas_get_default_view(struct nemocanvas *canvas);
