@@ -61,14 +61,23 @@ static int nemoscreen_repaint_frame(struct nemoscreen *screen)
 		wl_resource_destroy(cb->resource);
 	}
 
-	screen->repaint_needed = 0;
-
 	return r;
 }
 
 void nemoscreen_finish_frame(struct nemoscreen *screen, uint32_t secs, uint32_t usecs, uint32_t psf_flags)
 {
 	struct nemocompz *compz = screen->compz;
+
+	screen->repaint_scheduled = 0;
+
+	if (screen->repaint_needed == 0)
+		return;
+	screen->repaint_needed = 0;
+
+	screen->frame_msecs = secs * 1000 + usecs / 1000;
+	screen->frame_count++;
+
+	nemoscreen_repaint_frame(screen);
 
 	if (!wl_list_empty(&compz->feedback_list)) {
 		struct nemocanvas *canvas, *tmp;
@@ -104,15 +113,6 @@ void nemoscreen_finish_frame(struct nemoscreen *screen, uint32_t secs, uint32_t 
 				1000000000000LL / screen->current_mode->refresh,
 				secs, usecs * 1000, screen->msc, psf_flags);
 	}
-
-	if (screen->repaint_needed != 0) {
-		screen->frame_msecs = secs * 1000 + usecs / 1000;
-		screen->frame_count++;
-
-		nemoscreen_repaint_frame(screen);
-	}
-
-	screen->repaint_scheduled = 0;
 }
 
 static void nemoscreen_dispatch_repaint(void *data)
