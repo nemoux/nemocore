@@ -69,6 +69,7 @@ static void nemoenvs_handle_nemoshell_screen(struct nemoenvs *envs, struct json_
 			float r;
 			float px, py;
 			uint32_t refresh;
+			uint32_t framerate;
 			const char *transform;
 			const char *scope;
 
@@ -82,11 +83,15 @@ static void nemoenvs_handle_nemoshell_screen(struct nemoenvs *envs, struct json_
 			px = nemojson_object_get_double(cobj, "px", 0.0f);
 			py = nemojson_object_get_double(cobj, "py", 0.0f);
 			refresh = nemojson_object_get_integer(cobj, "refresh", 0);
+			framerate = nemojson_object_get_integer(cobj, "framerate", 0);
 			transform = nemojson_object_get_string(cobj, "transform", NULL);
 			scope = nemojson_object_get_string(cobj, "scope", NULL);
 
 			if (screen->width != width || screen->height != height)
 				nemoscreen_switch_mode(screen, width, height, refresh);
+
+			if (framerate > 0)
+				nemoscreen_set_frameout(screen, 1000 / framerate);
 
 			nemoscreen_clear_transform(screen);
 

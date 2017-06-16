@@ -56,6 +56,11 @@ struct nemoscreen {
 	uint32_t frame_msecs;
 	uint32_t frame_count;
 
+	struct wl_event_source *frameout_timer;
+	uint32_t frameout_timeout;
+	int frameout_scheduled;
+	int frameout_needed;
+
 	uint64_t msc;
 
 	int32_t x, y;
@@ -134,6 +139,8 @@ extern void nemoscreen_set_rotation(struct nemoscreen *screen, float r);
 extern void nemoscreen_set_scale(struct nemoscreen *screen, float sx, float sy);
 extern void nemoscreen_set_pivot(struct nemoscreen *screen, float px, float py);
 extern int nemoscreen_set_custom(struct nemoscreen *screen, const char *cmd);
+
+extern int nemoscreen_set_frameout(struct nemoscreen *screen, uint32_t timeout);
 
 extern int nemoscreen_set_overlay(struct nemoscreen *screen, struct nemoview *view);
 

@@ -125,14 +125,54 @@ static void nemoscreen_dispatch_repaint(void *data)
 
 void nemoscreen_schedule_repaint(struct nemoscreen *screen)
 {
-	screen->compz->dirty = 1;
+	if (screen->frameout_timeout == 0) {
+		screen->compz->dirty = 1;
 
-	screen->repaint_needed = 1;
-	if (screen->repaint_scheduled != 0)
-		return;
+		screen->repaint_needed = 1;
+		if (screen->repaint_scheduled != 0)
+			return;
 
-	wl_event_loop_add_idle(screen->compz->loop, nemoscreen_dispatch_repaint, screen);
-	screen->repaint_scheduled = 1;
+		wl_event_loop_add_idle(screen->compz->loop, nemoscreen_dispatch_repaint, screen);
+		screen->repaint_scheduled = 1;
+	} else if (screen->frameout_scheduled == 0) {
+		screen->compz->dirty = 1;
+
+		screen->frameout_scheduled = 1;
+
+		if (nemoscreen_has_state(screen, NEMOSCREEN_DISPLAY_STATE) != 0) {
+			screen->repaint_needed = 1;
+
+			screen->repaint(screen);
+		}
+
+		wl_event_source_timer_update(screen->frameout_timer, screen->frameout_timeout);
+	} else {
+		screen->frameout_needed = 1;
+	}
+}
+
+static int nemoscreen_dispatch_frameout(void *data)
+{
+	struct nemoscreen *screen = (struct nemoscreen *)data;
+
+	screen->frameout_scheduled = 0;
+
+	if (screen->frameout_needed != 0) {
+		screen->compz->dirty = 1;
+
+		screen->frameout_needed = 0;
+		screen->frameout_scheduled = 1;
+
+		if (nemoscreen_has_state(screen, NEMOSCREEN_DISPLAY_STATE) != 0) {
+			screen->repaint_needed = 1;
+
+			screen->repaint(screen);
+		}
+
+		wl_event_source_timer_update(screen->frameout_timer, screen->frameout_timeout);
+	}
+
+	return 1;
 }
 
 int nemoscreen_read_pixels(struct nemoscreen *screen, pixman_format_code_t format, void *pixels, uint32_t x, uint32_t y, uint32_t width, uint32_t height)
@@ -222,11 +262,18 @@ void nemoscreen_prepare(struct nemoscreen *screen)
 	screen->id = ffs(~compz->screen_idpool) - 1;
 	compz->screen_idpool |= 1 << screen->id;
 
-	screen->global = wl_global_create(compz->display, &wl_output_interface, 2, screen, nemoscreen_bind_output);
-	if (screen->global == NULL)
+	screen->frameout_timer = wl_event_loop_add_timer(compz->loop, nemoscreen_dispatch_frameout, screen);
+	if (screen->frameout_timer == NULL)
 		goto err1;
 
+	screen->global = wl_global_create(compz->display, &wl_output_interface, 2, screen, nemoscreen_bind_output);
+	if (screen->global == NULL)
+		goto err2;
+
 	return;
+
+err2:
+	wl_event_source_remove(screen->frameout_timer);
 
 err1:
 	nemoscreen_finish(screen);
@@ -239,6 +286,8 @@ void nemoscreen_finish(struct nemoscreen *screen)
 	wl_signal_emit(&screen->destroy_signal, screen);
 
 	wl_list_remove(&screen->overlay_destroy_listener.link);
+
+	wl_event_source_remove(screen->frameout_timer);
 
 	pixman_region32_fini(&screen->region);
 	pixman_region32_fini(&screen->damage);
@@ -471,6 +520,13 @@ int nemoscreen_set_custom(struct nemoscreen *screen, const char *cmd)
 	screen->transform.enable = 1;
 	screen->transform.dirty = 1;
 	screen->transform.custom = 1;
+
+	return 0;
+}
+
+int nemoscreen_set_frameout(struct nemoscreen *screen, uint32_t timeout)
+{
+	screen->frameout_timeout = timeout;
 
 	return 0;
 }
