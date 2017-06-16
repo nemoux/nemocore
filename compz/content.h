@@ -36,6 +36,7 @@ struct nemocontent {
 
 	uint32_t node_mask;
 	uint32_t screen_mask;
+	uint32_t screen_main;
 	int dirty;
 
 	nemocontent_key_handler_t key_handler;

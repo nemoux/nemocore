@@ -86,7 +86,7 @@ void nemoscreen_finish_frame(struct nemoscreen *screen, uint32_t secs, uint32_t 
 		wl_list_init(&feedback_list);
 
 		wl_list_for_each_safe(canvas, tmp, &compz->feedback_list, feedback_link) {
-			if (canvas->base.screen_mask & (1 << screen->id)) {
+			if (canvas->base.screen_main == screen->id) {
 				if (!wl_list_empty(&canvas->feedback_list)) {
 					struct nemoview *view;
 					struct nemofeedback *feedback;

@@ -6,6 +6,7 @@
 #include <errno.h>
 
 #include <assert.h>
+#include <limits.h>
 #include <linux/input.h>
 #include <wayland-server.h>
 #include <wayland-nemo-seat-server-protocol.h>
@@ -468,12 +469,14 @@ static pixman_box32_t nemocanvas_transform_to_buffer_rect(struct nemocontent *co
 static void nemocanvas_update_output(struct nemocontent *content, uint32_t node_mask, uint32_t screen_mask)
 {
 	struct nemocanvas *canvas = (struct nemocanvas *)container_of(content, struct nemocanvas, base);
+	struct nemocompz *compz = canvas->compz;
 	struct nemoscreen *screen;
 	struct nemoview *view;
 	struct wl_resource *resource;
 	struct wl_client *client;
 	uint32_t node_next = 0;
 	uint32_t screen_next = 0;
+	uint32_t frameout = UINT32_MAX;
 
 	wl_list_for_each(view, &canvas->view_list, link) {
 		node_next |= view->node_mask;
@@ -489,6 +492,16 @@ static void nemocanvas_update_output(struct nemocontent *content, uint32_t node_
 
 	content->node_mask = node_next;
 	content->screen_mask = screen_next;
+
+	wl_list_for_each(screen, &compz->screen_list, link) {
+		if (content->screen_mask & (1 << screen->id)) {
+			if (frameout > screen->frameout_timeout) {
+				content->screen_main = screen->id;
+
+				frameout = screen->frameout_timeout;
+			}
+		}
+	}
 }
 
 static void nemocanvas_update_transform(struct nemocontent *content, int visible, int32_t x, int32_t y, int32_t width, int32_t height)
