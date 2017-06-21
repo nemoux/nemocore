@@ -35,8 +35,6 @@ struct fbscreen {
 	pixman_image_t *shadow_image;
 	void *shadow_buffer;
 	uint8_t depth;
-
-	struct wl_event_source *frame_timer;
 };
 
 struct fbnode {

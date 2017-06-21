@@ -62,8 +62,6 @@ static int fb_screen_repaint_frame(struct nemoscreen *base, pixman_region32_t *d
 				y2 - y1);
 	}
 
-	wl_event_source_timer_update(screen->frame_timer, 1000 / screen->mode.refresh);
-
 	pixman_region32_subtract(&screen->base.damage, &screen->base.damage, damage);
 
 	return 0;
@@ -213,8 +211,6 @@ static int fb_create_screen(struct fbnode *node, const char *devpath)
 
 	if (fb_prepare_pixman_screen(screen) < 0)
 		goto err5;
-
-	screen->frame_timer = wl_event_loop_add_timer(compz->loop, fb_dispatch_frame_timeout, screen);
 
 	screen->base.repaint = fb_screen_repaint;
 	screen->base.repaint_frame = fb_screen_repaint_frame;
