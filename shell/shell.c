@@ -531,7 +531,7 @@ void nemoshell_destroy_bin(struct shellbin *bin)
 
 struct shellbin *nemoshell_get_bin(struct nemocanvas *canvas)
 {
-	if (canvas->configure == shellbin_configure_canvas)
+	if (canvas != NULL && canvas->configure == shellbin_configure_canvas)
 		return canvas->configure_private;
 
 	return NULL;
