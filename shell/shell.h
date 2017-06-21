@@ -255,6 +255,8 @@ struct shellbin {
 	struct binconfig config, next_config, requested_config;
 	int config_changed;
 	int config_requested;
+
+	void *userdata;
 };
 
 struct shellscreen {
@@ -437,19 +439,29 @@ static inline int nemoshell_bin_is_maximized(struct shellbin *bin)
 	return bin->config.maximized != 0 || bin->next_config.maximized != 0 || bin->requested_config.maximized != 0;
 }
 
-static void nemoshell_bin_set_pid(struct shellbin *bin, uint32_t pid)
+static inline void nemoshell_bin_set_pid(struct shellbin *bin, uint32_t pid)
 {
 	bin->pid = pid;
 }
 
-static uint32_t nemoshell_bin_get_pid(struct shellbin *bin)
+static inline uint32_t nemoshell_bin_get_pid(struct shellbin *bin)
 {
 	return bin->pid;
 }
 
-static struct nemoview *nemoshell_bin_get_view(struct shellbin *bin)
+static inline struct nemoview *nemoshell_bin_get_view(struct shellbin *bin)
 {
 	return bin->view;
+}
+
+static inline void nemoshell_bin_set_userdata(struct shellbin *bin, void *data)
+{
+	bin->userdata = data;
+}
+
+static inline void *nemoshell_bin_get_userdata(struct shellbin *bin)
+{
+	return bin->userdata;
 }
 
 static inline void nemoshell_screen_set_state(struct shellscreen *screen, uint32_t state)
