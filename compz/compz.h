@@ -133,7 +133,6 @@ struct nemocompz {
 	struct wl_signal activate_signal;
 	struct wl_signal transform_signal;
 	struct wl_signal sigchld_signal;
-	struct wl_signal idle_signal;
 
 	clockid_t presentation_clock;
 
@@ -141,9 +140,6 @@ struct nemocompz {
 	struct wl_list frame_list;
 	uint32_t frame_timeout;
 	int frame_done;
-
-	struct wl_event_source *idle_timer;
-	uint32_t idle_timeout;
 };
 
 extern struct nemocompz *nemocompz_create(void);
@@ -189,8 +185,6 @@ extern void nemocompz_dispatch_effect(struct nemocompz *compz, struct nemoeffect
 
 extern void nemocompz_dispatch_frame(struct nemocompz *compz);
 extern void nemocompz_set_frame_timeout(struct nemocompz *compz, uint32_t timeout);
-
-extern void nemocompz_set_idle_timeout(struct nemocompz *compz, uint32_t timeout);
 
 extern void nemocompz_dispatch_idle(struct nemocompz *compz, nemocompz_dispatch_idle_t dispatch, void *data);
 

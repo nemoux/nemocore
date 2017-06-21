@@ -24,6 +24,7 @@
 #include <content.h>
 #include <session.h>
 #include <binding.h>
+#include <touch.h>
 #include <plugin.h>
 #include <xserver.h>
 #include <timer.h>
@@ -46,12 +47,20 @@
 #include <nemomisc.h>
 #include <pixmanhelper.h>
 
+typedef enum {
+	MINISHELL_NORMAL_STATE = 0,
+	MINISHELL_IDLE_STATE = 1,
+	MINISHELL_LAST_STATE
+} MiniShellState;
+
 struct minishell {
 	struct nemocompz *compz;
 	struct nemoshell *shell;
 	struct nemoenvs *envs;
 	struct nemobus *bus;
 	struct wl_event_source *busfd;
+
+	int state;
 
 	struct {
 		struct nemothread *thread;
@@ -62,6 +71,12 @@ struct minishell {
 		char *path;
 		uint32_t interval;
 	} screenshot;
+
+	struct {
+		struct wl_event_source *timer;
+
+		uint32_t timeout;
+	} screensaver;
 };
 
 static int minishell_dispatch_command(struct minishell *mini, struct itemone *one)
@@ -89,8 +104,6 @@ static int minishell_dispatch_command(struct minishell *mini, struct itemone *on
 			nemoenvs_stop_services(mini->envs, group);
 		else
 			nemoenvs_start_services(mini->envs, group);
-	} else if (strcmp(type, "idle") == 0) {
-		nemocompz_set_idle_timeout(mini->compz, nemoitem_one_get_iattr(one, "timeout", 0));
 	} else if (strcmp(type, "close") == 0) {
 		struct nemoshell *shell = mini->shell;
 		struct shellbin *bin;
@@ -127,6 +140,8 @@ static int minishell_handle_json_config(struct minishell *mini, struct json_obje
 		if (strcmp(ikey, "screenshot") == 0) {
 			mini->screenshot.path = nemojson_object_dup_string(iobj, "path", NULL);
 			mini->screenshot.interval = nemojson_object_get_integer(iobj, "interval", 60 * 1000);
+		} else if (strcmp(ikey, "screensaver") == 0) {
+			mini->screensaver.timeout = nemojson_object_get_integer(iobj, "timeout", 0);
 		}
 	}
 
@@ -281,7 +296,22 @@ static void minishell_update_transform(void *data, struct shellbin *bin)
 	struct minishell *mini = (struct minishell *)data;
 }
 
-static void minishell_enter_idle(void *data)
+static void minishell_handle_touch_event(struct nemocompz *compz, struct touchpoint *tp, uint32_t time, void *data)
+{
+	struct minishell *mini = (struct minishell *)data;
+
+	if (tp->state == TOUCHPOINT_DOWN_STATE) {
+		if (mini->state == MINISHELL_NORMAL_STATE) {
+			wl_event_source_timer_update(mini->screensaver.timer, mini->screensaver.timeout);
+		} else if (mini->state == MINISHELL_IDLE_STATE) {
+			nemoenvs_stop_services(mini->envs, "screensaver");
+
+			mini->state = MINISHELL_NORMAL_STATE;
+		}
+	}
+}
+
+static int minishell_dispatch_screensaver_timeout(void *data)
 {
 	struct minishell *mini = (struct minishell *)data;
 
@@ -289,6 +319,8 @@ static void minishell_enter_idle(void *data)
 	nemoenvs_terminate_xclients(mini->envs);
 
 	nemoenvs_start_services(mini->envs, "screensaver");
+
+	mini->state = MINISHELL_IDLE_STATE;
 }
 
 static int minishell_dispatch_screenshot_thread(void *data)
@@ -462,13 +494,16 @@ int main(int argc, char *argv[])
 	nemoshell_set_update_client(shell, minishell_update_client);
 	nemoshell_set_update_layer(shell, minishell_update_layer);
 	nemoshell_set_update_transform(shell, minishell_update_transform);
-	nemoshell_set_enter_idle(shell, minishell_enter_idle);
 	nemoshell_set_frame_timeout(shell, framecheck);
 	nemoshell_set_userdata(shell, mini);
 
 	mini->compz = compz;
 	mini->shell = shell;
 	mini->envs = nemoenvs_create(shell);
+	mini->state = MINISHELL_NORMAL_STATE;
+
+	mini->screensaver.timer = wl_event_loop_add_timer(compz->loop, minishell_dispatch_screensaver_timeout, mini);
+	mini->screensaver.timeout = 0;
 
 	nemocompz_add_key_binding(compz, KEY_F1, MODIFIER_CTRL, nemoenvs_handle_terminal_key, (void *)mini->envs);
 	nemocompz_add_key_binding(compz, KEY_F2, MODIFIER_CTRL, nemoenvs_handle_touch_key, (void *)mini->envs);
@@ -476,6 +511,8 @@ int main(int argc, char *argv[])
 	nemocompz_add_button_binding(compz, BTN_LEFT, nemoenvs_handle_left_button, (void *)mini->envs);
 	nemocompz_add_button_binding(compz, BTN_RIGHT, nemoenvs_handle_right_button, (void *)mini->envs);
 	nemocompz_add_touch_binding(compz, nemoenvs_handle_touch_event, (void *)mini->envs);
+
+	nemocompz_add_touch_binding(compz, minishell_handle_touch_event, (void *)mini);
 
 	nemocompz_make_current(compz);
 
@@ -522,6 +559,8 @@ int main(int argc, char *argv[])
 	}
 
 	retval = nemocompz_run(compz);
+
+	wl_event_source_remove(mini->screensaver.timer);
 
 	nemoenvs_destroy(mini->envs);
 

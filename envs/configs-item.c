@@ -557,12 +557,6 @@ int nemoenvs_handle_item_config(struct nemoenvs *envs, struct itemone *one)
 		nemoenvs_handle_nemoshell_fullscreen(shell, one);
 	} else if (nemostring_has_prefix(path, "/nemoshell/stage") != 0) {
 		nemoenvs_handle_nemoshell_stage(shell, one);
-	} else if (nemostring_has_prefix(path, "/nemoshell/idle") != 0) {
-		uint32_t timeout;
-
-		timeout = nemoitem_one_get_iattr(one, "timeout", 0);
-
-		nemocompz_set_idle_timeout(shell->compz, timeout);
 	} else if (nemostring_has_prefix(path, "/nemoshell/legacy") != 0) {
 		envs->legacy.pick_taps = nemoitem_one_get_iattr(one, "pick_taps", 3);
 	} else if (nemostring_has_prefix(path, "/nemoshell/background") != 0) {

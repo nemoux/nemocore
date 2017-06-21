@@ -42,8 +42,6 @@ static void default_touchpoint_grab_down(struct touchpoint_grab *grab, uint32_t 
 	}
 
 	virtuio_dispatch_events(compz);
-
-	wl_event_source_timer_update(compz->idle_timer, compz->idle_timeout);
 }
 
 static void default_touchpoint_grab_up(struct touchpoint_grab *grab, uint32_t time, uint64_t touchid)

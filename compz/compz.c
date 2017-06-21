@@ -275,15 +275,6 @@ void nemocompz_dispatch_frame(struct nemocompz *compz)
 	}
 }
 
-static int nemocompz_dispatch_idle_timeout(void *data)
-{
-	struct nemocompz *compz = (struct nemocompz *)data;
-
-	wl_signal_emit(&compz->idle_signal, compz);
-
-	return 1;
-}
-
 void nemocompz_dispatch_idle(struct nemocompz *compz, nemocompz_dispatch_idle_t dispatch, void *data)
 {
 	wl_event_loop_add_idle(compz->loop, dispatch, data);
@@ -355,7 +346,6 @@ struct nemocompz *nemocompz_create(void)
 	wl_signal_init(&compz->activate_signal);
 	wl_signal_init(&compz->transform_signal);
 	wl_signal_init(&compz->sigchld_signal);
-	wl_signal_init(&compz->idle_signal);
 
 	compz->cursor_layer = nemolayer_create(compz, "cursor");
 	nemolayer_attach_above(compz->cursor_layer, NULL);
@@ -405,11 +395,6 @@ struct nemocompz *nemocompz_create(void)
 		goto err1;
 	compz->frame_timeout = NEMOCOMPZ_DEFAULT_FRAME_TIMEOUT;
 	compz->frame_done = 1;
-
-	compz->idle_timer = wl_event_loop_add_timer(compz->loop, nemocompz_dispatch_idle_timeout, compz);
-	if (compz->idle_timer == NULL)
-		goto err1;
-	compz->idle_timeout = 0;
 
 	wl_list_init(&compz->frame_list);
 
@@ -470,8 +455,6 @@ void nemocompz_destroy(struct nemocompz *compz)
 
 	if (compz->frame_timer != NULL)
 		wl_event_source_remove(compz->frame_timer);
-	if (compz->idle_timer != NULL)
-		wl_event_source_remove(compz->idle_timer);
 
 	nemolog_message("COMPZ", "destroy current session\n");
 
@@ -891,13 +874,6 @@ void nemocompz_dispatch_effect(struct nemocompz *compz, struct nemoeffect *effec
 void nemocompz_set_frame_timeout(struct nemocompz *compz, uint32_t timeout)
 {
 	compz->frame_timeout = timeout;
-}
-
-void nemocompz_set_idle_timeout(struct nemocompz *compz, uint32_t timeout)
-{
-	compz->idle_timeout = timeout;
-
-	wl_event_source_timer_update(compz->idle_timer, compz->idle_timeout);
 }
 
 int nemocompz_set_presentation_clock(struct nemocompz *compz, clockid_t id)

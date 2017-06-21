@@ -677,14 +677,6 @@ static void nemoshell_handle_sigchld(struct wl_listener *listener, void *data)
 		shell->destroy_client(shell->userdata, proc->pid);
 }
 
-static void nemoshell_handle_idle(struct wl_listener *listener, void *data)
-{
-	struct nemoshell *shell = (struct nemoshell *)container_of(listener, struct nemoshell, idle_listener);
-
-	if (shell->enter_idle != NULL)
-		shell->enter_idle(shell->userdata);
-}
-
 static int nemoshell_dispatch_frame_timeout(void *data)
 {
 	struct nemoshell *shell = (struct nemoshell *)data;
@@ -774,10 +766,6 @@ struct nemoshell *nemoshell_create(struct nemocompz *compz)
 	wl_list_init(&shell->sigchld_listener.link);
 	shell->sigchld_listener.notify = nemoshell_handle_sigchld;
 	wl_signal_add(&compz->sigchld_signal, &shell->sigchld_listener);
-
-	wl_list_init(&shell->idle_listener.link);
-	shell->idle_listener.notify = nemoshell_handle_idle;
-	wl_signal_add(&compz->idle_signal, &shell->idle_listener);
 
 	shell->frame_timer = wl_event_loop_add_timer(compz->loop, nemoshell_dispatch_frame_timeout, shell);
 	if (shell->frame_timer == NULL)
