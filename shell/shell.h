@@ -73,6 +73,7 @@ typedef void (*nemoshell_destroy_client_t)(void *data, pid_t pid);
 typedef void (*nemoshell_update_client_t)(void *data, struct shellbin *bin, struct clientstate *state);
 typedef void (*nemoshell_update_layer_t)(void *data, struct shellbin *bin, const char *type);
 typedef void (*nemoshell_update_transform_t)(void *data, struct shellbin *bin);
+typedef void (*nemoshell_update_focus_t)(void *data, struct shellbin *bin);
 
 struct nemoshell {
 	struct nemocompz *compz;
@@ -122,6 +123,7 @@ struct nemoshell {
 	nemoshell_update_client_t update_client;
 	nemoshell_update_layer_t update_layer;
 	nemoshell_update_transform_t update_transform;
+	nemoshell_update_focus_t update_focus;
 	void *userdata;
 };
 
@@ -373,6 +375,11 @@ static inline void nemoshell_set_update_layer(struct nemoshell *shell, nemoshell
 static inline void nemoshell_set_update_transform(struct nemoshell *shell, nemoshell_update_transform_t dispatch)
 {
 	shell->update_transform = dispatch;
+}
+
+static inline void nemoshell_set_update_focus(struct nemoshell *shell, nemoshell_update_focus_t dispatch)
+{
+	shell->update_focus = dispatch;
 }
 
 static inline void nemoshell_set_userdata(struct nemoshell *shell, void *data)

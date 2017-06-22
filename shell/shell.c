@@ -603,9 +603,6 @@ static void nemoshell_handle_pointer_focus(struct wl_listener *listener, void *d
 
 		if (bin != NULL)
 			nemoshell_ping(bin, wl_display_next_serial(shell->compz->display));
-
-		if (bin != NULL)
-			wl_signal_emit(&bin->focus_signal, bin);
 	}
 }
 
@@ -626,9 +623,6 @@ static void nemoshell_handle_keyboard_focus(struct wl_listener *listener, void *
 
 		if (bin != NULL && xdgshell_is_xdg_surface(bin))
 			nemoshell_send_bin_config(bin);
-
-		if (bin != NULL)
-			wl_signal_emit(&bin->focus_signal, bin);
 	}
 }
 
@@ -649,9 +643,6 @@ static void nemoshell_handle_keypad_focus(struct wl_listener *listener, void *da
 
 		if (bin != NULL && xdgshell_is_xdg_surface(bin))
 			nemoshell_send_bin_config(bin);
-
-		if (bin != NULL)
-			wl_signal_emit(&bin->focus_signal, bin);
 	}
 }
 
@@ -665,6 +656,9 @@ static void nemoshell_handle_touch_focus(struct wl_listener *listener, void *dat
 
 		if (bin != NULL)
 			wl_signal_emit(&bin->focus_signal, bin);
+
+		if (shell->update_focus != NULL && bin != NULL)
+			shell->update_focus(shell->userdata, bin);
 	}
 }
 

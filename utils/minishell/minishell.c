@@ -354,18 +354,16 @@ static void minishell_update_transform(void *data, struct shellbin *bin)
 	struct minishell *mini = (struct minishell *)data;
 }
 
-static void minishell_handle_touch_event(struct nemocompz *compz, struct touchpoint *tp, uint32_t time, void *data)
+static void minishell_update_focus(void *data, struct shellbin *bin)
 {
 	struct minishell *mini = (struct minishell *)data;
 
-	if (tp->state == TOUCHPOINT_DOWN_STATE) {
-		if (mini->state == MINISHELL_NORMAL_STATE) {
-			wl_event_source_timer_update(mini->screensaver.timer, mini->screensaver.timeout);
-		} else if (mini->state == MINISHELL_IDLE_STATE) {
-			nemoenvs_stop_services(mini->envs, "screensaver");
+	if (mini->state == MINISHELL_NORMAL_STATE) {
+		wl_event_source_timer_update(mini->screensaver.timer, mini->screensaver.timeout);
+	} else if (mini->state == MINISHELL_IDLE_STATE) {
+		nemoenvs_stop_services(mini->envs, "screensaver");
 
-			mini->state = MINISHELL_NORMAL_STATE;
-		}
+		mini->state = MINISHELL_NORMAL_STATE;
 	}
 }
 
@@ -552,6 +550,7 @@ int main(int argc, char *argv[])
 	nemoshell_set_update_client(shell, minishell_update_client);
 	nemoshell_set_update_layer(shell, minishell_update_layer);
 	nemoshell_set_update_transform(shell, minishell_update_transform);
+	nemoshell_set_update_focus(shell, minishell_update_focus);
 	nemoshell_set_frame_timeout(shell, framecheck);
 	nemoshell_set_userdata(shell, mini);
 
@@ -569,8 +568,6 @@ int main(int argc, char *argv[])
 	nemocompz_add_button_binding(compz, BTN_LEFT, nemoenvs_handle_left_button, (void *)mini->envs);
 	nemocompz_add_button_binding(compz, BTN_RIGHT, nemoenvs_handle_right_button, (void *)mini->envs);
 	nemocompz_add_touch_binding(compz, nemoenvs_handle_touch_event, (void *)mini->envs);
-
-	nemocompz_add_touch_binding(compz, minishell_handle_touch_event, (void *)mini);
 
 	nemocompz_make_current(compz);
 
