@@ -1191,6 +1191,7 @@ struct shellscreen *nemoshell_get_fullscreen(struct nemoshell *shell, const char
 	memset(screen, 0, sizeof(struct shellscreen));
 
 	screen->id = strdup(id);
+	screen->target = 0x1;
 
 	wl_list_init(&screen->bin_list);
 
