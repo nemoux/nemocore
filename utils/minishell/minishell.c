@@ -468,9 +468,9 @@ int main(int argc, char *argv[])
 	struct minishell *mini;
 	struct nemoshell *shell;
 	struct nemocompz *compz;
-	char *dbname = NULL;
-	char *configpath = NULL;
-	char *themepath = NULL;
+	char *dbname = "nemodb";
+	char *configpath = "_shell_";
+	char *themepath = "_theme_";
 	char *service = NULL;
 	char *rendernode = env_get_string("NEMOSHELL_RENDER_NODE", NULL);
 	char *evdevopts = env_get_string("NEMOSHELL_EVDEV_OPTS", NULL);
@@ -531,9 +531,6 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (configpath == NULL || themepath == NULL)
-		return 0;
-
 	mini = (struct minishell *)malloc(sizeof(struct minishell));
 	if (mini == NULL)
 		return -1;
@@ -571,7 +568,7 @@ int main(int argc, char *argv[])
 
 	nemocompz_make_current(compz);
 
-	if (dbname != NULL)
+	if (strstr(configpath, ".json") == NULL)
 		minishell_dispatch_db(mini, "mongodb://127.0.0.1", dbname, configpath, themepath);
 	else
 		minishell_dispatch_file(mini, configpath, themepath);
