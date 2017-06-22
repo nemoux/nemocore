@@ -454,6 +454,7 @@ struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas
 	nemoview_attach_canvas(bin->view, canvas);
 
 	wl_signal_init(&bin->destroy_signal);
+	wl_signal_init(&bin->focus_signal);
 	wl_signal_init(&bin->ungrab_signal);
 	wl_signal_init(&bin->change_signal);
 	wl_signal_init(&bin->resize_signal);
@@ -597,13 +598,15 @@ static void nemoshell_handle_pointer_focus(struct wl_listener *listener, void *d
 	struct nemoshell *shell = (struct nemoshell *)container_of(listener, struct nemoshell, pointer_focus_listener);
 	struct nemopointer *pointer = (struct nemopointer *)data;
 
-	if (pointer->focus == NULL ||
-			pointer->focus->canvas == NULL)
-		return;
+	if (pointer->focus != NULL) {
+		struct shellbin *bin = nemoshell_get_bin(pointer->focus->canvas);
 
-	nemoshell_ping(
-			nemoshell_get_bin(pointer->focus->canvas),
-			wl_display_next_serial(shell->compz->display));
+		if (bin != NULL)
+			nemoshell_ping(bin, wl_display_next_serial(shell->compz->display));
+
+		if (bin != NULL)
+			wl_signal_emit(&bin->focus_signal, bin);
+	}
 }
 
 static void nemoshell_handle_keyboard_focus(struct wl_listener *listener, void *data)
@@ -611,18 +614,21 @@ static void nemoshell_handle_keyboard_focus(struct wl_listener *listener, void *
 	struct nemoshell *shell = (struct nemoshell *)container_of(listener, struct nemoshell, keyboard_focus_listener);
 	struct nemokeyboard *keyboard = (struct nemokeyboard *)data;
 
-	if (keyboard->focused != NULL && keyboard->focused->canvas != NULL) {
+	if (keyboard->focused != NULL) {
 		struct shellbin *bin = nemoshell_get_bin(keyboard->focused->canvas);
 
-		if (xdgshell_is_xdg_surface(bin))
+		if (bin != NULL && xdgshell_is_xdg_surface(bin))
 			nemoshell_send_bin_config(bin);
 	}
 
-	if (keyboard->focus != NULL && keyboard->focus->canvas != NULL) {
+	if (keyboard->focus != NULL) {
 		struct shellbin *bin = nemoshell_get_bin(keyboard->focus->canvas);
 
-		if (xdgshell_is_xdg_surface(bin))
+		if (bin != NULL && xdgshell_is_xdg_surface(bin))
 			nemoshell_send_bin_config(bin);
+
+		if (bin != NULL)
+			wl_signal_emit(&bin->focus_signal, bin);
 	}
 }
 
@@ -631,24 +637,35 @@ static void nemoshell_handle_keypad_focus(struct wl_listener *listener, void *da
 	struct nemoshell *shell = (struct nemoshell *)container_of(listener, struct nemoshell, keypad_focus_listener);
 	struct nemokeypad *keypad = (struct nemokeypad *)data;
 
-	if (keypad->focused != NULL && keypad->focused->canvas != NULL) {
+	if (keypad->focused != NULL) {
 		struct shellbin *bin = nemoshell_get_bin(keypad->focused->canvas);
 
-		if (xdgshell_is_xdg_surface(bin))
+		if (bin != NULL && xdgshell_is_xdg_surface(bin))
 			nemoshell_send_bin_config(bin);
 	}
 
-	if (keypad->focus != NULL && keypad->focus->canvas != NULL) {
+	if (keypad->focus != NULL) {
 		struct shellbin *bin = nemoshell_get_bin(keypad->focus->canvas);
 
-		if (xdgshell_is_xdg_surface(bin))
+		if (bin != NULL && xdgshell_is_xdg_surface(bin))
 			nemoshell_send_bin_config(bin);
+
+		if (bin != NULL)
+			wl_signal_emit(&bin->focus_signal, bin);
 	}
 }
 
 static void nemoshell_handle_touch_focus(struct wl_listener *listener, void *data)
 {
 	struct nemoshell *shell = (struct nemoshell *)container_of(listener, struct nemoshell, touch_focus_listener);
+	struct touchpoint *tp = (struct touchpoint *)data;
+
+	if (tp->focus != NULL) {
+		struct shellbin *bin = nemoshell_get_bin(tp->focus->canvas);
+
+		if (bin != NULL)
+			wl_signal_emit(&bin->focus_signal, bin);
+	}
 }
 
 static void nemoshell_handle_transform(struct wl_listener *listener, void *data)

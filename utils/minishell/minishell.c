@@ -81,6 +81,7 @@ struct minishell {
 
 struct miniclient {
 	struct wl_listener destroy_listener;
+	struct wl_listener focus_listener;
 
 	struct wl_event_source *timer;
 	uint32_t timeout;
@@ -293,9 +294,9 @@ static void minishell_destroy_client(void *data, pid_t pid)
 
 static int minishell_dispatch_bin_timeout(void *data)
 {
-	struct shellbin *bin = (struct shellbin *)data;
+	struct miniclient *client = (struct miniclient *)data;
 
-	nemoshell_destroy_bin(bin);
+	nemoshell_destroy_bin(client->bin);
 
 	return 1;
 }
@@ -309,6 +310,13 @@ static void minishell_handle_bin_destroy(struct wl_listener *listener, void *dat
 	wl_event_source_remove(client->timer);
 
 	free(client);
+}
+
+static void minishell_handle_bin_focus(struct wl_listener *listener, void *data)
+{
+	struct miniclient *client = (struct miniclient *)container_of(listener, struct miniclient, focus_listener);
+
+	wl_event_source_timer_update(client->timer, client->timeout);
 }
 
 static void minishell_update_client(void *data, struct shellbin *bin, struct clientstate *state)
@@ -326,12 +334,13 @@ static void minishell_update_client(void *data, struct shellbin *bin, struct cli
 		client->destroy_listener.notify = minishell_handle_bin_destroy;
 		wl_signal_add(&bin->destroy_signal, &client->destroy_listener);
 
-		client->timer = wl_event_loop_add_timer(mini->compz->loop, minishell_dispatch_bin_timeout, bin);
+		client->focus_listener.notify = minishell_handle_bin_focus;
+		wl_signal_add(&bin->focus_signal, &client->focus_listener);
+
+		client->timer = wl_event_loop_add_timer(mini->compz->loop, minishell_dispatch_bin_timeout, client);
 		client->timeout = timeout;
 
 		wl_event_source_timer_update(client->timer, client->timeout);
-
-		nemoshell_bin_set_userdata(bin, client);
 	}
 }
 
@@ -350,18 +359,6 @@ static void minishell_handle_touch_event(struct nemocompz *compz, struct touchpo
 	struct minishell *mini = (struct minishell *)data;
 
 	if (tp->state == TOUCHPOINT_DOWN_STATE) {
-		if (tp->focus != NULL) {
-			struct shellbin *bin = nemoshell_get_bin(tp->focus->canvas);
-
-			if (bin != NULL) {
-				struct miniclient *client = (struct miniclient *)nemoshell_bin_get_userdata(bin);
-
-				if (client != NULL) {
-					wl_event_source_timer_update(client->timer, client->timeout);
-				}
-			}
-		}
-
 		if (mini->state == MINISHELL_NORMAL_STATE) {
 			wl_event_source_timer_update(mini->screensaver.timer, mini->screensaver.timeout);
 		} else if (mini->state == MINISHELL_IDLE_STATE) {

@@ -157,6 +157,7 @@ struct shellbin {
 
 	pid_t pid;
 
+	struct wl_signal focus_signal;
 	struct wl_signal ungrab_signal;
 	struct wl_signal change_signal;
 	struct wl_signal resize_signal;
