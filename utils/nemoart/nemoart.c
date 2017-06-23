@@ -818,14 +818,21 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 				if (url != NULL) {
 					const char *mode = nemoitem_one_get_sattr(one, "mode", "repeat_all");
 
-					if (strcmp(url, "@next") == 0)
+					if (strcmp(url, "@next") == 0) {
 						art->icontents = (art->icontents + 1) % nemofs_dir_get_filecount(art->contents);
-					else if (strcmp(url, "@prev") == 0)
+					} else if (strcmp(url, "@prev") == 0) {
 						art->icontents = (art->icontents + nemofs_dir_get_filecount(art->contents) - 1) % nemofs_dir_get_filecount(art->contents);
-					else if (strcmp(url, "@random") == 0)
+					} else if (strcmp(url, "@random") == 0) {
 						art->icontents = random_get_integer(0, nemofs_dir_get_filecount(art->contents) - 1);
-					else if (os_file_is_exist(url) != 0)
-						art->icontents = nemofs_dir_insert_file(art->contents, NULL, url);
+					} else if (os_file_is_directory(url) != 0) {
+						nemofs_dir_scan_extensions(art->contents, url, 10, "mp4", "avi", "mov", "mkv", "ts", "wmv", "png", "jpg", "jpeg", "svg");
+
+						art->icontents = (art->icontents + 1) % nemofs_dir_get_filecount(art->contents);
+					} else if (os_file_is_exist(url) != 0) {
+						nemofs_dir_insert_file(art->contents, NULL, url);
+
+						art->icontents = (art->icontents + 1) % nemofs_dir_get_filecount(art->contents);
+					}
 
 					if (nemofs_dir_get_filecount(art->contents) > 0) {
 						if (strcmp(mode, "oneshot") == 0)
@@ -864,8 +871,12 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 			} else if (nemoitem_one_has_path_suffix(one, "/append") != 0) {
 				const char *url = nemoitem_one_get_attr(one, "url");
 
-				if (url != NULL)
-					nemofs_dir_insert_file(art->contents, NULL, url);
+				if (url != NULL) {
+					if (os_file_is_directory(url) != 0)
+						nemofs_dir_scan_extensions(art->contents, url, 10, "mp4", "avi", "mov", "mkv", "ts", "wmv", "png", "jpg", "jpeg", "svg");
+					else if (os_file_is_exist(url) != 0)
+						nemofs_dir_insert_file(art->contents, NULL, url);
+				}
 			}
 		}
 
@@ -1119,7 +1130,7 @@ int main(int argc, char *argv[])
 		}
 
 		if (os_file_is_directory(contentpath) != 0)
-			nemofs_dir_scan_extensions(art->contents, contentpath, 9, "mp4", "avi", "mov", "mkv", "ts", "wmv", "png", "jpg", "jpeg");
+			nemofs_dir_scan_extensions(art->contents, contentpath, 10, "mp4", "avi", "mov", "mkv", "ts", "wmv", "png", "jpg", "jpeg", "svg");
 		else if (os_file_is_exist(contentpath) != 0)
 			nemofs_dir_insert_file(art->contents, NULL, contentpath);
 
