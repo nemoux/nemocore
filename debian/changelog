@@ -1,3 +1,25 @@
+nemocore (0.8.0) unstable; urgency=medium
+
+  [ haruband ]
+  * compz: Add frameout interface to screen
+  * shell: Add screen mask to frame log
+  * compz: Fix screen repainting mechanisms
+  * compz: Add main screen to canvas
+  * compz: Fix multiple screen rendering mechanisms for canvas
+  * compz: Fix output update interface for contents
+  * compz: Remove frame timer from fbnode
+  * minishell: Add screensaver interfaces
+  * shell: Add userdata to shellbin
+  * shell: Add null checking to nemoshell_get_bin()
+  * minishell: Add client timeout mechanisms
+  * minishell: Fix bin focus mechanisms
+  * shell: Add focus update callbacks
+  * shell: Set 0x1 to default fullscreen targets
+  * minishell: Add default config and theme database collection names
+  * envs: Fix DISPLAY envp bugs for xapp
+
+ -- Taehwan Kim <taehwan@nemoux.net>  Fri, 23 Jun 2017 11:33:14 +0900
+
 nemocore (0.7.0) unstable; urgency=medium
 
   [ haruband ]
