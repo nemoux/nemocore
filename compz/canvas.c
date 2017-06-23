@@ -478,13 +478,11 @@ static void nemocanvas_update_output(struct nemocontent *content)
 		screen_mask |= view->screen_mask;
 	}
 
-	if (content->node_mask != node_mask) {
-		content->dirty = 1;
-		content->screen_dirty = screen_mask;
+	pixman_region32_union_rect(&content->damage, &content->damage,
+			0, 0, content->width, content->height);
 
-		pixman_region32_union_rect(&content->damage, &content->damage,
-				0, 0, content->width, content->height);
-	}
+	content->dirty = 1;
+	content->screen_dirty = screen_mask;
 
 	content->node_mask = node_mask;
 	content->screen_mask = screen_mask;
