@@ -180,7 +180,8 @@ static int nemoart_video_load(struct artone *one)
 	if (video->threads > 0)
 		nemoplay_set_video_intopt(video->play, "threads", video->threads);
 
-	nemoplay_load_media(video->play, one->url);
+	if (nemoplay_load_media(video->play, one->url) < 0)
+		return -1;
 
 	video->decoderback = nemoplay_decoder_create(video->play);
 	video->videoback = nemoplay_video_create_by_timer(video->play);
@@ -358,7 +359,8 @@ static int nemoart_image_load(struct artone *one)
 {
 	struct artimage *image = NEMOART_IMAGE(one);
 
-	nemocook_texture_load_image(image->tex, one->url);
+	if (nemocook_texture_load_image(image->tex, one->url) < 0)
+		return -1;
 
 	nemonoty_dispatch(one->update_noty, one);
 
@@ -822,36 +824,38 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 						art->icontents = (art->icontents + nemofs_dir_get_filecount(art->contents) - 1) % nemofs_dir_get_filecount(art->contents);
 					else if (strcmp(url, "@random") == 0)
 						art->icontents = random_get_integer(0, nemofs_dir_get_filecount(art->contents) - 1);
-					else
+					else if (os_file_is_exist(url) != 0)
 						art->icontents = nemofs_dir_insert_file(art->contents, NULL, url);
 
-					if (strcmp(mode, "oneshot") == 0)
-						art->replay = NEMOART_ONESHOT_MODE;
-					else if (strcmp(mode, "repeat") == 0)
-						art->replay = NEMOART_REPEAT_MODE;
-					else
-						art->replay = NEMOART_REPEAT_ALL_MODE;
+					if (nemofs_dir_get_filecount(art->contents) > 0) {
+						if (strcmp(mode, "oneshot") == 0)
+							art->replay = NEMOART_ONESHOT_MODE;
+						else if (strcmp(mode, "repeat") == 0)
+							art->replay = NEMOART_REPEAT_MODE;
+						else
+							art->replay = NEMOART_REPEAT_ALL_MODE;
 
-					if (art->one != NULL)
-						nemoart_one_destroy(art->one);
+						if (art->one != NULL)
+							nemoart_one_destroy(art->one);
 
-					art->one = nemoart_one_create(
-							nemofs_dir_get_filepath(art->contents, art->icontents),
-							art->width, art->height);
-					if (nemoart_one_is_type(art->one, NEMOART_ONE_VIDEO_TYPE) != 0) {
-						nemoart_one_set_integer(art->one, "threads", art->threads);
-						nemoart_one_set_integer(art->one, "audio", art->audioon);
-						nemoart_one_set_float(art->one, "droprate", art->droprate);
-						nemotimer_set_timeout(art->tween_timer, 0);
-					} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
-						nemoart_one_set_pointer(art->one, "shader", art->shader);
-						nemotimer_set_timeout(art->tween_timer, art->tween_timeout);
+						art->one = nemoart_one_create(
+								nemofs_dir_get_filepath(art->contents, art->icontents),
+								art->width, art->height);
+						if (nemoart_one_is_type(art->one, NEMOART_ONE_VIDEO_TYPE) != 0) {
+							nemoart_one_set_integer(art->one, "threads", art->threads);
+							nemoart_one_set_integer(art->one, "audio", art->audioon);
+							nemoart_one_set_float(art->one, "droprate", art->droprate);
+							nemotimer_set_timeout(art->tween_timer, 0);
+						} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
+							nemoart_one_set_pointer(art->one, "shader", art->shader);
+							nemotimer_set_timeout(art->tween_timer, art->tween_timeout);
+						}
+						nemoart_one_set_integer(art->one, "opaque", art->opaque);
+						nemoart_one_set_integer(art->one, "flip", art->flip);
+						nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
+						nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
+						nemoart_one_load(art->one);
 					}
-					nemoart_one_set_integer(art->one, "opaque", art->opaque);
-					nemoart_one_set_integer(art->one, "flip", art->flip);
-					nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
-					nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
-					nemoart_one_load(art->one);
 				}
 			} else if (nemoitem_one_has_path_suffix(one, "/clear") != 0) {
 				nemofs_dir_clear(art->contents);
@@ -1116,26 +1120,28 @@ int main(int argc, char *argv[])
 
 		if (os_file_is_directory(contentpath) != 0)
 			nemofs_dir_scan_extensions(art->contents, contentpath, 9, "mp4", "avi", "mov", "mkv", "ts", "wmv", "png", "jpg", "jpeg");
-		else
+		else if (os_file_is_exist(contentpath) != 0)
 			nemofs_dir_insert_file(art->contents, NULL, contentpath);
 
-		art->one = nemoart_one_create(
-				nemofs_dir_get_filepath(art->contents, art->icontents),
-				art->width, art->height);
-		if (nemoart_one_is_type(art->one, NEMOART_ONE_VIDEO_TYPE) != 0) {
-			nemoart_one_set_integer(art->one, "threads", art->threads);
-			nemoart_one_set_integer(art->one, "audio", art->audioon);
-			nemoart_one_set_float(art->one, "droprate", art->droprate);
-			nemotimer_set_timeout(art->tween_timer, 0);
-		} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
-			nemoart_one_set_pointer(art->one, "shader", art->shader);
-			nemotimer_set_timeout(art->tween_timer, art->tween_timeout);
+		if (nemofs_dir_get_filecount(art->contents) > 0) {
+			art->one = nemoart_one_create(
+					nemofs_dir_get_filepath(art->contents, art->icontents),
+					art->width, art->height);
+			if (nemoart_one_is_type(art->one, NEMOART_ONE_VIDEO_TYPE) != 0) {
+				nemoart_one_set_integer(art->one, "threads", art->threads);
+				nemoart_one_set_integer(art->one, "audio", art->audioon);
+				nemoart_one_set_float(art->one, "droprate", art->droprate);
+				nemotimer_set_timeout(art->tween_timer, 0);
+			} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
+				nemoart_one_set_pointer(art->one, "shader", art->shader);
+				nemotimer_set_timeout(art->tween_timer, art->tween_timeout);
+			}
+			nemoart_one_set_integer(art->one, "opaque", art->opaque);
+			nemoart_one_set_integer(art->one, "flip", art->flip);
+			nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
+			nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
+			nemoart_one_load(art->one);
 		}
-		nemoart_one_set_integer(art->one, "opaque", art->opaque);
-		nemoart_one_set_integer(art->one, "flip", art->flip);
-		nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
-		nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
-		nemoart_one_load(art->one);
 	}
 
 	nemotool_run(tool);
