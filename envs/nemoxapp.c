@@ -137,12 +137,12 @@ static int nemoenvs_execute_xapp(struct nemoenvs *envs, struct nemoxserver *xser
 	nemotoken_update(args);
 
 	envp = nemotoken_create_simple();
-	nemotoken_set_maximum(envp, 512);
+	nemotoken_set_maximum(envp, 1024);
+	nemotoken_append_format(envp, "DISPLAY=:%d;", xserver->xdisplay);
 	if (_envp != NULL)
 		nemotoken_append_format(envp, "%s;", _envp);
 	for (i = 0; environ[i] != NULL; i++)
 		nemotoken_append_format(envp, "%s;", environ[i]);
-	nemotoken_append_format(envp, "DISPLAY=:%d", xserver->xdisplay);
 	nemotoken_divide(envp, ';');
 	nemotoken_update(envp);
 
