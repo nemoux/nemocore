@@ -825,29 +825,22 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 						art->icontents = (art->icontents + nemofs_dir_get_filecount(art->contents) - 1) % nemofs_dir_get_filecount(art->contents);
 					} else if (strcmp(url, "@random") == 0) {
 						art->icontents = random_get_integer(0, nemofs_dir_get_filecount(art->contents) - 1);
-					} else if (os_file_is_directory(url) != 0) {
+					} else {
 						char *path;
 
 						path = nemostring_replace(url, "@contents", env_get_string("NEMO_CONTENTS_PATH", "/opt/contents"));
 						if (path != NULL) {
-							nemofs_dir_scan_extensions(art->contents, path, 10, "mp4", "avi", "mov", "mkv", "ts", "wmv", "png", "jpg", "jpeg", "svg");
+							if (os_file_is_directory(path) != 0)
+								nemofs_dir_scan_extensions(art->contents, path, 10, "mp4", "avi", "mov", "mkv", "ts", "wmv", "png", "jpg", "jpeg", "svg");
+							else if (os_file_is_exist(path) != 0)
+								nemofs_dir_insert_file(art->contents, NULL, path);
 
 							free(path);
 						} else {
-							nemofs_dir_scan_extensions(art->contents, url, 10, "mp4", "avi", "mov", "mkv", "ts", "wmv", "png", "jpg", "jpeg", "svg");
-						}
-
-						art->icontents = (art->icontents + 1) % nemofs_dir_get_filecount(art->contents);
-					} else if (os_file_is_exist(url) != 0) {
-						char *path;
-
-						path = nemostring_replace(url, "@contents", env_get_string("NEMO_CONTENTS_PATH", "/opt/contents"));
-						if (path != NULL) {
-							nemofs_dir_insert_file(art->contents, NULL, path);
-
-							free(path);
-						} else {
-							nemofs_dir_insert_file(art->contents, NULL, url);
+							if (os_file_is_directory(url) != 0)
+								nemofs_dir_scan_extensions(art->contents, url, 10, "mp4", "avi", "mov", "mkv", "ts", "wmv", "png", "jpg", "jpeg", "svg");
+							else if (os_file_is_exist(url) != 0)
+								nemofs_dir_insert_file(art->contents, NULL, url);
 						}
 
 						art->icontents = (art->icontents + 1) % nemofs_dir_get_filecount(art->contents);
