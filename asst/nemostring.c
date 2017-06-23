@@ -82,6 +82,33 @@ out:
 	return n;
 }
 
+char *nemostring_replace(const char *str, const char *src, const char *dst)
+{
+	char *rep;
+	char *sub;
+
+	sub = strstr(str, src);
+	if (sub == NULL)
+		return NULL;
+
+	rep = (char *)malloc(strlen(str) + strlen(dst) - strlen(src) + 1);
+	if (rep == NULL)
+		return NULL;
+
+	if (str == sub) {
+		strcpy(rep, dst);
+		strcat(rep, sub + strlen(src));
+	} else {
+		strncpy(rep, str, sub - str);
+		rep[sub - str] = '\0';
+
+		strcat(rep, dst);
+		strcat(rep, sub + strlen(src));
+	}
+
+	return rep;
+}
+
 int nemostring_has_prefix(const char *str, const char *ps)
 {
 	int length = strlen(ps);

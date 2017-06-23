@@ -22,6 +22,7 @@
 #include <nemoitem.h>
 #include <nemoaction.h>
 #include <nemofs.h>
+#include <nemostring.h>
 #include <nemonoty.h>
 #include <nemomisc.h>
 
@@ -824,32 +825,30 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 						art->icontents = (art->icontents + nemofs_dir_get_filecount(art->contents) - 1) % nemofs_dir_get_filecount(art->contents);
 					} else if (strcmp(url, "@random") == 0) {
 						art->icontents = random_get_integer(0, nemofs_dir_get_filecount(art->contents) - 1);
-					} else if (url[0] == '@') {
-						const char *contentskey = "@contents";
-						char *subpath;
+					} else if (os_file_is_directory(url) != 0) {
+						char *path;
 
-						subpath = strstr(url, contentskey);
-						if (subpath != NULL) {
-							const char *ctspath = env_get_string("NEMO_CONTENTS_PATH", "/opt/contents");
-							char *path;
-
-							asprintf(&path, "%s%s", ctspath, subpath + strlen(contentskey));
-
-							if (os_file_is_directory(path) != 0)
-								nemofs_dir_scan_extensions(art->contents, path, 10, "mp4", "avi", "mov", "mkv", "ts", "wmv", "png", "jpg", "jpeg", "svg");
-							else if (os_file_is_exist(path) != 0)
-								nemofs_dir_insert_file(art->contents, NULL, path);
-
-							art->icontents = (art->icontents + 1) % nemofs_dir_get_filecount(art->contents);
+						path = nemostring_replace(url, "@contents", env_get_string("NEMO_CONTENTS_PATH", "/opt/contents"));
+						if (path != NULL) {
+							nemofs_dir_scan_extensions(art->contents, path, 10, "mp4", "avi", "mov", "mkv", "ts", "wmv", "png", "jpg", "jpeg", "svg");
 
 							free(path);
+						} else {
+							nemofs_dir_scan_extensions(art->contents, url, 10, "mp4", "avi", "mov", "mkv", "ts", "wmv", "png", "jpg", "jpeg", "svg");
 						}
-					} else if (os_file_is_directory(url) != 0) {
-						nemofs_dir_scan_extensions(art->contents, url, 10, "mp4", "avi", "mov", "mkv", "ts", "wmv", "png", "jpg", "jpeg", "svg");
 
 						art->icontents = (art->icontents + 1) % nemofs_dir_get_filecount(art->contents);
 					} else if (os_file_is_exist(url) != 0) {
-						nemofs_dir_insert_file(art->contents, NULL, url);
+						char *path;
+
+						path = nemostring_replace(url, "@contents", env_get_string("NEMO_CONTENTS_PATH", "/opt/contents"));
+						if (path != NULL) {
+							nemofs_dir_insert_file(art->contents, NULL, path);
+
+							free(path);
+						} else {
+							nemofs_dir_insert_file(art->contents, NULL, url);
+						}
 
 						art->icontents = (art->icontents + 1) % nemofs_dir_get_filecount(art->contents);
 					}
@@ -1137,16 +1136,13 @@ int main(int argc, char *argv[])
 	}
 
 	if (contentpath != NULL) {
-		if (contentpath[0] == '@') {
-			const char *contentskey = "@contents";
-			char *subpath;
+		char *replacepath;
 
-			subpath = strstr(contentpath, contentskey);
-			if (subpath != NULL) {
-				const char *ctspath = env_get_string("NEMO_CONTENTS_PATH", "/opt/contents");
+		replacepath = nemostring_replace(contentpath, "@contents", env_get_string("NEMO_CONTENTS_PATH", "/opt/contents"));
+		if (replacepath != NULL) {
+			free(contentpath);
 
-				asprintf(&contentpath, "%s%s", ctspath, subpath + strlen(contentskey));
-			}
+			contentpath = replacepath;
 		}
 
 		if (os_file_is_directory(contentpath) != 0)
