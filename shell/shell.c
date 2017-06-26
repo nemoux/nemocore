@@ -711,12 +711,13 @@ static int nemoshell_dispatch_frame_timeout(void *data)
 		if (bin != NULL) {
 			pixman_box32_t *extents = pixman_region32_extents(&bin->view->transform.boundingbox);
 
-			nemolog_message("SYSTEM", "  CANVAS[%d] bounds(%d,%d/%d,%d) screen(0x%x) frames(%d) damages(%d/%f)\n",
+			nemolog_message("SYSTEM", "  CANVAS[%d] bounds(%d,%d/%d,%d) rotate(%.1f) screen(0x%x) frames(%d) damages(%d/%f)\n",
 					bin->pid,
 					extents->x1,
 					extents->y1,
 					extents->x2,
 					extents->y2,
+					bin->view->geometry.r * 180.0f / M_PI,
 					canvas->base.screen_mask,
 					canvas->frame_count,
 					canvas->frame_damage,
