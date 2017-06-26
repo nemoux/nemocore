@@ -186,7 +186,8 @@ static inline struct nemoattr *nemoobject_set(struct nemoobject *object, const c
 	if (object->nattrs >= object->mattrs)
 		return NULL;
 
-	strncpy(object->attrs[i].name, name, NEMOATTR_NAME_MAX);
+	strncpy(object->attrs[i].name, name, NEMOATTR_NAME_MAX - 1);
+	object->attrs[i].name[MIN(strlen(name), NEMOATTR_NAME_MAX - 1)] = '\0';
 
 	object->nattrs++;
 

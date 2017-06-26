@@ -11,6 +11,7 @@
 #include <linux/fb.h>
 
 #include <fbhelper.h>
+#include <nemomisc.h>
 
 static pixman_format_code_t framebuffer_calculate_pixman_format(struct fb_var_screeninfo *vinfo, struct fb_fix_screeninfo *finfo)
 {
@@ -98,6 +99,7 @@ int framebuffer_query_screen_info(int fd, struct fbscreeninfo *info)
 	info->buffer_length = fixinfo.smem_len > 0 ? fixinfo.smem_len : fixinfo.line_length * varinfo.yres;
 	info->line_length = fixinfo.line_length;
 	strncpy(info->id, fixinfo.id, sizeof(info->id) / sizeof(info->id[0]));
+	info->id[MIN(strlen(fixinfo.id), sizeof(info->id) / sizeof(info->id[0]))] = '\0';
 
 	info->pixel_format = framebuffer_calculate_pixman_format(&varinfo, &fixinfo);
 	info->refresh_rate = framebuffer_calculate_refresh_rate(&varinfo);
