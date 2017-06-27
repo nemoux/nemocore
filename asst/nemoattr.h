@@ -12,6 +12,8 @@ NEMO_BEGIN_EXTERN_C
 #include <stdlib.h>
 #include <string.h>
 
+#include <nemomisc.h>
+
 #define	NEMOATTR_NAME_MAX		(32)
 
 struct nemoattr {
