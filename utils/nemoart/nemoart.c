@@ -589,12 +589,15 @@ static int nemoart_dispatch_one_done(void *data, void *event)
 	struct nemoart *art = (struct nemoart *)data;
 
 	if (art->replay == NEMOART_ONESHOT_MODE || nemofs_dir_get_filecount(art->contents) == 0) {
-		nemoart_one_destroy(art->one);
-		art->one = NULL;
+		if (art->one != NULL) {
+			nemoart_one_destroy(art->one);
+			art->one = NULL;
+		}
 
 		nemocanvas_dispatch_frame(art->canvas);
 	} else if (art->replay == NEMOART_REPEAT_MODE) {
-		nemoart_one_replay(art->one);
+		if (art->one != NULL)
+			nemoart_one_replay(art->one);
 	} else {
 		int pcontents = art->icontents;
 
@@ -606,21 +609,23 @@ static int nemoart_dispatch_one_done(void *data, void *event)
 			art->one = nemoart_one_create(
 					nemofs_dir_get_filepath(art->contents, art->icontents),
 					art->width, art->height);
-			if (nemoart_one_is_type(art->one, NEMOART_ONE_VIDEO_TYPE) != 0) {
-				nemoart_one_set_integer(art->one, "threads", art->threads);
-				nemoart_one_set_integer(art->one, "audio", art->audioon);
-				nemoart_one_set_float(art->one, "droprate", art->droprate);
-				nemotimer_set_timeout(art->tween_timer, 0);
-			} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
-				nemoart_one_set_pointer(art->one, "shader", art->shader);
-				nemotimer_set_timeout(art->tween_timer, art->tween_timeout);
+			if (art->one != NULL) {
+				if (nemoart_one_is_type(art->one, NEMOART_ONE_VIDEO_TYPE) != 0) {
+					nemoart_one_set_integer(art->one, "threads", art->threads);
+					nemoart_one_set_integer(art->one, "audio", art->audioon);
+					nemoart_one_set_float(art->one, "droprate", art->droprate);
+					nemotimer_set_timeout(art->tween_timer, 0);
+				} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
+					nemoart_one_set_pointer(art->one, "shader", art->shader);
+					nemotimer_set_timeout(art->tween_timer, art->tween_timeout);
+				}
+				nemoart_one_set_integer(art->one, "opaque", art->opaque);
+				nemoart_one_set_integer(art->one, "flip", art->flip);
+				nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
+				nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
+				nemoart_one_load(art->one);
 			}
-			nemoart_one_set_integer(art->one, "opaque", art->opaque);
-			nemoart_one_set_integer(art->one, "flip", art->flip);
-			nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
-			nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
-			nemoart_one_load(art->one);
-		} else {
+		} else if (art->one != NULL) {
 			nemoart_one_replay(art->one);
 		}
 	}
@@ -754,12 +759,15 @@ static void nemoart_dispatch_tween_timer(struct nemotimer *timer, void *data)
 	struct nemoart *art = (struct nemoart *)data;
 
 	if (art->replay == NEMOART_ONESHOT_MODE || nemofs_dir_get_filecount(art->contents) == 0) {
-		nemoart_one_destroy(art->one);
-		art->one = NULL;
+		if (art->one != NULL) {
+			nemoart_one_destroy(art->one);
+			art->one = NULL;
+		}
 
 		nemocanvas_dispatch_frame(art->canvas);
 	} else if (art->replay == NEMOART_REPEAT_MODE) {
-		nemoart_one_replay(art->one);
+		if (art->one != NULL)
+			nemoart_one_replay(art->one);
 	} else {
 		int pcontents = art->icontents;
 
@@ -771,21 +779,23 @@ static void nemoart_dispatch_tween_timer(struct nemotimer *timer, void *data)
 			art->one = nemoart_one_create(
 					nemofs_dir_get_filepath(art->contents, art->icontents),
 					art->width, art->height);
-			if (nemoart_one_is_type(art->one, NEMOART_ONE_VIDEO_TYPE) != 0) {
-				nemoart_one_set_integer(art->one, "threads", art->threads);
-				nemoart_one_set_integer(art->one, "audio", art->audioon);
-				nemoart_one_set_float(art->one, "droprate", art->droprate);
-				nemotimer_set_timeout(art->tween_timer, 0);
-			} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
-				nemoart_one_set_pointer(art->one, "shader", art->shader);
-				nemotimer_set_timeout(art->tween_timer, art->tween_timeout);
+			if (art->one != NULL) {
+				if (nemoart_one_is_type(art->one, NEMOART_ONE_VIDEO_TYPE) != 0) {
+					nemoart_one_set_integer(art->one, "threads", art->threads);
+					nemoart_one_set_integer(art->one, "audio", art->audioon);
+					nemoart_one_set_float(art->one, "droprate", art->droprate);
+					nemotimer_set_timeout(art->tween_timer, 0);
+				} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
+					nemoart_one_set_pointer(art->one, "shader", art->shader);
+					nemotimer_set_timeout(art->tween_timer, art->tween_timeout);
+				}
+				nemoart_one_set_integer(art->one, "opaque", art->opaque);
+				nemoart_one_set_integer(art->one, "flip", art->flip);
+				nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
+				nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
+				nemoart_one_load(art->one);
 			}
-			nemoart_one_set_integer(art->one, "opaque", art->opaque);
-			nemoart_one_set_integer(art->one, "flip", art->flip);
-			nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
-			nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
-			nemoart_one_load(art->one);
-		} else {
+		} else if (art->one != NULL) {
 			nemoart_one_replay(art->one);
 		}
 	}
@@ -860,20 +870,22 @@ static void nemoart_dispatch_bus(void *data, const char *events)
 						art->one = nemoart_one_create(
 								nemofs_dir_get_filepath(art->contents, art->icontents),
 								art->width, art->height);
-						if (nemoart_one_is_type(art->one, NEMOART_ONE_VIDEO_TYPE) != 0) {
-							nemoart_one_set_integer(art->one, "threads", art->threads);
-							nemoart_one_set_integer(art->one, "audio", art->audioon);
-							nemoart_one_set_float(art->one, "droprate", art->droprate);
-							nemotimer_set_timeout(art->tween_timer, 0);
-						} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
-							nemoart_one_set_pointer(art->one, "shader", art->shader);
-							nemotimer_set_timeout(art->tween_timer, art->tween_timeout);
+						if (art->one != NULL) {
+							if (nemoart_one_is_type(art->one, NEMOART_ONE_VIDEO_TYPE) != 0) {
+								nemoart_one_set_integer(art->one, "threads", art->threads);
+								nemoart_one_set_integer(art->one, "audio", art->audioon);
+								nemoart_one_set_float(art->one, "droprate", art->droprate);
+								nemotimer_set_timeout(art->tween_timer, 0);
+							} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
+								nemoart_one_set_pointer(art->one, "shader", art->shader);
+								nemotimer_set_timeout(art->tween_timer, art->tween_timeout);
+							}
+							nemoart_one_set_integer(art->one, "opaque", art->opaque);
+							nemoart_one_set_integer(art->one, "flip", art->flip);
+							nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
+							nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
+							nemoart_one_load(art->one);
 						}
-						nemoart_one_set_integer(art->one, "opaque", art->opaque);
-						nemoart_one_set_integer(art->one, "flip", art->flip);
-						nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
-						nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
-						nemoart_one_load(art->one);
 					}
 				}
 			} else if (nemoitem_one_has_path_suffix(one, "/clear") != 0) {
@@ -1147,20 +1159,22 @@ int main(int argc, char *argv[])
 			art->one = nemoart_one_create(
 					nemofs_dir_get_filepath(art->contents, art->icontents),
 					art->width, art->height);
-			if (nemoart_one_is_type(art->one, NEMOART_ONE_VIDEO_TYPE) != 0) {
-				nemoart_one_set_integer(art->one, "threads", art->threads);
-				nemoart_one_set_integer(art->one, "audio", art->audioon);
-				nemoart_one_set_float(art->one, "droprate", art->droprate);
-				nemotimer_set_timeout(art->tween_timer, 0);
-			} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
-				nemoart_one_set_pointer(art->one, "shader", art->shader);
-				nemotimer_set_timeout(art->tween_timer, art->tween_timeout);
+			if (art->one != NULL) {
+				if (nemoart_one_is_type(art->one, NEMOART_ONE_VIDEO_TYPE) != 0) {
+					nemoart_one_set_integer(art->one, "threads", art->threads);
+					nemoart_one_set_integer(art->one, "audio", art->audioon);
+					nemoart_one_set_float(art->one, "droprate", art->droprate);
+					nemotimer_set_timeout(art->tween_timer, 0);
+				} else if (nemoart_one_is_type(art->one, NEMOART_ONE_IMAGE_TYPE) != 0) {
+					nemoart_one_set_pointer(art->one, "shader", art->shader);
+					nemotimer_set_timeout(art->tween_timer, art->tween_timeout);
+				}
+				nemoart_one_set_integer(art->one, "opaque", art->opaque);
+				nemoart_one_set_integer(art->one, "flip", art->flip);
+				nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
+				nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
+				nemoart_one_load(art->one);
 			}
-			nemoart_one_set_integer(art->one, "opaque", art->opaque);
-			nemoart_one_set_integer(art->one, "flip", art->flip);
-			nemoart_one_set_update_callback(art->one, nemoart_dispatch_one_update, art);
-			nemoart_one_set_done_callback(art->one, nemoart_dispatch_one_done, art);
-			nemoart_one_load(art->one);
 		}
 	}
 
