@@ -56,10 +56,6 @@ typedef enum {
 } NemoShellFullscreenType;
 
 typedef enum {
-	NEMOSHELL_FULLSCREEN_FIXED_STATE = (1 << 0)
-} NemoShellFullscreenState;
-
-typedef enum {
 	NEMOSHELL_FULLSCREEN_NONE_FOCUS = 0,
 	NEMOSHELL_FULLSCREEN_ALL_FOCUS = 1,
 	NEMOSHELL_FULLSCREEN_LAST_FOCUS
@@ -344,7 +340,7 @@ extern struct shellstage *nemoshell_get_stage_by(struct nemoshell *shell, const 
 extern struct shellstage *nemoshell_get_stage_on(struct nemoshell *shell, int32_t x, int32_t y);
 
 extern void nemoshell_set_fullscreen_bin_legacy(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen);
-extern void nemoshell_set_fullscreen_bin_overlay(struct nemoshell *shell, struct shellbin *bin, const char *id, int fixed, struct nemoscreen *screen);
+extern void nemoshell_set_fullscreen_bin_overlay(struct nemoshell *shell, struct shellbin *bin, const char *id, struct nemoscreen *screen);
 extern void nemoshell_set_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin, struct shellscreen *screen);
 extern void nemoshell_put_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin);
 extern void nemoshell_set_maximized_bin_legacy(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen);

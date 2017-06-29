@@ -436,11 +436,6 @@ static void nemoenvs_handle_nemoshell_fullscreen(struct nemoshell *shell, struct
 					screen->focus = NEMOSHELL_FULLSCREEN_ALL_FOCUS;
 				else
 					screen->focus = NEMOSHELL_FULLSCREEN_NONE_FOCUS;
-			} else if (strcmp(name, "fixed") == 0) {
-				if (strcmp(value, "on") == 0 || strcmp(value, "true") == 0)
-					nemoshell_screen_set_state(screen, NEMOSHELL_FULLSCREEN_FIXED_STATE);
-				else
-					nemoshell_screen_put_state(screen, NEMOSHELL_FULLSCREEN_FIXED_STATE);
 			} else if (strcmp(name, "target") == 0) {
 				screen->target = strtoul(value, NULL, 10);
 			}

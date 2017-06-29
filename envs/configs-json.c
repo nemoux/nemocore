@@ -395,11 +395,6 @@ static void nemoenvs_handle_nemoshell_fullscreen(struct nemoenvs *envs, struct j
 			else
 				screen->focus = NEMOSHELL_FULLSCREEN_NONE_FOCUS;
 
-			if (nemojson_object_get_boolean(cobj, "fixed", 0) == 0)
-				nemoshell_screen_put_state(screen, NEMOSHELL_FULLSCREEN_FIXED_STATE);
-			else
-				nemoshell_screen_set_state(screen, NEMOSHELL_FULLSCREEN_FIXED_STATE);
-
 			screen->target = nemojson_object_get_integer(cobj, "target", 0x1);
 		}
 	}
