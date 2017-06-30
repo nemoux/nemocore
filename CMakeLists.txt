@@ -21,6 +21,8 @@ option(WITH_PROFILE "Build with PROFILE" OFF)
 option(WITH_NEMO_DEBUG "Build with NEMODEBUG" ON)
 option(WITH_NEMO_LOG "Build with NEMOLOG" ON)
 
+option(WITH_QT5_WEBENGINE "Build with QT5WEBENGINE" OFF)
+
 include_directories(
 	${CMAKE_CURRENT_BINARY_DIR}
 	)
@@ -70,9 +72,12 @@ add_subdirectory(envs)
 
 add_subdirectory(utils/nemolog)
 add_subdirectory(utils/nemoart)
-add_subdirectory(utils/nemobox)
 add_subdirectory(utils/nemobusd)
 add_subdirectory(utils/nemosound)
 add_subdirectory(utils/minishell)
+
+if(WITH_QT5_WEBENGINE)
+	add_subdirectory(utils/nemobox)
+endif(WITH_QT5_WEBENGINE)
 
 INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/manifest.json DESTINATION ${CMAKE_INSTALL_PACKAGES}/nemocore/)
