@@ -70,6 +70,7 @@ add_subdirectory(envs)
 
 add_subdirectory(utils/nemolog)
 add_subdirectory(utils/nemoart)
+add_subdirectory(utils/nemobox)
 add_subdirectory(utils/nemobusd)
 add_subdirectory(utils/nemosound)
 add_subdirectory(utils/minishell)
