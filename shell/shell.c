@@ -530,6 +530,14 @@ void nemoshell_destroy_bin(struct shellbin *bin)
 	free(bin);
 }
 
+void nemoshell_kill_bin(struct shellbin *bin)
+{
+	if (bin->type == NEMOSHELL_BIN_XWAYLAND_TYPE)
+		kill(-bin->pid, SIGKILL);
+	else
+		kill(bin->pid, SIGKILL);
+}
+
 struct shellbin *nemoshell_get_bin(struct nemocanvas *canvas)
 {
 	if (canvas != NULL && canvas->configure == shellbin_configure_canvas)
@@ -1535,12 +1543,8 @@ void nemoshell_kill_fullscreen_bin(struct nemoshell *shell, uint32_t target)
 			wl_list_remove(&sbin->screen_link);
 			wl_list_init(&sbin->screen_link);
 
-			if (sbin->resource != NULL) {
-				if (sbin->type == NEMOSHELL_BIN_XWAYLAND_TYPE)
-					kill(-sbin->pid, SIGKILL);
-				else
-					kill(sbin->pid, SIGKILL);
-			}
+			if (sbin->resource != NULL)
+				nemoshell_kill_bin(sbin);
 		}
 
 		wl_signal_emit(&screen->kill_signal, screen);

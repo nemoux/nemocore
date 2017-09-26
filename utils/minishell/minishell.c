@@ -296,7 +296,7 @@ static int minishell_dispatch_bin_timeout(void *data)
 {
 	struct miniclient *client = (struct miniclient *)data;
 
-	nemoshell_destroy_bin(client->bin);
+	nemoshell_kill_bin(client->bin);
 
 	return 1;
 }

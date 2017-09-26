@@ -301,6 +301,8 @@ extern struct nemolayer *nemoshell_get_fullscreen_layer(struct nemoshell *shell)
 extern struct shellbin *nemoshell_create_bin(struct nemoshell *shell, struct nemocanvas *canvas, struct nemocanvas_callback *callback);
 extern void nemoshell_destroy_bin(struct shellbin *bin);
 
+extern void nemoshell_kill_bin(struct shellbin *bin);
+
 extern struct shellbin *nemoshell_get_bin(struct nemocanvas *canvas);
 extern void nemoshell_set_parent_bin(struct shellbin *bin, struct shellbin *parent);
 
