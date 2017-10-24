@@ -350,6 +350,8 @@ extern void nemoshell_set_maximized_bin(struct nemoshell *shell, struct shellbin
 extern void nemoshell_put_maximized_bin(struct nemoshell *shell, struct shellbin *bin);
 extern void nemoshell_kill_fullscreen_bin(struct nemoshell *shell, uint32_t target);
 
+extern void nemoshell_kill_region_bin(struct nemoshell *shell, const char *layer, int32_t x, int32_t y, int32_t w, int32_t h);
+
 static inline void nemoshell_set_alive_client(struct nemoshell *shell, nemoshell_alive_client_t dispatch)
 {
 	shell->alive_client = dispatch;

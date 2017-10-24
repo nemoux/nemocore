@@ -128,8 +128,9 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 					height = screen->dh;
 
 					nemoshell_kill_fullscreen_bin(shell, screen->target);
-
 					nemoshell_set_fullscreen_bin(shell, bin, screen);
+
+					nemoshell_kill_region_bin(shell, shell->default_layer, screen->dx, screen->dy, screen->dw, screen->dh);
 
 					nemoseat_put_touchpoint_by_view(compz->seat, bin->view);
 
@@ -153,8 +154,9 @@ static void pick_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 					height = screen->dh;
 
 					nemoshell_kill_fullscreen_bin(shell, screen->target);
-
 					nemoshell_set_fullscreen_bin(shell, bin, screen);
+
+					nemoshell_kill_region_bin(shell, shell->default_layer, screen->dx, screen->dy, screen->dw, screen->dh);
 
 					nemoseat_put_touchpoint_by_view(compz->seat, bin->view);
 

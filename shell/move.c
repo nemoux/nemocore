@@ -150,8 +150,9 @@ static void move_shellgrab_dispatch_effect_done(struct nemoeffect *base)
 
 		if (screen != NULL) {
 			nemoshell_kill_fullscreen_bin(shell, screen->target);
-
 			nemoshell_set_fullscreen_bin(shell, bin, screen);
+
+			nemoshell_kill_region_bin(shell, shell->default_layer, screen->dx, screen->dy, screen->dw, screen->dh);
 
 			if (screen->focus == NEMOSHELL_FULLSCREEN_ALL_FOCUS) {
 				nemoseat_set_keyboard_focus(shell->compz->seat, bin->view);
@@ -216,8 +217,9 @@ static void move_shellgrab_touchpoint_up(struct touchpoint_grab *base, uint32_t 
 
 				if (screen != NULL) {
 					nemoshell_kill_fullscreen_bin(shell, screen->target);
-
 					nemoshell_set_fullscreen_bin(shell, bin, screen);
+
+					nemoshell_kill_region_bin(shell, shell->default_layer, screen->dx, screen->dy, screen->dw, screen->dh);
 
 					if (screen->focus == NEMOSHELL_FULLSCREEN_ALL_FOCUS) {
 						nemoseat_set_keyboard_focus(shell->compz->seat, bin->view);

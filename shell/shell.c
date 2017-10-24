@@ -1439,31 +1439,11 @@ void nemoshell_put_fullscreen_bin(struct nemoshell *shell, struct shellbin *bin)
 		bin->screen.overlay = NULL;
 	}
 
+	bin->has_screen = 0;
+
 	nemoshell_send_bin_config(bin);
 
 	nemocontent_update_fullscreen(bin->view->content, NULL, bin->screen.x, bin->screen.y, bin->screen.width, bin->screen.height);
-}
-
-static inline int nemoshell_bin_contain_view(struct shellbin *bin, struct nemoview *view)
-{
-	float s[4][2] = {
-		{ 0.0f, 0.0f },
-		{ view->content->width, 0.0f },
-		{ 0.0f, view->content->height },
-		{ view->content->width, view->content->height }
-	};
-	float x, y;
-	int i;
-
-	for (i = 0; i < 4; i++) {
-		nemoview_transform_to_global(view, s[i][0], s[i][1], &x, &y);
-
-		if (x < bin->screen.x || x > bin->screen.x + bin->screen.width ||
-				y < bin->screen.y || y > bin->screen.y + bin->screen.height)
-			return 0;
-	}
-
-	return 1;
 }
 
 void nemoshell_set_maximized_bin_legacy(struct nemoshell *shell, struct shellbin *bin, struct nemoscreen *screen)
@@ -1527,6 +1507,8 @@ void nemoshell_put_maximized_bin(struct nemoshell *shell, struct shellbin *bin)
 		bin->next_config.maximized = 0;
 	}
 
+	bin->has_screen = 0;
+
 	nemoshell_send_bin_config(bin);
 }
 
@@ -1548,5 +1530,35 @@ void nemoshell_kill_fullscreen_bin(struct nemoshell *shell, uint32_t target)
 		}
 
 		wl_signal_emit(&screen->kill_signal, screen);
+	}
+}
+
+void nemoshell_kill_region_bin(struct nemoshell *shell, const char *layer, int32_t x, int32_t y, int32_t w, int32_t h)
+{
+	struct nemolayer *target;
+	struct shellbin *bin;
+	struct nemoview *view;
+	float tx, ty;
+
+	if (layer == NULL)
+		return;
+
+	target = nemocompz_get_layer_by_name(shell->compz, layer);
+	if (target == NULL)
+		return;
+
+	wl_list_for_each(bin, &shell->bin_list, link) {
+		if (bin->layer != target || bin->has_screen != 0)
+			continue;
+
+		view = bin->view;
+
+		nemoview_transform_to_global(view,
+				view->content->width * view->geometry.fx,
+				view->content->height * view->geometry.fy,
+				&tx, &ty);
+
+		if (x <= tx && tx <= x + w && y <= ty && ty <= y + h)
+			nemoshell_kill_bin(bin);
 	}
 }
