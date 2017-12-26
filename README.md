@@ -11,7 +11,7 @@ We recommend Ubuntu server 16.10.
 
 follow the link and install the package
 
-* [skia](https://github.com/nemoux/skia_build]
+* [skia](https://github.com/nemoux/skia_build)
 
 # How to build and install
 
@@ -38,7 +38,7 @@ $sudo cp -rfv debian/minishell.service /lib/systemd/system/
 
 ## Create a debian package and Install it
 
-This is more simple & easy than (#Make-and-Install)
+This is more simple & easy than [Make and Install](#Make-and-Install)
 ```
 $dpkg-buildpackage -b -uc -us
 $sudo dpkg -i nemocore_xxx.deb
