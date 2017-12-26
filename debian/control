@@ -1,7 +1,7 @@
 Source: nemocore
 Priority: optional
 Maintainer: Taehwan Kim <taehwan@nemoux.net>,
-Build-Depends: debhelper (>=9), dh-systemd, cmake, libc6-dev, skia-dev, libpixman-1-dev, libfreetype6-dev, libharfbuzz-dev, libfontconfig1-dev, libavcodec-dev, libavformat-dev, libavutil-dev, libswscale-dev, libao-dev, libpng-dev, libjpeg-dev, libexpat1-dev, libcurl4-openssl-dev, libjson-c-dev, uuid-dev, libmongoc-dev, libbson-dev, libpulse-dev, libwayland-dev, libxkbcommon-dev, libxcb1-dev, libxcb-render0-dev, libxcb-xfixes0-dev, libxcb-composite0-dev, libxcursor-dev, libmtdev-dev, libudev-dev, liblo-dev, libdrm-dev, libgl1-mesa-dev, libegl1-mesa-dev, libgles2-mesa-dev, libgbm-dev, libdbus-1-dev, libssl-dev, libgoogle-perftools-dev, libleptonica-dev, libtesseract-dev
+Build-Depends: debhelper (>=9), dh-systemd, cmake, pkg-config, libc6-dev, skia-dev, libpixman-1-dev, libfreetype6-dev, libharfbuzz-dev, libfontconfig1-dev, libavcodec-dev, libavformat-dev, libavutil-dev, libswscale-dev, libao-dev, libpng-dev, libjpeg-dev, libexpat1-dev, libcurl4-openssl-dev, libjson-c-dev, uuid-dev, libmongoc-dev, libbson-dev, libpulse-dev, libwayland-dev, libxkbcommon-dev, libxcb1-dev, libxcb-render0-dev, libxcb-xfixes0-dev, libxcb-composite0-dev, libxcursor-dev, libmtdev-dev, libudev-dev, liblo-dev, libdrm-dev, libgl1-mesa-dev, libegl1-mesa-dev, libgles2-mesa-dev, libgbm-dev, libdbus-1-dev, libssl-dev, libgoogle-perftools-dev, libleptonica-dev, libtesseract-dev, librsvg2-dev
 #xwayland, libglu1-mesa-dev
 Standards-Version: 3.9.8
 Section: libs
