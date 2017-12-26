@@ -38,7 +38,7 @@ $sudo cp -rfv debian/minishell.service /lib/systemd/system/
 
 ## Create a debian package and Install it
 
-This is more simple & easy than [Make and Install](#Make-and-Install)
+This is more simple & easy than [Make and Install](#make-and-install)
 ```
 $dpkg-buildpackage -b -uc -us
 $sudo dpkg -i nemocore_xxx.deb
