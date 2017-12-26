@@ -15,15 +15,14 @@ follow the link and install the package
 
 # How to build & install
 
-1. Install all dependent packages.
+## Install dependent packages.
 
 ```
 $sudo apt-get install devscripts equivs
 $sudo mk-builddeps -r -i
 ```
 
-2. Make & Install
-
+## Make & Install
 
 ```
 $mkdir build && cd build
@@ -37,7 +36,7 @@ $sudo cp -rfv debian/nemobusd.service /lib/systemd/system/
 $sudo cp -rfv debian/minishell.service /lib/systemd/system/
 ```
 
-3. Create a debian package and Install it
+## Create a debian package and Install it
 
 This is more simple & easy than "2. make & install"
 ```
