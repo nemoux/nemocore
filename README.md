@@ -13,7 +13,7 @@ follow the link and install the package
 
 * [skia](https://github.com/nemoux/skia_build]
 
-# How to build & install
+# How to build and install
 
 ## Install dependent packages.
 
@@ -22,7 +22,7 @@ $sudo apt-get install devscripts equivs
 $sudo mk-builddeps -r -i
 ```
 
-## Make & Install
+## Make and Install
 
 ```
 $mkdir build && cd build
@@ -38,7 +38,7 @@ $sudo cp -rfv debian/minishell.service /lib/systemd/system/
 
 ## Create a debian package and Install it
 
-This is more simple & easy than "2. make & install"
+This is more simple & easy than (#Make-and-Install)
 ```
 $dpkg-buildpackage -b -uc -us
 $sudo dpkg -i nemocore_xxx.deb
