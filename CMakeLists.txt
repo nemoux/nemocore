@@ -22,6 +22,7 @@ option(WITH_NEMO_DEBUG "Build with NEMODEBUG" ON)
 option(WITH_NEMO_LOG "Build with NEMOLOG" ON)
 
 option(WITH_QT5_WEBENGINE "Build with QT5WEBENGINE" OFF)
+option(WITH_SKIA "Build with SKIA" OFF)
 
 include_directories(
 	${CMAKE_CURRENT_BINARY_DIR}
@@ -60,8 +61,6 @@ add_subdirectory(tool)
 add_subdirectory(cook)
 add_subdirectory(action)
 add_subdirectory(play)
-add_subdirectory(tozz)
-add_subdirectory(motz)
 
 add_subdirectory(xwayland)
 
@@ -79,5 +78,10 @@ add_subdirectory(utils/minishell)
 if(WITH_QT5_WEBENGINE)
 	add_subdirectory(utils/nemobox)
 endif(WITH_QT5_WEBENGINE)
+
+if(WITH_SKIA)
+	add_subdirectory(tozz)
+	add_subdirectory(motz)
+endif(WITH_SKIA)
 
 INSTALL(FILES ${CMAKE_CURRENT_SOURCE_DIR}/manifest.json DESTINATION ${CMAKE_INSTALL_PACKAGES}/nemocore/)
